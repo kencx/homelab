@@ -1,0 +1,23 @@
+---
+proxmox_node: "pve"
+proxmox_api_host: "pve"
+proxmox_api_user: "root@pam"
+proxmox_api_token_id: "root"
+proxmox_api_token_secret: "11b12739-24bf-4711-825e-8529a04ab15c"
+
+base_template_storage: "local"
+base_template_name: "debian-10-standard_10.7-1_amd64.tar.gz"
+base_template_path: "{{ base_template_storage }}:vztmpl/{{ base_template_name }}"
+
+container_storage: "volumes"
+temp_dir: "/tmp/debian-tmp/"
+dump_dir: "/var/lib/vz/template/cache/"
+
+template_id: "110"
+template_hostname: "debian"
+template_root_password: "changeme"
+template_name: "debian-10-docker"
+
+template_user: "debian"
+ip_address: "10.10.10.10/24"
+gateway: "10.10.10.1"

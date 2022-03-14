@@ -1,0 +1,51 @@
+---
+- hosts: all
+  tasks:
+  - name: Stop container
+    proxmox:
+      node: "{{ proxmox_node }}"
+      api_host: "{{ proxmox_api_host }}"
+      api_user: "{{ proxmox_api_user }}"
+      api_token_id: "{{ proxmox_api_token_id }}"
+      api_token_secret: "{{ proxmox_api_token_secret }}"
+
+      vmid: "{{ template_id }}"
+      state: stopped
+
+  - name: Create temp dump_dir
+    file:
+      path: "{{ temp_dir }}"
+      state: directory
+
+  - name: Dump template to temp dir
+    command: "vzdump {{ template_id }} --mode stop --compress gzip --dumpdir {{ temp_dir }}"
+
+  - name: Find template file
+    find:
+      paths: "{{ temp_dir }}"
+      patterns: "*.tar.gz"
+    register: template
+
+  - name: Move template to dumpdir
+    copy:
+      src: "{{ template.files[0].path }}"
+      dest: "{{ dump_dir }}/{{ template_name }}-{{ date }}.tar.gz"
+      remote_src: yes
+    when: template.matched == 1
+
+  - name: Delete container
+    proxmox:
+      node: "{{ proxmox_node }}"
+      api_host: "{{ proxmox_api_host }}"
+      api_user: "{{ proxmox_api_user }}"
+      api_token_id: "{{ proxmox_api_token_id }}"
+      api_token_secret: "{{ proxmox_api_token_secret }}"
+
+      vmid: "{{ template_id }}"
+      state: absent
+
+
+  - name: Delete temp dump_dir
+    file:
+      path: "{{ temp_dir }}"
+      state: absent

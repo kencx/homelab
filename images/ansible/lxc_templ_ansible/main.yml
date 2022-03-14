@@ -1,0 +1,17 @@
+---
+# Credits to https://github.com/DMunkov/customize_pve_lxc_template/blob/master/tasks/main.yml
+
+- hosts: all
+  tasks:
+    - include_vars: vars.yml
+
+- name: Create LXC
+  import_playbook: tasks/create_lxc.yml
+
+- name: Bootstrap LXC template
+  import_playbook: tasks/bootstrap_lxc.yml
+
+- name: Template and destroy LXC
+  import_playbook: tasks/template_lxc.yml
+  vars:
+    date: "{{ lookup('pipe', 'date +%Y%m%d') }}"
