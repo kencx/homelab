@@ -1,0 +1,41 @@
+
+- hosts: lxc
+  tasks:
+
+    - name: update and upgrade packages
+      apt:
+        upgrade: true
+        update_cache: true
+        cache_valid_time: 86400
+
+    - name: install packages
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items: "{{ apps | default([curl]) }}"
+
+    - name: Create user
+      user:
+        name: "{{ user }}"
+        uid: "{{ uid | default(1000) }}"
+        groups: sudo
+
+    - name: Configure sudo
+      lineinfile:
+        dest: /etc/sudoers
+        regexp: "^{{ item }}"
+        line: "{{ item }} ALL=(ALL) ALL"
+        state: present
+        validate: 'visudo -cf %s'
+        mode: 0644
+      with_items: "{{ user }}"
+
+    - name: Start and enable sshd
+      service:
+        name: ssh
+        state: started
+
+    - name: Clean up
+      apt:
+        autoremove: true
+        autoclean: true
