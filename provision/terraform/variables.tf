@@ -27,11 +27,11 @@ variable "ssh_public_key" {
   description = "Public SSH key to root"
 }
 
-variable "staging_id" {
+variable "controller_id" {
   type = number
 }
 
-variable "staging_user" {
+variable "controller_user" {
   type = string
 }
 
