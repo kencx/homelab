@@ -1,0 +1,6 @@
+roles:
+  - name: geerlingguy.docker
+    version: 4.1.3
+collections:
+  - name: https://github.com/kencx/homelab-ansible.git
+    type: git

@@ -9,7 +9,7 @@
       api_token_id: "{{ proxmox_api_token_id }}"
       api_token_secret: "{{ proxmox_api_token_secret }}"
 
-      vmid: "{{ template_id }}"
+      vmid: "{{ template_vmid }}"
       state: stopped
 
   - name: Create temp dump dir
@@ -18,7 +18,8 @@
       state: directory
 
   - name: Dump template to temp dir
-    command: "vzdump {{ template_id }} --mode stop --compress gzip --dumpdir {{ temp_dir }}"
+    become: true
+    command: "vzdump {{ template_vmid }} --mode stop --compress gzip --dumpdir {{ temp_dir }}"
 
   - name: Get template file
     find:
@@ -27,6 +28,7 @@
     register: template
 
   - name: Move template to dump dir
+    become: true
     copy:
       src: "{{ template.files[0].path }}"
       dest: "{{ dump_dir }}/{{ template_name }}-{{ date }}.tar.gz"
@@ -34,6 +36,7 @@
     when: template.matched == 1
 
   - name: Delete temp dump dir
+    become: true
     file:
       path: "{{ temp_dir }}"
       state: absent

@@ -1,40 +1,37 @@
-
+---
 - hosts: lxc
-  tasks:
-
+  pre_tasks:
+    # fails on debian 10 as --allow-release-info-change is needed
     - name: update and upgrade packages
+      become: true
       apt:
         upgrade: true
         update_cache: true
         cache_valid_time: 86400
+      # command:
+      #   cmd: "apt update --allow-releaseinfo-change"
 
     - name: install packages
       package:
         name: "{{ item }}"
         state: present
-      with_items: "{{ apps | default([curl]) }}"
+      with_items: "{{ apps | default([sudo]) }}"
 
     - name: Create user
       user:
-        name: "{{ user }}"
-        uid: "{{ uid | default(1000) }}"
+        name: "{{ template_user }}"
+        uid: "{{ template_uid | default(1000) }}"
         groups: sudo
 
-    - name: Configure sudo
-      lineinfile:
-        dest: /etc/sudoers
-        regexp: "^{{ item }}"
-        line: "{{ item }} ALL=(ALL) ALL"
-        state: present
-        validate: 'visudo -cf %s'
-        mode: 0644
-      with_items: "{{ user }}"
+  roles:
+    - role: kencx.homelab.security
+    - role: geerlingguy.docker
+      vars:
+        docker_compose_version: "v2.2.2"
+        docker_compose_arch: x86_64
+        docker_users: ["{{ template_user }}"]
 
-    - name: Start and enable sshd
-      service:
-        name: ssh
-        state: started
-
+  post_tasks:
     - name: Clean up
       apt:
         autoremove: true

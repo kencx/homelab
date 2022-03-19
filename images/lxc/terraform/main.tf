@@ -23,7 +23,7 @@ provider "proxmox" {
 module "base_lxc" {
   source = "../../../terraform/modules/lxc"
 
-  target_node  = "pve"
+  target_node  = var.target_node
   vm_id        = var.vm_id
   hostname     = "base-lxc"
   lxc_template = var.base_template
@@ -35,37 +35,33 @@ module "base_lxc" {
   memory = 4096
   swap   = 2048
 
-  size                 = "5G"
-  proxmox_storage_pool = "volumes"
+  size                 = var.size
+  proxmox_storage_pool = var.proxmox_storage_pool
 
-  ip_address      = "10.10.10.254/24"
-  gateway         = "10.10.10.1"
-  ssh_public_keys = tls_private_key.temp_private_key.public_key_openssh
+  ip_address     = var.ip_address
+  gateway        = var.gateway
+  ssh_public_key = tls_private_key.temp_private_key.public_key_openssh
 }
 
 resource "tls_private_key" "temp_private_key" {
   algorithm = "RSA"
 }
 
-
 resource "null_resource" "provisioning" {
 
   provisioner "local-exec" {
-    inline = [
-      "echo LXC up!"
-    ]
+    command = "echo LXC up!"
+    # "ansible-playbook ../ansible/main.yml -i ../ansible/inventory/hosts \
+    # -e 'template_vmid=${var.vm_id}'"
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "echo LXC connected!"
-    ]
+  depends_on = [module.base_lxc, tls_private_key.temp_private_key]
+}
 
-    connection {
-      type        = "ssh"
-      host        = "var.ip_address"
-      user        = var.user
-      private_key = tls_private_key.temp_private_key.private_key_pem
-    }
-  }
+resource "local_file" "private_key" {
+  content         = tls_private_key.temp_private_key.private_key_pem
+  filename        = "private_key.pem"
+  file_permission = "0600"
+
+  depends_on = [tls_private_key.temp_private_key]
 }

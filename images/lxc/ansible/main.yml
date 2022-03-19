@@ -11,3 +11,4 @@
   import_playbook: template_lxc.yml
   vars:
     date: "{{ lookup('pipe', 'date +%Y%m%d') }}"
+    template_vmid: 900

@@ -1,0 +1,11 @@
+#!/bin/bash
+BASEDIR=$(dirname "$0")
+
+cd "$BASEDIR/terraform" || exit
+terraform apply
+
+cd "$BASEDIR/ansible" || exit
+ansible-playbook main.yml -i inventory/hosts
+
+cd "$BASEDIR/terraform" || exit
+terraform destroy
