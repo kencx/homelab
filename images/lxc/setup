@@ -5,7 +5,7 @@ cd "$BASEDIR/terraform" || exit
 terraform apply
 
 cd "$BASEDIR/ansible" || exit
-ansible-playbook main.yml -i inventory/hosts
+ansible-playbook main.yml -i inventory/hosts -K
 
 cd "$BASEDIR/terraform" || exit
 terraform destroy
