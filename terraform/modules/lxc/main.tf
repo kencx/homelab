@@ -36,7 +36,7 @@ resource "proxmox_lxc" "lxc" {
 
   network {
     name   = "eth0"
-    bridge = "vmbr0"
+    bridge = var.bridge
     ip     = var.ip_address
     gw     = var.gateway
   }

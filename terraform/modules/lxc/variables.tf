@@ -70,6 +70,12 @@ variable "proxmox_storage_pool" {
   default     = "local-lvm"
 }
 
+variable "bridge" {
+  type = string
+  description = "LXC network device"
+  default = "vmbr1"
+}
+
 variable "ip_address" {
   type        = string
   description = "LXC IP address"
