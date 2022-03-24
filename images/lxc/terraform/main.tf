@@ -38,6 +38,7 @@ module "base_lxc" {
   size                 = var.size
   proxmox_storage_pool = var.proxmox_storage_pool
 
+  bridge = "vmbr1"
   ip_address     = var.ip_address
   gateway        = var.gateway
   ssh_public_key = tls_private_key.temp_private_key.public_key_openssh
@@ -60,7 +61,7 @@ resource "null_resource" "provisioning" {
 
 resource "local_file" "private_key" {
   content         = tls_private_key.temp_private_key.private_key_pem
-  filename        = "private_key.pem"
+  filename        = "../ansible/private_key.pem"
   file_permission = "0600"
 
   depends_on = [tls_private_key.temp_private_key]

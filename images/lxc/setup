@@ -2,10 +2,14 @@
 BASEDIR=$(dirname "$0")
 
 cd "$BASEDIR/terraform" || exit
+terraform init
 terraform apply
 
+# ping "$IP"
+
 cd "$BASEDIR/ansible" || exit
-ansible-playbook main.yml -i inventory/hosts -K
+ansible-galaxy install -f -r requirements.yml
+ansible-playbook main.yml -i inventory/hosts.yml -K
 
 cd "$BASEDIR/terraform" || exit
 terraform destroy
