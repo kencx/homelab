@@ -11,9 +11,9 @@ terraform {
 locals {
   proxmox_api_url = "https://${var.proxmox_ip}:8006/api2/json"
 
-  gateway       = "${var.ip_block}1"
-  controller_ip = "${var.ip_block}${var.controller_id}/24"
-  cicd_ip       = "${var.ip_block}${var.cicd_id}/24"
+  gateway = "${var.ip_block}1"
+  core_ip = "${var.ip_block}${var.core_id}/24"
+  apps_ip = "${var.ip_block}${var.apps_id}/24"
 }
 
 provider "proxmox" {
@@ -24,12 +24,12 @@ provider "proxmox" {
   pm_api_token_secret = var.proxmox_api_token_secret
 }
 
-module "controller" {
+module "core" {
   source = "../../terraform/modules/lxc"
 
   target_node  = "pve"
-  vm_id        = var.controller_id
-  hostname     = "controller"
+  vm_id        = var.core_id
+  hostname     = "${var.environment}-core"
   lxc_template = "local:vztmpl/debian-10-standard_10.7-1_amd64.tar.gz"
   unprivileged = true
   onboot       = true
@@ -39,33 +39,60 @@ module "controller" {
   memory = 4096
   swap   = 2048
 
-  size                 = "5G"
+  size                 = "10G"
   proxmox_storage_pool = "volumes"
 
-  ip_address     = local.controller_ip
+  bridge         = "vmbr1"
+  ip_address     = local.core_ip
   gateway        = local.gateway
   ssh_public_key = var.ssh_public_key
 }
 
-# module "cicd" {
+module "apps" {
+  source = "../../terraform/modules/lxc"
+
+  target_node  = "pve"
+  vm_id        = var.apps_id
+  hostname     = "${var.environment}-apps"
+  lxc_template = "local:vztmpl/debian-10-standard_10.7-1_amd64.tar.gz"
+  unprivileged = true
+  onboot       = true
+  start        = true
+
+  cores  = 2
+  memory = 8192
+  swap   = 2048
+
+  size                 = "30G"
+  proxmox_storage_pool = "volumes"
+
+  bridge         = "vmbr1"
+  ip_address     = local.apps_ip
+  gateway        = local.gateway
+  ssh_public_key = var.ssh_public_key
+}
+
+# module "vault" {
 #   source = "../../terraform/modules/lxc"
+#   count  = 0
 #
 #   target_node  = "pve"
-#   vm_id        = var.cicd_id
-#   hostname     = "cicd"
+#   vm_id        = var.vault_id
+#   hostname     = "${var.environment}-vault"
 #   lxc_template = "local:vztmpl/debian-10-standard_10.7-1_amd64.tar.gz"
 #   unprivileged = true
 #   onboot       = true
 #   start        = true
 #
-#   cores  = 1
+#   cores  = 2
 #   memory = 4096
 #   swap   = 2048
 #
 #   size                 = "5G"
 #   proxmox_storage_pool = "volumes"
 #
-#   ip_address     = local.cicd_ip
+#   bridge         = "vmbr1"
+#   ip_address     = local.vault_ip
 #   gateway        = local.gateway
 #   ssh_public_key = var.ssh_public_key
 # }
@@ -73,11 +100,11 @@ module "controller" {
 resource "local_file" "ansible_inventory" {
   content = templatefile("${path.module}/templates/inventory.tpl",
     {
-      controller_ip   = local.controller_ip
-      controller_user = var.controller_user
-      cicd_ip         = local.cicd_ip
-      cicd_user       = var.cicd_user
+      core_ip   = local.core_ip
+      core_user = var.core_user
+      apps_ip   = local.apps_ip
+      apps_user = var.apps_user
     }
   )
-  filename = "../ansible/inventory/hosts"
+  filename = "../playbooks/inventory/hosts"
 }

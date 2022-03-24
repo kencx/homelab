@@ -1,4 +1,3 @@
-
 variable "proxmox_ip" {
   type        = string
   description = "IP of Proxmox server"
@@ -31,16 +30,10 @@ variable "controller_id" {
   type = number
 }
 
-variable "controller_user" {
-  type = string
-}
-
-variable "cicd_id" {
-  type = number
-}
-
-variable "cicd_user" {
-  type = string
+variable "lxc_template_name" {
+  type        = string
+  description = "LXC template"
+  default     = "debian-10-standard_10.7-1_amd64.tar.gz"
 }
 
 variable "ip_block" {
