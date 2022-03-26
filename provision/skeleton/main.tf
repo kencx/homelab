@@ -11,9 +11,10 @@ terraform {
 locals {
   proxmox_api_url = "https://${var.proxmox_ip}:8006/api2/json"
 
-  gateway = "${var.ip_block}1"
-  core_ip = "${var.ip_block}${var.core_id}/24"
-  apps_ip = "${var.ip_block}${var.apps_id}/24"
+  lxc_template_name = "local:vztmpl/${var.lxc_template_name}"
+  gateway           = "${var.ip_block}1"
+  core_ip           = "${var.ip_block}${var.core_id}/24"
+  apps_ip           = "${var.ip_block}${var.apps_id}/24"
 }
 
 provider "proxmox" {
@@ -30,7 +31,7 @@ module "core" {
   target_node  = "pve"
   vm_id        = var.core_id
   hostname     = "${var.environment}-core"
-  lxc_template = "local:vztmpl/debian-10-standard_10.7-1_amd64.tar.gz"
+  lxc_template = local.lxc_template_name
   unprivileged = true
   onboot       = true
   start        = true
@@ -54,7 +55,7 @@ module "apps" {
   target_node  = "pve"
   vm_id        = var.apps_id
   hostname     = "${var.environment}-apps"
-  lxc_template = "local:vztmpl/debian-10-standard_10.7-1_amd64.tar.gz"
+  lxc_template = local.lxc_template_name
   unprivileged = true
   onboot       = true
   start        = true
@@ -79,7 +80,7 @@ module "apps" {
 #   target_node  = "pve"
 #   vm_id        = var.vault_id
 #   hostname     = "${var.environment}-vault"
-#   lxc_template = "local:vztmpl/debian-10-standard_10.7-1_amd64.tar.gz"
+#   lxc_template = local.lxc_template_name
 #   unprivileged = true
 #   onboot       = true
 #   start        = true

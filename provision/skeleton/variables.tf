@@ -32,6 +32,12 @@ variable "environment" {
   description = "Environment (dev, staging, prod)"
 }
 
+variable "lxc_template_name" {
+  type        = string
+  description = "LXC template"
+  default     = "debian-10-standard_10.7-1_amd64.tar.gz"
+}
+
 variable "core_id" {
   type = number
 }
