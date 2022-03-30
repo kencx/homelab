@@ -20,4 +20,4 @@ temp_dir: "/tmp/debian-tmp/"
 dump_dir: "/var/lib/vz/template/cache/"
 
 template_name: "debian-10-docker"
-ssh_key_file: "/home/kenc/.ssh/pve.pub"
+ssh_key_file: "/home/kenc/.ssh/pve.pub" # TODO remove dependence on kenc

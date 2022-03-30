@@ -38,7 +38,7 @@ module "base_lxc" {
   size                 = var.size
   proxmox_storage_pool = var.proxmox_storage_pool
 
-  bridge = "vmbr1"
+  bridge         = "vmbr1"
   ip_address     = var.ip_address
   gateway        = var.gateway
   ssh_public_key = tls_private_key.temp_private_key.public_key_openssh
@@ -48,17 +48,6 @@ resource "tls_private_key" "temp_private_key" {
   algorithm = "RSA"
 }
 
-resource "null_resource" "provisioning" {
-
-  provisioner "local-exec" {
-    command = "echo LXC up!"
-    # "ansible-playbook ../ansible/main.yml -i ../ansible/inventory/hosts \
-    # -e 'template_vmid=${var.vm_id}'"
-  }
-
-  depends_on = [module.base_lxc, tls_private_key.temp_private_key]
-}
-
 resource "local_file" "private_key" {
   content         = tls_private_key.temp_private_key.private_key_pem
   filename        = "../ansible/private_key.pem"
@@ -66,3 +55,21 @@ resource "local_file" "private_key" {
 
   depends_on = [tls_private_key.temp_private_key]
 }
+
+resource "null_resource" "provisioning" {
+
+  provisioner "local-exec" {
+    command = <<EOT
+		echo LXC up!
+		ansible-playbook ../ansible/main.yml \
+			-i ../ansible/inventory/hosts.yml \
+			--private-key ../ansible/private_key.pem \
+			-K \
+			-e 'template_vmid=${var.vm_id}' \
+			-e 'template_name=${var.template_name}'
+	EOT
+  }
+
+  depends_on = [module.base_lxc, tls_private_key.temp_private_key]
+}
+

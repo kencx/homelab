@@ -26,7 +26,11 @@ variable "vm_id" {
 variable "base_template" {
   type        = string
   description = "Base LXC template"
-  default     = "local:vztmpl/debian-10-standard_10.7-1_amd64.tar.gz"
+}
+
+variable "template_name" {
+  type        = string
+  description = "Base LXC template name"
 }
 
 variable "size" {
