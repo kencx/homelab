@@ -30,6 +30,12 @@ variable "controller_id" {
   type = number
 }
 
+variable "controller_user" {
+  type        = string
+  description = "Controller User"
+  default     = "debian"
+}
+
 variable "lxc_template_name" {
   type        = string
   description = "LXC template"
@@ -39,4 +45,9 @@ variable "lxc_template_name" {
 variable "ip_block" {
   type        = string
   description = "IP address block"
+}
+
+variable "github_access_token" {
+  type        = string
+  description = "Github Personal Access Token for Ansible play git_ssh"
 }

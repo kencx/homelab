@@ -1,0 +1,13 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: User debian is present
+    - name: User debian has github SSH key
+    - name: Python 3.9 and above is installed
+    - name: Ansible is installed
+    - name: ansible-lint is installed
+    - name: Terraform is installed
+    - name: Test github SSH connection

@@ -1,0 +1,16 @@
+- name: Check Python version
+  command: "python3 --version"
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  register: installed_python_version
+
+- name: Extract version number
+  set_fact:
+    installed_python_version: "{{ (installed_python_version.stdout | split(' '))[1] }}"
+
+- name: Update to Python 3.9
+  apt:
+    name: python3.9
+    state: present
+  when: installed_python_version is version(latest_python_version, '<')

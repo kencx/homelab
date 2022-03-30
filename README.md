@@ -52,6 +52,7 @@ Tested on:
 1. (Optional) Provision `controller` with a chosen base image.
 
 All subsequent steps are executed on `controller` (or your workstation)
+
 2. Build and test base images
 3. Clone `skeleton` folder and pass all relevant environment parameters (dev,
    sit, prod).

@@ -1,0 +1,29 @@
+- name: Create .ssh directory
+  file:
+    path: "{{ ssh_path }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    state: directory
+    mode: 0700
+
+- name: Generate public-private keypair
+  community.crypto.openssh_keypair:
+    state: present
+    type: ed25519
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    path: "{{ ssh_key_file }}"
+
+- name: Read public key
+  slurp:
+    src: "{{ ssh_key_file }}.pub"
+  register: gh_pub_key
+
+- name: Authorize public key with Github
+  community.general.github_key:
+    name: PVE Controller Access Key
+    state: present
+    token: "{{ github_access_token }}"
+    pubkey: "{{ gh_pub_key.content | b64decode }}"
+
+- name: Add git config file

@@ -1,0 +1,35 @@
+- name: Install python3.9-venv
+  apt:
+    name: python3.9-venv
+    state: present
+
+- name: Install pip3
+  apt:
+    name: python3-pip
+    state: present
+
+  # install on root
+- name: Install pipx
+  pip:
+    name: pipx
+  register: pipx_install
+
+- name: Pipx ensurepath
+  command: "pipx ensurepath"
+  when: pipx_install.changed
+
+  # install on user
+- name: Install Ansible with pipx
+  become_user: "{{ user }}"
+  community.general.pipx:
+    name: ansible
+    install_deps: true
+    state: present
+
+- name: Inject ansible-lint with pipx
+  become_user: "{{ user }}"
+  community.general.pipx:
+    name: ansible
+    inject_packages: ansible-lint
+    state: inject
+

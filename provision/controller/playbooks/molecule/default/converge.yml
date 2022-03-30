@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: all
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+- import_playbook: ../../controller.yml

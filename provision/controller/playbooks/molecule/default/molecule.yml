@@ -1,0 +1,21 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: debian11
+    image: "geerlingguy/docker-debian11-ansible:latest"
+    pre_build_image: true
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+
+provisioner:
+  name: ansible
+verifier:
+  name: ansible
+lint: |
+  set -e
+  ansible-lint .

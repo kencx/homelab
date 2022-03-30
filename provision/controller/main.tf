@@ -12,7 +12,8 @@ locals {
 
   lxc_template_name = "local:vztmpl/${var.lxc_template_name}"
   gateway           = "${var.ip_block}1"
-  controller_ip     = "${var.ip_block}${var.controller_id}/24"
+  controller_ip     = "${var.ip_block}${var.controller_id}"
+  controller_cidr   = "${local.controller_ip}/24"
 }
 
 provider "proxmox" {
@@ -42,8 +43,32 @@ module "controller" {
   proxmox_storage_pool = "volumes"
 
   bridge         = "vmbr1"
-  ip_address     = local.controller_ip
+  ip_address     = local.controller_cidr
   gateway        = local.gateway
   ssh_public_key = var.ssh_public_key
+}
+
+resource "local_file" "ansible_inventory" {
+  content = templatefile("${path.module}/templates/inventory.tpl",
+    {
+      controller_ip       = local.controller_ip
+      controller_user     = var.controller_user
+      github_access_token = var.github_access_token
+    }
+  )
+  filename   = "./playbooks/inventory/hosts.yml"
+  depends_on = [module.controller]
+}
+
+resource "null_resource" "provisioning" {
+
+  provisioner "local-exec" {
+    command     = <<EOT
+		echo LXC up!
+		ansible-playbook controller.yml -K
+	EOT
+    working_dir = "./playbooks/"
+  }
+  depends_on = [module.controller, resource.local_file.ansible_inventory]
 }
 
