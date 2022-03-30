@@ -41,4 +41,4 @@ $ ansible-galaxy install -f -r requirements.yml
 ## TODO
 - For easier configuration, conslidate all key variables to one input file. Refer
 to `terraform.tfvars` and `vars.yml` for all variables.
-- Ansible inventory variables are not read
+- Ansible inventory variables are not read. Add `working_dir` arg to `local-exec`

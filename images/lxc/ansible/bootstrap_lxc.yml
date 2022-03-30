@@ -18,6 +18,7 @@
         state: present
       with_items: "{{ apps | default([sudo]) }}"
 
+  # set temp password that must be changed on first login
     - name: Create user
       become: true
       user:
@@ -26,6 +27,15 @@
         create_home: true
         groups: sudo
         shell: /bin/bash
+        password: "{{ template_password }}"
+        update_password: on_create
+      register: new_user
+
+  # https://github.com/ansible/ansible/issues/18917#issuecomment-520254763
+    - name: Force reset password on first login
+      become: true
+      command: "chage -d 0 {{ template_user }}"
+      when: new_user.changed
 
     - name: Add new SSH authorized key to user
       authorized_key:

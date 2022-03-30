@@ -1,40 +1,58 @@
 # Homelab
-This repository details the Infrastructure as Code (IaC) for my Proxmox VE 7 homelab.
+This project builds and configures my Proxmox VE 7 homelab with Infrastructure
+as Code.
 
-It consists of:
-- Automated creation of VM & LXC base images.
-- Declarative provisioning of virtual VMs & LXCs
+It consists of two key parts:
+1. Automated creation of base images
+2. Declarative provisioning of hosts
 
-## Images
-All configuration changes must happen on base images.
+## Tools
+- Terraform
+- Ansible
+- Packer
 
-Change process:
-1. Manual test and tinker on dev server
-2. Perform automated builds of changes with Ansible
+## Base Images
+Base images of our hosts are built and tested to practice Immutable
+Infrastructure. A general workflow is as follows:
+
+1. Manual tinkering on dev server
+2. Automate changes with Ansible
 3. Save the base image
-4. Perform automated tests on new base image
+4. Automated testing on new base image
 5. Ensure all persistent data is available in persistent storage
-6. Destroy existing servers and re-create with new templates
-7. Monitor for configuration drift
+6. Destroy existing servers and re-create with new base images
 
-#### LXCs
-Terraform and Ansible are used to build LXC templates.
-
-1. Terraform provisions a temporary container from a known base image as a starting point
-2. Ansible executes the changes in the container
-3. Ansible stops the container and creates a template. This is done in the
-   Proxmox host.
-4. Terraform destroys the temporary container
-
-#### VMs
-1. Packer builds a VM from a declarative Packer file.
-2. Ansible performs post-provisioning.
-3. Packer saves the VM image.
+All code is situated within `images`. Refer to `images/README.md` for more
+details.
 
 ## Provisioning
-All infrastructure is defined in Terraform. With immutable infrastructure, no
-configuration changes should be happening in the server.
+A `controller` host is deployed to perform all subsequent provisioning. While
+our workstation can be used, I chose to execute all such tasks on a particular
+VM on the same subnet. It clones and deploys `skeleton` through CI/CD with the
+relevant environment parameters.
 
-However, some VMs/containers are catered for one piece of software. For such
-hosts, Ansible is used to perform software-specific configuration that changes
-frequently.
+All code is within `provision`. Refer to `provision/README.md` for more details.
+
+## Usage
+### Pre-requisites
+Tested on:
+- Proxmox VE 7.2
+- Terraform v1.1.7
+- Ansible v2.12.3
+- Molecule v3.5.2
+- Docker v20.10.14
+- pre-commit v2.17.0
+
+### pre-commit
+- Run terraformfmt and terraformdocs
+- Run molecule tests
+- Ensure no secrets are committed.
+
+### Steps
+1. (Optional) Provision `controller` with a chosen base image.
+
+All subsequent steps are executed on `controller` (or your workstation)
+2. Build and test base images
+3. Clone `skeleton` folder and pass all relevant environment parameters (dev,
+   sit, prod).
+4. Provision your environment(s) with their parameters from `skeleton`.
