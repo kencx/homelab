@@ -51,7 +51,7 @@
         ssh_key_file: ".ssh/id_ed25519"
 
   roles:
-    - role: kencx.homelab.security
+    - role: kencx.ansible.security
       vars:
         ssh_disable_root_login: false
         skip_handlers: true
