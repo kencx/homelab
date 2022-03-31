@@ -1,5 +1,5 @@
 
-### VMs
+## VMs
 For VMs, Packer and Ansible are used instead.
 
 1. Packer builds a VM from a declarative Packer file.

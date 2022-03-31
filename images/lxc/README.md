@@ -1,4 +1,5 @@
 # LXC Base Image Pipeline
+
 ## Overview
 For LXCs, Terraform and Ansible are used to build templates.
 
@@ -10,17 +11,10 @@ For LXCs, Terraform and Ansible are used to build templates.
 
 ## Usage
 Ensure all variables are correct in `terraform.tfvars` and
-`../ansible/vars.yml`. Then, run the following:
+`../playbooks/vars.yml`.
 
-```bash
-$ cd lxc/terraform
-$ terraform init
-$ terraform apply
-```
-
-Wait for templating to complete.
-
-Finally, run `terraform destroy`. Refer to `setup` for a complete overview.
+Then, run `make apply`. Wait for `local-exec` provisioning to complete. Finally,
+run `make destroy`.
 
 ### Notes
 When destroying and recreating a new LXC with the same IP, ensure that the ARP
@@ -32,13 +26,9 @@ LXC, it could be due to the following issues:
 - `private_key.pem` is not passed correctly.
 - `SSH host checking is still on`
 
-Ensure the Ansible playbook dependencies are installed and updated with
-
-```
-$ ansible-galaxy install -f -r requirements.yml
-```
+Ensure the Ansible playbook dependencies are installed and updated.
 
 ## TODO
-- For easier configuration, conslidate all key variables to one input file. Refer
+- For easier configuration, consolidate all key variables to one input file. Refer
 to `terraform.tfvars` and `vars.yml` for all variables.
 - Ansible inventory variables are not read. Add `working_dir` arg to `local-exec`

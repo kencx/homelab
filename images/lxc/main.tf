@@ -21,7 +21,7 @@ provider "proxmox" {
 }
 
 module "base_lxc" {
-  source = "../../../terraform/modules/lxc"
+  source = "../../terraform/modules/lxc"
 
   target_node  = var.target_node
   vm_id        = var.vm_id
@@ -50,7 +50,7 @@ resource "tls_private_key" "temp_private_key" {
 
 resource "local_file" "private_key" {
   content         = tls_private_key.temp_private_key.private_key_pem
-  filename        = "../ansible/private_key.pem"
+  filename        = "../playbooks/private_key.pem"
   file_permission = "0600"
 
   depends_on = [tls_private_key.temp_private_key]
@@ -61,9 +61,10 @@ resource "null_resource" "provisioning" {
   provisioner "local-exec" {
     command = <<EOT
 		echo LXC up!
-		ansible-playbook ../ansible/main.yml \
-			-i ../ansible/inventory/hosts.yml \
-			--private-key ../ansible/private_key.pem \
+		ANSIBLE_FORCE_COLOR=1 ansible-playbook ../playbooks/main.yml \
+			-i ../playbooks/inventory/hosts.yml \
+			--private-key ../playbooks/private_key.pem \
+			--ssh-extra-args='-o StrictHostKeyChecking=no'
 			-K \
 			-e 'template_vmid=${var.vm_id}' \
 			-e 'template_name=${var.template_name}'
