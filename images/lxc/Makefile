@@ -1,5 +1,7 @@
 .PHONY: plan apply destroy
 
+default: plan
+
 .terraform.lock.hcl: main.tf terraform.tfvars
 	terraform init
 
