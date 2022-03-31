@@ -18,10 +18,14 @@ Pre-requisites:
 - Terraform 1.1.7
 
 ```bash
-$ cd /provision/controller
-$ terraform init
-$ terraform plan
-$ terraform apply
+$ make plan
+$ make apply
+```
+
+To re-run the provisioning playbook, run:
+
+```bash
+$ make bootstrap
 ```
 
 ### Development

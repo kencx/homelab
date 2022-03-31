@@ -4,12 +4,12 @@
   vars_files:
     - vars.yml
 
-  # roles:
-  #   - role: kencx.homelab.terraform
+  roles:
+    - role: kencx.ansible.terraform
 
   tasks:
     - import_tasks: install_python39.yml
     - import_tasks: install_ansible.yml
-    - import_tasks: git_ssh.yml
+    - import_tasks: git_config.yml
     # - import_tasks: sparse_checkout.yml
 
