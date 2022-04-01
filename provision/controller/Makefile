@@ -23,4 +23,4 @@ bootstrap:
 
 mol = create converge verify test
 $(mol):
-	cd $(PLAYBOOK_DIR); molecule $@
+	cd $(PLAYBOOK_DIR); ANSIBLE_FORCE_COLOR=1 molecule $@

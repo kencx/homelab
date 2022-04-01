@@ -6,6 +6,15 @@
     state: directory
     mode: 0700
 
+- name: Add SSH config file
+  copy:
+    src: "./files/ssh_config"
+    dest: "{{ ssh_path }}/config"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0600"
+    backup: true
+
 - name: Generate public-private keypair
   community.crypto.openssh_keypair:
     state: present
@@ -13,17 +22,19 @@
     owner: "{{ user }}"
     group: "{{ user }}"
     path: "{{ ssh_key_file }}"
+  register: ssh_keypair
 
 - name: Read public key
   slurp:
     src: "{{ ssh_key_file }}.pub"
   register: gh_pub_key
+  when: ssh_keypair.changed
 
-- name: Authorize public key with Github
+- name: Authorize public key on Github
   community.general.github_key:
-    name: PVE Controller Access Key
+    name: PVE Access Key
     state: present
     token: "{{ github_access_token }}"
     pubkey: "{{ gh_pub_key.content | b64decode }}"
+  when: ssh_keypair.changed
 
-- name: Add git config file

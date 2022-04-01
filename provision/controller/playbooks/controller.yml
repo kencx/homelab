@@ -10,6 +10,6 @@
   tasks:
     - import_tasks: install_python39.yml
     - import_tasks: install_ansible.yml
-    - import_tasks: git_config.yml
+    - import_tasks: ssh_config.yml
     # - import_tasks: sparse_checkout.yml
 
