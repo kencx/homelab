@@ -71,9 +71,9 @@ variable "proxmox_storage_pool" {
 }
 
 variable "bridge" {
-  type = string
+  type        = string
   description = "LXC network device"
-  default = "vmbr1"
+  default     = "vmbr1"
 }
 
 variable "ip_address" {

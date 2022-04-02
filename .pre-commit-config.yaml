@@ -10,14 +10,19 @@ repos:
       - id: check-merge-conflict
       - id: check-added-large-files
 
-  # - repo: https://github.com/antonbabenko/pre-commit-terraform
-  #   rev:
-  #   hooks:
-  #     - id: terraform_fmt
-  #     - id: terraform_docs
-  #       args:
-  #         - --hook-config=--create-file-if-not-exist=true
-  #         - --hook-config=--path-to-file=README.md
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.5.3
+    hooks:
+      - id: gitleaks-docker
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.64.1
+    hooks:
+      - id: terraform_fmt
+        args:
+          - --args=-diff
+          - --args=-recursive
+      - id: terraform_validate
 
   - repo: https://github.com/ansible-community/ansible-lint
     rev: v6.0.1
