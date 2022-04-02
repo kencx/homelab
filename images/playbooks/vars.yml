@@ -2,7 +2,7 @@
 # bootstrap_lxc
 template_user: "debian"
 template_password: "password"
-template_uid : 1000
+template_uid: 1000
 
 apps:
   - sudo

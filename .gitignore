@@ -1,3 +1,5 @@
+.cache/*
+
 # terraform
 **/.terraform/*
 *.tfstate

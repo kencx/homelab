@@ -73,4 +73,3 @@ resource "null_resource" "provisioning" {
 
   depends_on = [module.base_lxc, tls_private_key.temp_private_key]
 }
-

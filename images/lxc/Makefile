@@ -13,4 +13,3 @@ apply: .terraform.lock.hcl
 
 destroy: .terraform.lock.hcl
 	terraform destroy
-

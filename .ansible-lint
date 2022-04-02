@@ -1,0 +1,25 @@
+# exclude_paths included in this file are parsed relative to this file's location
+# and not relative to the CWD of execution. CLI arguments passed to the --exclude
+# option will be parsed relative to the CWD of execution.
+exclude_paths:
+  - .cache/
+  - .github/
+  - terraform/
+  - ./provision/controller/playbooks/molecule/
+  - ${HOME}/.ansible/roles/
+
+skip_list:
+  - fqcn-builtins
+  - no-handler
+
+warn_list:
+  - parser-error
+  - command-instead-of-module
+  - git-latest
+
+kinds:
+  - vars: "**/vars.yml"
+  - vars: "**/group_vars/*.yml"
+  - tasks: "**/playbooks/*.yml"
+  - playbook: "**/playbooks/main.yml"
+  - playbook: "**/*.{yml,yaml}"

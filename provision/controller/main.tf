@@ -65,10 +65,9 @@ resource "null_resource" "provisioning" {
   provisioner "local-exec" {
     command     = <<EOT
 		echo LXC up!
-		ANSIBLE_FORCE_COLOR=1 ansible-playbook controller.yml -K
+		ANSIBLE_FORCE_COLOR=1 ansible-playbook main.yml -K
 	EOT
     working_dir = "./playbooks/"
   }
   depends_on = [module.controller, resource.local_file.ansible_inventory]
 }
-

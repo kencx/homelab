@@ -37,4 +37,3 @@
     token: "{{ github_access_token }}"
     pubkey: "{{ gh_pub_key.content | b64decode }}"
   when: ssh_keypair.changed
-

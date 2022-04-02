@@ -3,4 +3,3 @@ latest_python_version: 3.9
 
 ssh_path: "/home/{{ user }}/.ssh"
 ssh_key_file: "{{ ssh_path }}/github"
-

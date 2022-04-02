@@ -32,7 +32,7 @@
     copy:
       src: "{{ template.files[0].path }}"
       dest: "{{ dump_dir }}/{{ template_name }}-{{ date }}.tar.gz"
-      remote_src: yes
+      remote_src: true
     when: template.matched == 1
 
   - name: Delete temp dump dir

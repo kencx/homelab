@@ -1,3 +1,4 @@
+---
 - name: Check Python version
   command: "python3 --version"
   ignore_errors: true

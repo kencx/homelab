@@ -4,6 +4,7 @@
     dest: "{{ repo_dest }}"
     bare: true
     clone: true
+    version: "HEAD"
 
 - name: Prepare sparse checkout
   shell: |
@@ -11,7 +12,9 @@
     git sparse-checkout set {{ item }}
   with_items:
     - "dots/nvim" # change to list variable
+  changed_when: true
 
 - name: Checkout sparse repo
   shell: |
     git checkout master
+  changed_when: true
