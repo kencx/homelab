@@ -10,11 +10,13 @@ For LXCs, Terraform and Ansible are used to build templates.
 4. Terraform destroys the temporary container
 
 ## Usage
-Ensure all variables are correct in `terraform.tfvars` and
-`../playbooks/vars.yml`.
 
-Then, run `make apply`. Wait for `local-exec` provisioning to complete. Finally,
-run `make destroy`.
+0. Run `ansible-galaxy install -r requirements.yml` to install all collections
+   and roles.
+1. Ensure all variables are correct in `terraform.tfvars` and
+   `../playbooks/vars.yml`.
+2. Run `make apply`. Wait for `local-exec` provisioning to complete.
+3. Run `make destroy`.
 
 ### Notes
 When destroying and recreating a new LXC with the same IP, ensure that the ARP

@@ -5,11 +5,27 @@ variable "proxmox_ip" {
 }
 
 variable "proxmox_api_token_id" {
-  type = string
+  type        = string
+  description = "Proxmox API token ID for TERRAFORM"
+  sensitive   = true
 }
 
 variable "proxmox_api_token_secret" {
-  type = string
+  type        = string
+  description = "Proxmox API token secret for TERRAFORM"
+  sensitive   = true
+}
+
+variable "proxmox_api_token_id_ansible" {
+  type        = string
+  description = "Proxmox API token ID for ANSIBLE"
+  sensitive   = true
+}
+
+variable "proxmox_api_token_secret_ansible" {
+  type        = string
+  description = "Proxmox API token secret for ANSIBLE"
+  sensitive   = true
 }
 
 variable "target_node" {
@@ -49,11 +65,19 @@ variable "ip_address" {
   description = "IP address of LXC"
 }
 
+variable "subnet_mask" {
+  type        = string
+  description = "Subnet Mask of LXC"
+  default     = "/24"
+}
+
 variable "gateway" {
   type        = string
   description = "Gateway address of LXC"
 }
 
-variable "ssh_user" {
-  type = string
+variable "ansible_inventory_path" {
+  type        = string
+  description = "Path to Ansible hosts file"
+  default     = "../playbooks/inventory/hosts.yml"
 }

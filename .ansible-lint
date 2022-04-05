@@ -19,7 +19,7 @@ warn_list:
 
 kinds:
   - vars: "**/vars.yml"
-  - vars: "**/group_vars/*.yml"
+  - vars: "**/host_vars/*.yml"
   - tasks: "**/playbooks/*.yml"
   - playbook: "**/playbooks/main.yml"
   - playbook: "**/*.{yml,yaml}"

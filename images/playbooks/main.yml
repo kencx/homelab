@@ -3,9 +3,11 @@
 - hosts: all
   tasks:
     - include_vars: vars.yml
+  any_errors_fatal: true
 
 - name: Bootstrap LXC template
   import_playbook: bootstrap_lxc.yml
+  any_errors_fatal: true
 
 - name: Template LXC
   import_playbook: template_lxc.yml
