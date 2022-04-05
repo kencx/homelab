@@ -4,13 +4,13 @@ variable "proxmox_ip" {
   description = "IP of Proxmox server"
 }
 
-variable "proxmox_api_token_id" {
+variable "proxmox_api_token_id_terraform" {
   type        = string
   description = "Proxmox API token ID for TERRAFORM"
   sensitive   = true
 }
 
-variable "proxmox_api_token_secret" {
+variable "proxmox_api_token_secret_terraform" {
   type        = string
   description = "Proxmox API token secret for TERRAFORM"
   sensitive   = true
@@ -74,10 +74,4 @@ variable "subnet_mask" {
 variable "gateway" {
   type        = string
   description = "Gateway address of LXC"
-}
-
-variable "ansible_inventory_path" {
-  type        = string
-  description = "Path to Ansible hosts file"
-  default     = "../playbooks/inventory/hosts.yml"
 }

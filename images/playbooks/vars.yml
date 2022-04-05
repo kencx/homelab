@@ -1,7 +1,7 @@
 ---
 # bootstrap_lxc
 template_user: "debian"
-template_password: "password"
+template_password: "password"  # temp password to be changed on first login
 template_uid: 1000
 
 apps:
@@ -20,5 +20,5 @@ container_storage: "volumes"
 temp_dir: "/tmp/debian-tmp/"
 dump_dir: "/var/lib/vz/template/cache/"
 
-template_name: "debian-10-docker"
+template_name: "debian-11-docker"
 ssh_key_file: "/home/kenc/.ssh/pve.pub" # TODO remove dependence on kenc

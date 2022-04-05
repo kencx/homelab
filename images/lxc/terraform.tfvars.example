@@ -1,0 +1,17 @@
+proxmox_api_token_id_terraform     = ""
+proxmox_api_token_secret_terraform = ""
+
+proxmox_api_token_id_ansible     = ""
+proxmox_api_token_secret_ansible = ""
+
+proxmox_ip           = "192.168.86.200"
+target_node          = "pve"
+proxmox_storage_pool = "volumes"
+
+vm_id         = 900
+base_template = "local:vztmpl/debian-11-standard_11.3-1_amd64.tar.zst"
+template_name = "debian-11-docker"
+
+ip_address  = "10.10.10.254"
+subnet_mask = "/24"
+gateway     = "10.10.10.1"

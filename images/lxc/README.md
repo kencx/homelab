@@ -11,12 +11,18 @@ For LXCs, Terraform and Ansible are used to build templates.
 
 ## Usage
 
-0. Run `ansible-galaxy install -r requirements.yml` to install all collections
-   and roles.
-1. Ensure all variables are correct in `terraform.tfvars` and
-   `../playbooks/vars.yml`.
-2. Run `make apply`. Wait for `local-exec` provisioning to complete.
-3. Run `make destroy`.
+1. Add configuration to `terraform.tfvars` and `../playbooks/vars.yml`.
+
+```bash
+$ cp terraform.tfvars.example terraform.tfvars
+```
+
+2. Run `make apply`. This will provision a temporary container and execute the
+   Ansible playbook on it.
+
+>This will prompt for `pve` sudo password somewhere in the middle.
+
+3. On completion, run `make destroy`.
 
 ### Notes
 When destroying and recreating a new LXC with the same IP, ensure that the ARP
@@ -31,6 +37,5 @@ LXC, it could be due to the following issues:
 Ensure the Ansible playbook dependencies are installed and updated.
 
 ## TODO
-- For easier configuration, consolidate all key variables to one input file. Refer
-to `terraform.tfvars` and `vars.yml` for all variables.
-- Ansible inventory variables are not read. Add `working_dir` arg to `local-exec`
+- [ ] Add sudo password as encrypted secret
+- [ ] `host_vars`

@@ -17,8 +17,8 @@ provider "proxmox" {
   pm_api_url      = local.proxmox_api_url
   pm_tls_insecure = true
 
-  pm_api_token_id     = var.proxmox_api_token_id
-  pm_api_token_secret = var.proxmox_api_token_secret
+  pm_api_token_id     = var.proxmox_api_token_id_terraform
+  pm_api_token_secret = var.proxmox_api_token_secret_terraform
 }
 
 module "base_lxc" {
@@ -66,23 +66,24 @@ resource "local_file" "ansible_inventory" {
       base_lxc_ip                      = var.ip_address
     }
   )
-  filename   = var.ansible_inventory_path
+  filename   = "../playbooks/inventory/hosts.yml"
   depends_on = [module.base_lxc]
 }
 
 resource "null_resource" "provisioning" {
 
   provisioner "local-exec" {
-    command = <<EOT
+    command     = <<EOT
         ansible-galaxy install -f -r ../../requirements.yml
-		ANSIBLE_FORCE_COLOR=1 ansible-playbook ../playbooks/main.yml \
-			-i ${var.ansible_inventory_path} \
-			--private-key ../playbooks/private_key.pem \
+		ANSIBLE_FORCE_COLOR=1 ansible-playbook ./main.yml \
+			-i ./inventory/hosts.yml \
+			--private-key ./private_key.pem \
 			--ssh-extra-args='-o StrictHostKeyChecking=no' \
 			-K \
 			-e 'template_vmid=${var.vm_id}' \
 			-e 'template_name=${var.template_name}'
 	EOT
+    working_dir = "../playbooks/"
   }
 
   depends_on = [module.base_lxc, tls_private_key.temp_private_key]
