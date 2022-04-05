@@ -12,3 +12,5 @@
     - import_tasks: install_ansible.yml
     - import_tasks: ssh_config.yml
     # - import_tasks: sparse_checkout.yml
+    # - import_tasks: docker_containers.yml
+    # - import_tasks: setup_drone.yml

@@ -1,0 +1,17 @@
+proxmox_api_token_id     = ""
+proxmox_api_token_secret = ""
+proxmox_ip               = "192.168.86.200"
+target_node              = "pve"
+proxmox_storage_pool     = "volumes"
+
+ssh_public_key = ""
+
+cmd_id            = 102
+cmd_user          = "debian"
+cmd_drone_id      = 103
+cmd_drone_user    = "debian"
+lxc_template_name = "debian-11-docker-20220406.tar.gz"
+ip_address        = "10.10.10."
+subnet_mask       = "/24"
+
+github_access_token = ""

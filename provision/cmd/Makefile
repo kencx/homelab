@@ -19,7 +19,7 @@ destroy: .terraform.lock.hcl
 
 # ansible
 bootstrap:
-	cd $(PLAYBOOK_DIR); ANSIBLE_FORCE_COLOR=1 ansible-playbook controller.yml -K
+	cd $(PLAYBOOK_DIR); ANSIBLE_FORCE_COLOR=1 ansible-playbook main.yml -K
 
 mol = create converge verify test
 $(mol):

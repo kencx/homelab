@@ -1,15 +1,15 @@
-## Controller
-`provision/controller` contains the infrastructure for the Controller host. The
-Controller belongs on the same subnet and take cares of the provisioning and
+## cmd
+`provision/cmd` contains the infrastructure for the cmd host. The
+cmd belongs on the same subnet and take cares of the provisioning and
 post-provisioning of all other hosts with CI/CD. It also runs the automated
 creation of base images mentioned previously.
 
-`controller/playbooks` contains the post-provisioning playbooks that will be run
+`cmd/playbooks` contains the post-provisioning playbooks that will be run
 to install Terraform, Ansible and Packer to perform these tasks. It also sets up
 Gitea and Drone CI for CI/CD.
 
 ### Usage
-`controller` has been tested on Debian 11 only.
+`cmd` has been tested on Debian 11 only.
 
 Pre-requisites:
 - Debian 11
@@ -30,7 +30,7 @@ $ make bootstrap
 
 ### Development
 To test the Ansible playbooks, ensure the relevant variables are present in
-`controller/playbooks/vars.yml`
+`cmd/playbooks/vars.yml`
 
 ```yaml
 user: debian
@@ -40,7 +40,7 @@ github_access_token: "changeme"
 then run
 
 ```bash
-$ cd /provision/controller/playbooks
+$ cd /provision/cmd/playbooks
 $ molecule test
 ```
 
@@ -54,9 +54,9 @@ reset their password on first login.
 - [ ] Template for gitea + drone CI
 - [ ] Molecule `verify.yml`
 
-## Skeleton
+## Base
 
-`provision/skeleton` defines a skeleton of the infrastructure for a single
+`provision/base` defines a skeleton of the infrastructure for a single
 environment. To deploy an environment, we enter the necessary variables in
 `[env].tfvars` and apply the infrastructure.
 

@@ -26,13 +26,23 @@ variable "ssh_public_key" {
   description = "Public SSH key to root"
 }
 
-variable "controller_id" {
+variable "cmd_id" {
   type = number
 }
 
-variable "controller_user" {
+variable "cmd_user" {
   type        = string
-  description = "Controller User"
+  description = "cmd User"
+  default     = "debian"
+}
+
+variable "cmd_drone_id" {
+  type = number
+}
+
+variable "cmd_drone_user" {
+  type        = string
+  description = "cmd-drone User"
   default     = "debian"
 }
 
@@ -42,9 +52,14 @@ variable "lxc_template_name" {
   default     = "debian-10-standard_10.7-1_amd64.tar.gz"
 }
 
-variable "ip_block" {
+variable "ip_address" {
   type        = string
-  description = "IP address block"
+  description = "IP address"
+}
+
+variable "subnet_mask" {
+  type        = string
+  description = "Subnet Mask"
 }
 
 variable "github_access_token" {
