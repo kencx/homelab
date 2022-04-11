@@ -1,32 +1,39 @@
-## cmd
-`provision/cmd` contains the infrastructure for the cmd host. The
-cmd belongs on the same subnet and take cares of the provisioning and
-post-provisioning of all other hosts with CI/CD. It also runs the automated
-creation of base images mentioned previously.
+## Command Center
+
+`provision/cmd` provisions the Command Center and helper hosts which have the
+following functions:
+- Deployment and provisioning of other hosts with CI/CD
+- Base image templating pipeline
+- Hosts global management applications including Portainer, Gitea etc.
 
 `cmd/playbooks` contains the post-provisioning playbooks that will be run
-to install Terraform, Ansible and Packer to perform these tasks. It also sets up
-Gitea and Drone CI for CI/CD.
+to install Terraform, Ansible and Packer to perform these tasks.
 
-### Usage
-`cmd` has been tested on Debian 11 only.
-
-Pre-requisites:
+### Prerequisites
+`cmd` has been tested with the following pre-requsites only:
 - Debian 11
 - Python 3.9 and above
 - Ansible 2.12
 - Terraform 1.1.7
+
+### Usage
+To execute the Terraform plan and apply, run:
 
 ```bash
 $ make plan
 $ make apply
 ```
 
-To re-run the provisioning playbook, run:
+Terraform will execute the Ansible playbook automatically with `local-exec`. In
+the event that `local-exec` fails, we can re-run playbook with:
 
 ```bash
 $ make bootstrap
 ```
+
+>Known issue: Because the current base image forces the user to change its
+>password on first login (with SSH), Ansible fails to connect until the user
+>manually changes the password.
 
 ### Development
 To test the Ansible playbooks, ensure the relevant variables are present in
@@ -44,19 +51,17 @@ $ cd /provision/cmd/playbooks
 $ molecule test
 ```
 
-To run playbooks individually, use the local `inventory/hosts-test.yml` instead.
-Additionally, take care of user passwords. The base image forces the user to
-reset their password on first login.
+To run and debug playbooks individually, use the local
+`inventory/hosts-test.yml` instead. Take care of the user passwords.
 
 ### TODO
-- [ ] Force overwrite Github SSH key
-- [ ] Sparse checkout homelab-iac
-- [ ] Template for gitea + drone CI
+- [ ] Start compose stacks
 - [ ] Molecule `verify.yml`
+- [ ] Automate changing of password on first login
 
-## Base
+## Base Template
 
-`provision/base` defines a skeleton of the infrastructure for a single
+`provision/base` contains a base template of the infrastructure for a single
 environment. To deploy an environment, we enter the necessary variables in
 `[env].tfvars` and apply the infrastructure.
 
@@ -64,11 +69,6 @@ The following variables should differ between environments:
 
 ```
 environment = "dev"
-core_id = 110
-apps_id = 111
+apps_id = 110
 ip_block = "10.10.10."
 ```
-
->DO NOT implement repository branches to manage each environment. Use a single
->source branch with separate folders or repositories for each environment
->instead.

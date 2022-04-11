@@ -1,0 +1,24 @@
+---
+version: "3.6"
+
+services:
+  gitea:
+    image: gitea/gitea:{{ gitea_img_version }}
+    container_name: gitea
+    restart: unless-stopped
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    volumes:
+      - {{ gitea_data_dir }}:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      # - 3000:3000
+      - 2222:22
+    networks:
+      - {{ proxy_network }}
+
+networks:
+  {{ proxy_network }}:
+    external: true

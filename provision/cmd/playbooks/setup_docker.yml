@@ -1,0 +1,30 @@
+---
+- name: Install docker module
+  pip:
+    name: docker
+
+- name: Create proxy docker network
+  community.docker.docker_network:
+    name: proxy
+
+- name: Create socket-proxy docker network
+  community.docker.docker_network:
+    name: socket-proxy
+
+- name: Ensure docker directory structure exists
+  become_user: "{{ user }}"
+  file:
+    path: "{{ docker_destination }}/{{ item.path }}"
+    state: directory
+  with_filetree: "./templates/"
+  when: item.state == "directory"
+
+- name: Copy compose files over
+  become_user: "{{ user }}"
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ docker_destination }}/{{ item.path | regex_replace('\\.j2$', '')}}"
+  with_filetree: "./templates/"
+  when: item.state == "file"
+
+# - name: Start all compose services

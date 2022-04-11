@@ -1,16 +1,25 @@
 ---
 - hosts: all
+  vars_files:
+    - vars.yml
+  tasks:
+    - import_tasks: ssh_config.yml
+
+- hosts: cmd
   become: true
   vars_files:
     - vars.yml
-
   roles:
     - role: kencx.ansible.terraform
 
   tasks:
     - import_tasks: install_python39.yml
     - import_tasks: install_ansible.yml
-    - import_tasks: ssh_config.yml
-    # - import_tasks: sparse_checkout.yml
-    # - import_tasks: docker_containers.yml
-    # - import_tasks: setup_drone.yml
+    - import_tasks: setup_docker.yml
+
+# - hosts: drone
+#   become: true
+#   vars_files:
+#     - vars.yml
+#   tasks:
+#     - import_tasks: setup_drone.yml

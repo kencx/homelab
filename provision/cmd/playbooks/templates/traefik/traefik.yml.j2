@@ -1,0 +1,46 @@
+---
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+
+api:
+  insecure: false
+  dashboard: true
+
+ping: {}
+
+log:
+  level: "DEBUG"
+
+accessLog:
+  filePath: "/traefik.log"
+  filters:
+    statusCodes: "400-499"
+
+entrypoints:
+  http:
+    address: :80
+  https:
+    address: :443
+
+providers:
+  docker:
+    network: "{{ proxy_network }}"  # docker network name
+    endpoint: "tcp://socket-proxy:2375"
+    exposedByDefault: false
+    defaultRule: 'Host(`{% raw %}{{ index .Labels "com.docker.compose.service" }}{%
+	endraw %}.{{
+	domain_name }}`)'
+
+  file:
+    directory: "/rules"
+
+certificatesResolvers:
+  dns-dgo:
+    acme:
+#      email: ""
+      storage: "acme.json"
+#      caServer: ""
+      dnsChallenge:
+        provider: digitalocean
+        resolvers: "1.1.1.1:53,1.0.0.1:53"

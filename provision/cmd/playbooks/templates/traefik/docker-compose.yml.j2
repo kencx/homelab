@@ -1,0 +1,80 @@
+---
+version: '3.6'
+
+services:
+  reverse-proxy:
+    container_name: traefik
+    image: traefik:{{ traefik_img_version }}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      - socket-proxy
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck"]
+      interval: 30s
+      start_period: 30s
+    # env_file: traefik.env
+    environment:
+      - TZ=Asia/Singapore
+    ports:
+      - "80:80"
+      - "443:443"
+      - "{{ traefik_port }}:8085"
+    volumes:
+      - ./traefik.yml:/traefik.yml:ro # config file
+      - ./traefik.log:/traefik.log    # access log
+      - ./acme/acme.json:/acme.json   # certificate resolver
+      - ./rules:/rules  # file provider
+    networks:
+      - {{ proxy_network }}
+      - {{ socket_proxy_network }}
+
+    labels:
+      - "traefik.enable=true"
+
+      # HTTP to HTTPs redirects
+      - "traefik.http.routers.http-catch.entrypoints=http"
+      - "traefik.http.routers.http-catch.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catch.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+      # HTTPS Routers
+      - "traefik.http.routers.traefik-router.entrypoints=https"
+      - "traefik.http.routers.traefik-router.rule=Host(`traefik.{{ domain_name }}`)"
+      - "traefik.http.routers.traefik-router.tls=true"  # HTTPs only
+      # Comment out the below line after first run of traefik to force the use of wildcard certs
+      # - "traefik.http.routers.traefik-router.tls.certResolver=dns-dgo"
+      - "traefik.http.routers.traefik-router.tls.domains[0].main={{ domain_name }}"
+      - "traefik.http.routers.traefik-router.tls.domains[0].sans=*.{{ domain_name }}"
+      - "traefik.http.routers.traefik-router.service=api@internal"
+      # - "traefik.http.routers.traefik-router.middlewares=chain-authelia@file"
+
+  socket-proxy:
+    container_name: socket-proxy
+    image: tecnativa/docker-socket-proxy:0.1.1
+    restart: unless-stopped
+    privileged: true
+    environment:
+      - LOG_LEVEL=info
+      # for traefik
+      - CONTAINERS=1
+      # for portainer
+      - IMAGES=1
+      - INFO=1
+      - NETWORKS=1
+      - SERVICES=1
+      - TASKS=1
+      - VOLUMES=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - {{ socket_proxy_network }}
+
+networks:
+  {{ proxy_network }}:
+    external: true
+  {{ socket_proxy_network }}:
+    external: true
+  default:
+    driver: bridge
