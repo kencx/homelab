@@ -50,6 +50,12 @@
         ssh_key_type: "ed25519"
         ssh_key_file: ".ssh/id_ed25519"
 
+    - name: Setup git config
+      template:
+        src: "./templates/gitconfig.j2"
+        dest: "/home/{{ template_user }}/.gitconfig"
+        owner: "{{ template_user }}"
+
   roles:
     - role: kencx.ansible.security
       vars:
@@ -61,6 +67,8 @@
         docker_compose_version: "v2.2.2"
         docker_compose_arch: x86_64
         docker_users: ["{{ template_user }}"]
+
+    - role: kencx.ansible.python3
 
   post_tasks:
     - name: Clean up

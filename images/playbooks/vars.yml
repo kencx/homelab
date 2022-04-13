@@ -10,6 +10,7 @@ apps:
   - vim
   - openssh-server
   - git
+  - make
 
 # template_lxc
 proxmox_node: "pve"
@@ -22,3 +23,6 @@ dump_dir: "/var/lib/vz/template/cache/"
 
 template_name: "debian-11-docker"
 ssh_key_file: "/home/kenc/.ssh/pve.pub" # TODO remove dependence on kenc
+
+git_email: ""
+git_user: ""

@@ -1,6 +1,6 @@
 # Credits to https://github.com/DMunkov/customize_pve_lxc_template/blob/master/tasks/main.yml
 
-- hosts: all
+- hosts: pve
   tasks:
     - include_vars: vars.yml
   any_errors_fatal: true
