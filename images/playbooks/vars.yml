@@ -12,6 +12,10 @@ apps:
   - git
   - make
 
+git_email: ""
+git_user: ""
+ssh_key_file: "/home/kenc/.ssh/pve.pub" # TODO remove dependence on kenc
+
 # template_lxc
 proxmox_node: "pve"
 proxmox_api_host: "pve"
@@ -22,7 +26,3 @@ temp_dir: "/tmp/debian-tmp/"
 dump_dir: "/var/lib/vz/template/cache/"
 
 template_name: "debian-11-docker"
-ssh_key_file: "/home/kenc/.ssh/pve.pub" # TODO remove dependence on kenc
-
-git_email: ""
-git_user: ""

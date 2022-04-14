@@ -1,15 +1,16 @@
-.PHONY: plan apply destroy
+.PHONY: install check bootstrap
 
-default: plan
+default: check
 
-.terraform.lock.hcl: main.tf terraform.tfvars
-	terraform init
+install: ../../requirements.yml
+	ansible-galaxy install -f -r ../../requirements.yml
 
-plan: .terraform.lock.hcl
-	terraform plan
+check: ../../inventory/hosts.yml
+	ANSIBLE_FORCE_COLOR=1 ansible-playbook main.yml \
+		-i ../../inventory/hosts.yml \
+		-K --check
 
-apply: .terraform.lock.hcl
-	terraform apply -auto-approve
-
-destroy: .terraform.lock.hcl
-	terraform destroy
+bootstrap: ../../inventory/hosts.yml
+	ANSIBLE_FORCE_COLOR=1 ansible-playbook main.yml \
+		-i ../../inventory/hosts.yml \
+		-K

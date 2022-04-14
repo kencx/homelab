@@ -1,0 +1,14 @@
+---
+- name: Create temp LXC
+  import_playbook: create_lxc.yml
+  any_errors_fatal: true
+
+- name: Bootstrap temp LXC
+  import_playbook: ../playbooks/bootstrap_lxc.yml
+  any_errors_fatal: true
+  when: not ansible_check_mode
+
+- name: Template temp LXC
+  import_playbook: template_lxc.yml
+  vars:
+    date: "{{ lookup('pipe', 'date +%Y%m%d') }}"

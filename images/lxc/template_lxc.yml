@@ -1,7 +1,9 @@
 ---
 - hosts: pve
+  vars_files:
+    - vars.yml
   tasks:
-  - name: Stop container
+  - name: Stop temp LXC
     proxmox:
       node: "{{ proxmox_node }}"
       api_host: "{{ proxmox_api_host }}"
@@ -39,4 +41,15 @@
     become: true
     file:
       path: "{{ temp_dir }}"
+      state: absent
+
+  - name: Remove temp LXC
+    proxmox:
+      node: "{{ proxmox_node }}"
+      api_host: "{{ proxmox_api_host }}"
+      api_user: "{{ proxmox_api_user }}"
+      api_token_id: "{{ proxmox_api_token_id }}"
+      api_token_secret: "{{ proxmox_api_token_secret }}"
+
+      vmid: "{{ template_vmid }}"
       state: absent

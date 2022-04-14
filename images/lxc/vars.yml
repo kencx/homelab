@@ -1,0 +1,21 @@
+---
+# create_lxc
+proxmox_node: "pve"
+proxmox_api_host: "pve"
+proxmox_api_user: "ansible@pam"
+proxmox_storage: "volumes"
+
+template_vmid: 900
+template_hostname: "lxc-template"
+base_image: "debian-11-standard_11.3-1_amd64.tar.zst"
+template_disk_size: "volumes:5"
+
+ip_address: ""
+gateway: ""
+
+# template_lxc
+container_storage: "volumes"
+temp_dir: "/tmp/debian-tmp/"
+dump_dir: "/var/lib/vz/template/cache/"
+
+template_name: "debian-11-docker"
