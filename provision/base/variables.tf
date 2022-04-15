@@ -38,20 +38,8 @@ variable "lxc_template_name" {
   default     = "debian-10-standard_10.7-1_amd64.tar.gz"
 }
 
-variable "core_id" {
-  type = number
-}
-
-variable "core_user" {
-  type = string
-}
-
 variable "apps_id" {
   type = number
-}
-
-variable "apps_user" {
-  type = string
 }
 
 variable "ip_block" {

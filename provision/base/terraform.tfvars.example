@@ -1,0 +1,12 @@
+proxmox_api_token_id     = ""
+proxmox_api_token_secret = ""
+proxmox_ip               = ""
+target_node              = "pve"
+proxmox_storage_pool     = ""
+
+ssh_public_key = ""
+
+environment       = "dev"
+lxc_template_name = ""
+apps_id           = 110
+ip_block          = "10.10.10."

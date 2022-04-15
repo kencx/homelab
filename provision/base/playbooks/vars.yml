@@ -1,0 +1,15 @@
+
+stacks_repo_url: "https://github.com/kencx/compose-stacks.git"
+stacks_version: "HEAD"
+stacks_directory: "/home/{{ user.stdout }}/docker"
+
+domain_name: ""
+ca_email: ""
+
+started_stacks:
+  - traefik
+  - miniflux
+  - linkding
+  - calibre-web
+  # - paperless-ng
+  # - photoprism

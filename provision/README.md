@@ -62,13 +62,20 @@ To run and debug playbooks individually, use the local
 ## Base Template
 
 `provision/base` contains a base template of the infrastructure for a single
-environment. To deploy an environment, we enter the necessary variables in
-`[env].tfvars` and apply the infrastructure.
-
-The following variables should differ between environments:
+environment. Copy `terraform.tfvars.example` and populate the variables. The following variables should differ between environments:
 
 ```
+ssh_public_key = "changeme"
 environment = "dev"
+lxc_template_name = "template-name"
 apps_id = 110
 ip_block = "10.10.10."
+```
+
+Init, plan and apply.
+
+```bash
+$ terraform init
+$ terraform plan -vars-file=[file]
+$ terraform apply -vars-file=[file]
 ```
