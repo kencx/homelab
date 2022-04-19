@@ -7,4 +7,5 @@
 *.tfvars
 
 # ansible
-**/inventory
+*/hosts.yml
+!*/*.example.yml

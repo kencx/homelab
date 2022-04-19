@@ -1,6 +1,6 @@
 ---
 - name: Verify
-  hosts: all
+  hosts: cmd
   gather_facts: false
   become_user: debian
   tasks:
@@ -37,11 +37,6 @@
         - { file: github, mode: "0600" }
 
     # - name: Github SSH connection is successful
-
-    - name: Python >3.9 is installed
-      package:
-        name: python3.9
-        state: present
 
     # - name: Ansible is installed
     # - name: ansible-lint is installed
