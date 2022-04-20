@@ -22,6 +22,8 @@ provider "proxmox" {
   pm_api_url      = local.proxmox_api_url
   pm_tls_insecure = true
 
+  pm_user             = var.proxmox_user
+  pm_password         = var.proxmox_password
   pm_api_token_id     = var.proxmox_api_token_id
   pm_api_token_secret = var.proxmox_api_token_secret
 }
@@ -43,6 +45,8 @@ module "cmd-core" {
 
   size                 = "10G"
   proxmox_storage_pool = "volumes"
+
+  mounts = var.cmd_mounts
 
   bridge         = "vmbr1"
   ip_address     = local.cmd_cidr
@@ -68,34 +72,22 @@ module "cmd_drone" {
   size                 = "10G"
   proxmox_storage_pool = "volumes"
 
+  mounts = var.cmd_drone_mounts
+
   bridge         = "vmbr1"
   ip_address     = local.cmd_drone_cidr
   gateway        = local.gateway
   ssh_public_key = var.ssh_public_key
 }
 
-resource "local_file" "ansible_inventory" {
-  content = templatefile("${path.module}/templates/inventory.tpl",
-    {
-      cmd_ip              = local.cmd_ip
-      cmd_user            = var.cmd_user
-      cmd_drone_ip        = local.cmd_drone_ip
-      cmd_drone_user      = var.cmd_drone_user
-      github_access_token = var.github_access_token
-    }
-  )
-  filename   = "./playbooks/inventory/hosts.yml"
-  depends_on = [module.cmd-core, module.cmd_drone]
-}
-
-resource "null_resource" "provisioning" {
-
-  provisioner "local-exec" {
-    command     = <<EOT
-		ansible-galaxy -f -r ../../requirements.yml
-		ANSIBLE_FORCE_COLOR=1 ansible-playbook main.yml -K
-	EOT
-    working_dir = "./playbooks/"
-  }
-  depends_on = [module.cmd-core, module.cmd_drone, resource.local_file.ansible_inventory]
-}
+# resource "null_resource" "provisioning" {
+#
+#   provisioner "local-exec" {
+#     command     = <<EOT
+# 		ansible-galaxy -f -r ../../requirements.yml
+# 		ANSIBLE_FORCE_COLOR=1 ansible-playbook main.yml -K
+# 	EOT
+#     working_dir = "./playbooks/"
+#   }
+#   depends_on = [module.cmd-core, module.cmd_drone]
+# }

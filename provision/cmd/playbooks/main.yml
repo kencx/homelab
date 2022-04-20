@@ -1,9 +1,32 @@
 ---
-- hosts: all
+# required to handle password change on first login
+# - hosts: cmd
+#   gather_facts: false
+#   tasks:
+#     - name: Check if reachable
+#       wait_for:
+#         timeout: 5
+#       register: connected
+#       ignore_unreachable: true
+#
+#     - name: Change password on initial login
+#       delegate_to: localhost
+#       become: false
+#       expect:
+#         command: ssh {{ ssh_args }} {{ user }}@{{ hostname }}
+#         responses:
+#           "Current password:": "{{ user_expect_password }}"
+#           "New password:": "{{ user_new_password }}"
+#           "Retype new password:": "{{ user_new_password }}"
+#       no_log: true
+#       when: connected is unreachable
+
+- hosts: cmd, drone
   vars_files:
     - vars.yml
   tasks:
-    - import_tasks: ssh_config.yml
+    - import_tasks: tasks/ssh_config.yml
+    # - import_tasks: add_aliases.yml
 
 - hosts: cmd
   become: true
@@ -13,13 +36,12 @@
     - role: kencx.ansible.terraform
 
   tasks:
-    - import_tasks: install_python39.yml
-    - import_tasks: install_ansible.yml
-    - import_tasks: setup_docker.yml
+    - import_tasks: tasks/install_ansible.yml
+    - import_tasks: tasks/setup_docker.yml
 
 # - hosts: drone
 #   become: true
 #   vars_files:
 #     - vars.yml
 #   tasks:
-#     - import_tasks: setup_drone.yml
+#     - import_tasks: tasks/setup_drone.yml

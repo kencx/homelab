@@ -8,7 +8,7 @@
 
 - name: Add SSH config file
   copy:
-    src: "./files/ssh_config"
+    src: "../files/ssh_config"
     dest: "{{ ssh_path }}/config"
     owner: "{{ user }}"
     group: "{{ user }}"

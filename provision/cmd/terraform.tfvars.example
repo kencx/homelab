@@ -1,3 +1,5 @@
+proxmox_user     = ""
+proxmox_password = ""
 proxmox_api_token_id     = ""
 proxmox_api_token_secret = ""
 proxmox_ip               = "192.168.86.200"
@@ -10,8 +12,18 @@ cmd_id            = 102
 cmd_user          = "debian"
 cmd_drone_id      = 103
 cmd_drone_user    = "debian"
-lxc_template_name = "debian-11-docker-20220406.tar.gz"
+lxc_template_name = "debian-11-docker-20220415.tar.gz"
 ip_address        = "10.10.10."
 subnet_mask       = "/24"
 
-github_access_token = ""
+cmd_mounts = [{
+  host_mountpoint = ""
+  lxc_mountpoint  = ""
+  mp_size         = "5G"
+}]
+
+cmd_drone_mounts = [{
+  host_mountpoint = ""
+  lxc_mountpoint  = ""
+  mp_size         = "5G"
+}]

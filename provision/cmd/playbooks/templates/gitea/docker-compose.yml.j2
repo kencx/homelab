@@ -14,10 +14,17 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
-      # - 3000:3000
       - 2222:22
     networks:
       - {{ proxy_network }}
+	labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.gitea-proxy.entrypoints=https"
+      - "traefik.http.routers.gitea-proxy.rule=Host(`git.{{ domain_name }}`)"
+      - "traefik.http.routers.gitea-proxy.tls=true"
+      - "traefik.http.routers.gitea-proxy.service=gitea-service"
+      - "traefik.http.services.gitea-service.loadbalancer.server.port=3000"
 
 networks:
   {{ proxy_network }}:

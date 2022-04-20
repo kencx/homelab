@@ -4,7 +4,7 @@ ssh_path: "/home/{{ user }}/.ssh"
 ssh_key_file: "{{ ssh_path }}/github"
 
 # docker
-domain_name: ""
+domain_name: "cmd.kencv.xyz"
 proxy_network: "proxy"
 socket_proxy_network: "socket-proxy"
 docker_destination: "/home/{{ user }}/docker"

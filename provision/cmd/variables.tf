@@ -3,12 +3,27 @@ variable "proxmox_ip" {
   description = "IP of Proxmox server"
 }
 
+variable "proxmox_user" {
+  type    = string
+  default = "root@pam"
+}
+
+variable "proxmox_password" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+
 variable "proxmox_api_token_id" {
-  type = string
+  type      = string
+  default   = ""
+  sensitive = true
 }
 
 variable "proxmox_api_token_secret" {
-  type = string
+  type      = string
+  default   = ""
+  sensitive = true
 }
 
 variable "target_node" {
@@ -62,7 +77,14 @@ variable "subnet_mask" {
   description = "Subnet Mask"
 }
 
-variable "github_access_token" {
-  type        = string
-  description = "Github Personal Access Token for Ansible play git_ssh"
+variable "cmd_mounts" {
+  type        = list(any)
+  description = "LXC mount points (optional)"
+  default     = []
+}
+
+variable "cmd_drone_mounts" {
+  type        = list(any)
+  description = "LXC mount points (optional)"
+  default     = []
 }

@@ -16,7 +16,7 @@
   file:
     path: "{{ docker_destination }}/{{ item.path }}"
     state: directory
-  with_filetree: "./templates/"
+  with_filetree: "../templates/"
   when: item.state == "directory"
 
 - name: Copy compose files over
@@ -24,7 +24,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ docker_destination }}/{{ item.path | regex_replace('\\.j2$', '')}}"
-  with_filetree: "./templates/"
+  with_filetree: "../templates/"
   when: item.state == "file"
 
 # - name: Start all compose services
