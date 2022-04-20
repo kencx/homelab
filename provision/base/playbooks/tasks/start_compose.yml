@@ -1,0 +1,7 @@
+---
+- name: Plan all compose services
+
+- name: Start all compose services
+  command:
+    cmd: "make start-all"
+    chdir: "{{ stacks_directory }}"

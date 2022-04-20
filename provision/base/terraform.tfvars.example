@@ -1,12 +1,21 @@
-proxmox_api_token_id     = ""
-proxmox_api_token_secret = ""
-proxmox_ip               = ""
-target_node              = "pve"
-proxmox_storage_pool     = ""
+proxmox_user     = ""
+proxmox_password = ""
+# proxmox_api_token_id     = ""
+# proxmox_api_token_secret = ""
+
+proxmox_ip           = "192.168.86.200"
+target_node          = "pve"
+proxmox_storage_pool = "volumes"
 
 ssh_public_key = ""
 
 environment       = "dev"
-lxc_template_name = ""
-apps_id           = 110
+lxc_template_name = "debian-11-docker-20220415.tar.gz"
+vmid              = 120
 ip_block          = "10.10.10."
+
+mounts = [{
+  host_mountpoint = "/mnt/test"
+  lxc_mountpoint  = "/home/debian/test"
+  mp_size         = "5G"
+}]

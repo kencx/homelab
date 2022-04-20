@@ -1,20 +1,40 @@
 
 variable "proxmox_ip" {
   type        = string
-  description = "IP of Proxmox server"
+  description = "IP of Proxmox server (mandatory)"
+}
+
+variable "proxmox_user" {
+  type    = string
+  default = "root@pam"
+}
+
+variable "proxmox_password" {
+  type      = string
+  default   = ""
+  sensitive = true
 }
 
 variable "proxmox_api_token_id" {
-  type = string
+  type      = string
+  default   = ""
+  sensitive = true
 }
 
 variable "proxmox_api_token_secret" {
-  type = string
+  type      = string
+  default   = ""
+  sensitive = true
 }
 
 variable "target_node" {
   type    = string
   default = "pve"
+}
+
+variable "vmid" {
+  type        = number
+  description = "VM ID (mandatory)"
 }
 
 variable "proxmox_storage_pool" {
@@ -25,24 +45,26 @@ variable "proxmox_storage_pool" {
 variable "ssh_public_key" {
   type        = string
   description = "Public SSH key to root"
+  default     = ""
 }
 
 variable "environment" {
   type        = string
-  description = "Environment (dev, staging, prod)"
+  description = "Environment (mandatory)"
 }
 
 variable "lxc_template_name" {
   type        = string
-  description = "LXC template"
-  default     = "debian-10-standard_10.7-1_amd64.tar.gz"
+  description = "LXC template (mandatory)"
 }
 
-variable "apps_id" {
-  type = number
+variable "mounts" {
+  type        = list(any)
+  description = "LXC mount points (optional)"
+  default     = []
 }
 
 variable "ip_block" {
   type        = string
-  description = "IP address block"
+  description = "IP address block (mandatory)"
 }

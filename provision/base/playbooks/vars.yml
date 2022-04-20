@@ -3,6 +3,8 @@ stacks_repo_url: "https://github.com/kencx/compose-stacks.git"
 stacks_version: "HEAD"
 stacks_directory: "/home/{{ user.stdout }}/docker"
 
+first_time_setup: false
+
 domain_name: ""
 ca_email: ""
 
@@ -11,5 +13,6 @@ started_stacks:
   - miniflux
   - linkding
   - calibre-web
+  - firefly
   # - paperless-ng
   # - photoprism
