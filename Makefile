@@ -19,3 +19,9 @@ inv-list: inventory/hosts.yml
 
 inv-graph: inventory/hosts.yml
 	ansible-inventory -i inventory/hosts.yml --graph --vars
+
+# base
+.PHONY: new-env
+new-env:
+	mkdir -p "$(p)"
+	cp -r provision/base "$(p)"

@@ -21,7 +21,13 @@ all:
     cmd:
       hosts:
         cmd.kencv.xyz:
-        cmd-drone.kencv.xyz:
+      vars:
+        github_access_token: ""
+    drone:
+      hosts:
+        drone.kencv.xyz:
+      vars:
+        github_access_token: ""
     dev:
       hosts:
         dev.kencv.xyz:

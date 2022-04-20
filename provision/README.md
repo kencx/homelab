@@ -36,12 +36,14 @@ $ make bootstrap
 >manually changes the password.
 
 ### Development
-To test the Ansible playbooks, ensure the relevant variables are present in
-`cmd/playbooks/vars.yml`
+To test the Ansible playbooks, ensure the relevant variables are present in the
+root inventory file:
 
 ```yaml
-user: debian
-github_access_token: "changeme"
+cmd:
+  vars:
+	user: debian
+	github_access_token: "changeme"
 ```
 
 then run
@@ -51,31 +53,19 @@ $ cd /provision/cmd/playbooks
 $ molecule test
 ```
 
-To run and debug playbooks individually, use the local
-`inventory/hosts-test.yml` instead. Take care of the user passwords.
-
 ### TODO
-- [ ] Start compose stacks
 - [ ] Molecule `verify.yml`
 - [ ] Automate changing of password on first login
+- [ ] Change Github Public Key name based on host
+- [ ] Add dotfiles, aliases
+- [ ] Drone playbook
 
 ## Base Template
 
 `provision/base` contains a base template of the infrastructure for a single
-environment. Copy `terraform.tfvars.example` and populate the variables. The following variables should differ between environments:
+environment. Copy `terraform.tfvars.example` and populate the variables.
 
-```
-ssh_public_key = "changeme"
-environment = "dev"
-lxc_template_name = "template-name"
-apps_id = 110
-ip_block = "10.10.10."
-```
-
-Init, plan and apply.
-
-```bash
-$ terraform init
-$ terraform plan -vars-file=[file]
-$ terraform apply -vars-file=[file]
-```
+>NOTE: Credentials `proxmox_user="root@pam"` and `proxmox_password` must be used
+>in place of the API token credentials if you require bind mounts. There is [no
+>support](https://bugzilla.proxmox.com/show_bug.cgi?id=2582) for mounting bind
+>mounts to LXC via an API token.
