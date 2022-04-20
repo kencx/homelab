@@ -1,0 +1,15 @@
+---
+http:
+  routers:
+    drone:
+      entrypoints:
+        - https
+      rule: "Host(`drone.{{ domain_name }}`)"
+      tls: {}
+      service: drone
+
+  services:
+    drone:
+      loadBalancer:
+        servers:
+          - url: "{{ drone_url }}"
