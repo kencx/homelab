@@ -10,33 +10,37 @@ terraform {
 
 resource "proxmox_vm_qemu" "test_vm" {
   count       = 1
-  name        = "test-vm-1"
+  name        = var.hostname
+  vmid        = var.vmid
   target_node = var.target_node
 
-  clone   = var.vm_template_name
-  os_type = "cloud-init"
+  clone      = var.vm_template_name
+  full_clone = true
+  os_type    = "cloud-init"
+
+  onboot   = false
+  oncreate = false
 
   guest_agent_ready_timeout = 60 # temp workaround
   agent                     = 1  # ensure qemu_guest_agent is installed in img
-  cores                     = 1
+  cores                     = var.cores
   sockets                   = 1
-  memory                    = 1024
+  memory                    = var.memory
   tablet                    = false
 
   scsihw   = "virtio-scsi-pci"
-  boot     = "c"
   bootdisk = "scsi0"
 
   disk {
     slot    = 0
-    size    = "5G"
+    size    = var.size
     type    = "scsi"
     storage = "volumes"
   }
 
   network {
     model  = "virtio"
-    bridge = "vmbr0"
+    bridge = var.bridge
   }
 
   lifecycle {
@@ -47,6 +51,6 @@ resource "proxmox_vm_qemu" "test_vm" {
 
   ipconfig0 = "ip=10.10.10.101/24,gw=10.10.10.1"
   sshkeys   = <<EOF
-	${var.sshkey}
+	${var.ssh_public_key}
 	EOF
 }

@@ -7,32 +7,31 @@ variable "target_node" {
 
 variable "vm_id" {
   type        = number
-  description = "LXC ID"
+  description = "LXC ID (defaults to 900)"
   default     = 900
 }
 
 variable "hostname" {
   type        = string
-  description = "Name of container"
+  description = "Name of container (defaults to test-lxc)"
   default     = "test-lxc"
 }
 
 variable "lxc_template" {
   type        = string
-  description = "LXC template to deploy"
-  default     = "local:vztmpl/debian-10-standard_10.7-1_amd64.tar.gz"
+  description = "LXC template to deploy (mandatory)"
 }
 
 variable "unprivileged" {
   type        = bool
-  description = "Unprivileged container"
+  description = "Start as unprivileged container"
   default     = true
 }
 
 variable "onboot" {
   type        = bool
   description = "Start container on boot"
-  default     = true
+  default     = false
 }
 variable "start" {
   type        = bool
@@ -48,14 +47,14 @@ variable "cores" {
 
 variable "memory" {
   type        = number
-  description = "Memory"
+  description = "Memory in MB"
   default     = 1024
 }
 
 variable "swap" {
   type        = number
-  description = "Swap"
-  default     = 2048
+  description = "Swap space in MB"
+  default     = 1024
 }
 
 variable "size" {
@@ -67,7 +66,13 @@ variable "size" {
 variable "proxmox_storage_pool" {
   type        = string
   description = ""
-  default     = "local-lvm"
+  default     = "volumes"
+}
+
+variable "mounts" {
+  type        = list(any)
+  description = "List of mounts (optional)"
+  default     = []
 }
 
 variable "bridge" {
@@ -78,15 +83,16 @@ variable "bridge" {
 
 variable "ip_address" {
   type        = string
-  description = "LXC IP address"
+  description = "LXC IP address (mandatory)"
 }
 
 variable "gateway" {
   type        = string
-  description = "LXC Gateway"
+  description = "LXC Gateway (mandatory)"
 }
 
 variable "ssh_public_key" {
   type        = string
   description = "Public SSH key"
+  default     = ""
 }

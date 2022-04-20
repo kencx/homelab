@@ -34,6 +34,19 @@ resource "proxmox_lxc" "lxc" {
     size    = var.size
   }
 
+  dynamic "mountpoint" {
+    for_each = var.mounts
+
+    content {
+      key     = 0
+      slot    = "0"
+      storage = mountpoint.value.host_mountpoint
+      volume  = mountpoint.value.host_mountpoint
+      mp      = mountpoint.value.lxc_mountpoint
+      size    = mountpoint.value.mp_size
+    }
+  }
+
   network {
     name   = "eth0"
     bridge = var.bridge
