@@ -26,7 +26,6 @@
     - vars.yml
   tasks:
     - import_tasks: tasks/ssh_config.yml
-    # - import_tasks: add_aliases.yml
 
 - hosts: cmd
   become: true
@@ -39,9 +38,14 @@
     - import_tasks: tasks/install_ansible.yml
     - import_tasks: tasks/setup_docker.yml
 
-# - hosts: drone
-#   become: true
-#   vars_files:
-#     - vars.yml
-#   tasks:
-#     - import_tasks: tasks/setup_drone.yml
+    # - import_tasks: tasks/setup_traefik.yml
+    #   when: first_time_setup == true
+    # - import_tasks: tasks/start_docker.yml
+    #   when: first_time_setup == false
+
+- hosts: drone
+  become: true
+  vars_files:
+    - vars.yml
+  tasks:
+    - import_tasks: tasks/setup_drone.yml

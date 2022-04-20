@@ -17,7 +17,7 @@
     path: "{{ docker_destination }}/{{ item.path }}"
     state: directory
   with_filetree: "../templates/"
-  when: item.state == "directory"
+  when: item.state == "directory" and item.path != "drone"
 
 - name: Copy compose files over
   become_user: "{{ user }}"
@@ -25,6 +25,4 @@
     src: "{{ item.src }}"
     dest: "{{ docker_destination }}/{{ item.path | regex_replace('\\.j2$', '')}}"
   with_filetree: "../templates/"
-  when: item.state == "file"
-
-# - name: Start all compose services
+  when: (item.state == "file") and (item.path | regex_search('drone') == none)

@@ -6,10 +6,18 @@ pre-commit:
 galaxy-install: requirements.yml
 	ansible-galaxy install -f -r requirements.yml
 
-.PHONY: lxc-image
+.PHONY: create-lxc-image provision-cmd new-env
 
-lxc-image:
+create-lxc-image:
 	make -C images/lxc
+
+provision-cmd:
+	make -C provision/cmd
+
+new-env:
+	mkdir -p "$(p)"
+	cp -r provision/base/* "$(p)"
+	cd "$(p)" && cp terraform.tfvars.example terraform.tfvars
 
 # inventory management
 .PHONY: inv-list inv-graph
@@ -19,9 +27,3 @@ inv-list: inventory/hosts.yml
 
 inv-graph: inventory/hosts.yml
 	ansible-inventory -i inventory/hosts.yml --graph --vars
-
-# base
-.PHONY: new-env
-new-env:
-	mkdir -p "$(p)"
-	cp -r provision/base "$(p)"
