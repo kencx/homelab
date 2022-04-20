@@ -1,7 +1,7 @@
-## Command Center
+## Command
 
-`provision/cmd` provisions the Command Center and helper hosts which have the
-following functions:
+`provision/cmd` provisions a command environment which have the following
+functions:
 - Deployment and provisioning of other hosts with CI/CD
 - Base image templating pipeline
 - Hosts global management applications including Portainer, Gitea etc.
@@ -63,9 +63,8 @@ $ molecule test
 ## Base Template
 
 `provision/base` contains a base template of the infrastructure for a single
-environment. Copy `terraform.tfvars.example` and populate the variables.
+environment. It has the following goals:
+- Describes a single environment with general, default variables
+- Every change is a new versioned release
 
->NOTE: Credentials `proxmox_user="root@pam"` and `proxmox_password` must be used
->in place of the API token credentials if you require bind mounts. There is [no
->support](https://bugzilla.proxmox.com/show_bug.cgi?id=2582) for mounting bind
->mounts to LXC via an API token.
+Copy `terraform.tfvars.example` and populate the variables.
