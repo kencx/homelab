@@ -38,8 +38,8 @@ resource "proxmox_lxc" "lxc" {
     for_each = var.mounts
 
     content {
-      key     = 0
-      slot    = "0"
+      key     = mountpoint.value.key
+      slot    = mountpoint.value.slot
       storage = mountpoint.value.host_mountpoint
       volume  = mountpoint.value.host_mountpoint
       mp      = mountpoint.value.lxc_mountpoint

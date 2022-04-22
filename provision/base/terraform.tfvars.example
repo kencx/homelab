@@ -15,6 +15,8 @@ vmid              = 120
 ip_block          = "10.10.10."
 
 mounts = [{
+  key             = 0
+  slot            = "0"
   host_mountpoint = "/mnt/test"
   lxc_mountpoint  = "/home/debian/test"
   mp_size         = "5G"
