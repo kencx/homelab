@@ -16,7 +16,8 @@ provision-cmd:
 
 new-env:
 	mkdir -p "$(p)"
-	cp -r provision/base "$(p)"
+	cp -r provision/base/* "$(p)"
+	cd "$(p)" && cp terraform.tfvars.example terraform.tfvars
 
 # inventory management
 .PHONY: inv-list inv-graph
