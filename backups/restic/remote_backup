@@ -1,0 +1,39 @@
+#!/bin/bash
+
+set -e
+
+######### CONFIG ##########
+USER=""
+B2_CONFIG=""
+GLOBAL_FLAGS="-q"
+LOG_FILE="/home/$USER/logs/restic.log"
+HEALTHCHECK_URL=""
+
+###########################
+
+curl -fsS -m 10 --retry 5 -o /dev/null "${HEALTHCHECK_URL}/start"
+echo "--------------------------------------------"
+echo "Starting backup process at $(date '+%Y-%m-%d %H:%M:%S')." | tee -a $LOG_FILE
+
+source $B2_CONFIG
+
+# pre-backup check
+restic-remote check | tee -a $LOG_FILE
+
+# start backup
+echo "Performing backups..."
+restic-remote $GLOBAL_FLAGS backup "/home/$USER" --exclude "/home/$USER/logs"
+
+# post-backup check
+restic-remote $GLOBAL_FLAGS check | tee -a $LOG_FILE
+
+# clean up old snapshots
+echo "Cleaning old snapshots..."
+restic-remote $GLOBAL_FLAGS forget -w 5 -m 10 -y 1 --prune
+
+# final check
+restic-remote check | tee -a $LOG_FILE
+
+echo "Backup completed at $(date '+%Y-%m-%d %H:%M:%S')." | tee -a $LOG_FILE
+curl -fsS -m 10 --retry 5 -o /dev/null "${HEALTHCHECK_URL}"
+exit 0

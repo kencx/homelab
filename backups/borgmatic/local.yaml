@@ -1,0 +1,64 @@
+location:
+    source_directories:
+        - /mnt/dietpi
+
+    repositories:
+        - /mnt/hdd/borg
+
+storage:
+    # env variables not supported
+    encryption_passcommand: "/home/kenc/.config/borgmatic/decrypt"
+    checkpoint_interval: 1800
+
+    retries: 3
+    retry_wait: 10
+
+    archive_name_format: '{hostname}-{now}'
+
+retention:
+    keep_daily: 7
+    keep_weekly: 4
+    keep_monthly: 3
+    keep_yearly: 1
+
+    prefix: "{hostname}-"
+
+consistency:
+    checks:
+        - repository
+        - archives
+
+    check_last: 3
+    prefix: "{hostname}-"
+
+hooks:
+    before_backup:
+        # pass root ssh-key to ssh-add
+        - sh -c 'export SSH_AUTH_SOCK="'"$SSH_AUTH_SOCK"'"; \
+            export SSH_AGENT_PID="'"$SSH_AGENT_PID"'"; \
+            ssh-add /root/.ssh/pi'
+        # mount remote server dir
+        - "sshfs -o IdentityFile=/root/.ssh/pi \
+            yossarian:/home/dietpi/docker /mnt/dietpi"
+
+    before_prune:
+        - echo "Starting pruning."
+
+    before_check:
+        - echo "Starting checks."
+
+    after_backup:
+        # umount remote dir
+        - fusermount -u /mnt/dietpi
+
+    after_prune:
+        - echo "Finished pruning."
+
+    after_check:
+        - echo "Finished checks."
+
+    on_error:
+        - echo "Error during prune/create/check."
+        # cleanup
+        - fusermount -u /mnt/dietpi
+        - umount /mnt/hdd

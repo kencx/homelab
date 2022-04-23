@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e
+
+sleep 5
+
+USER=kenc
+MOUNT_POINT=/mnt/hdd
+DISK_UUID=
+
+# check for backup drive
+if [ ! -e "/dev/disk/by-uuid/$DISK_UUID" ]; then
+	logger -p user.warning "Backup drive not found. Exiting..."
+	exit 1
+fi
+
+mount $MOUNT_POINT
+
+# run script
+/root/.local/bin/borgmatic -c "/home/kenc/.config/borgmatic/local.yaml" --syslog-verbosity 1 --verbosity -1
+
+umount $MOUNT_POINT
+
+# spin down drive
+# hdparm -S120 /dev/sdc

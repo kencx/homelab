@@ -1,0 +1,58 @@
+location:
+    # Globs and tildes are expanded. Do not backslash spaces in path names.
+    source_directories:
+        - /home/dietpi/docker
+
+    # Paths to local or remote repositories (required).
+    # Tildes are expanded. If systemd service is used, then add local
+    # repository paths in the systemd service file to the ReadWritePaths list.
+    repositories:
+        - z2n027q5@z2n027q5.repo.borgbase.com:repo
+
+storage:
+    encryption_passcommand: "cat /root/.borg-passphrase"
+    checkpoint_interval: 1800
+
+    retries: 3
+    retry_wait: 10
+
+    ssh_command: ssh -i /home/borg/.ssh/id_borgbase
+    archive_name_format: '{hostname}-{now}'
+
+retention:
+    keep_daily: 7
+    keep_weekly: 4
+    keep_monthly: 3
+    keep_yearly: 1
+
+    prefix: "{hostname}-"
+
+consistency:
+    checks:
+        - repository
+        - archives
+
+    check_last: 3
+    prefix: "{hostname}-"
+
+hooks:
+    before_backup:
+        - echo "Starting backup"
+
+    before_prune:
+        - echo "Starting pruning."
+
+    before_check:
+        - echo "Starting checks."
+
+    before_extract:
+        - echo "Starting extracting."
+
+    after_backup:
+        - echo "Finished a backup."
+
+    after_prune:
+        - echo "Finished pruning."
+
+    on_error:
+        - echo "Error during prune/create/check."

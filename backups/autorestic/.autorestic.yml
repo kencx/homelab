@@ -1,0 +1,49 @@
+version: 2
+
+global:
+  forget:
+    keep-daily: 7
+    keep-weekly: 4
+    keep-monthly: 3
+    keep-yearly: 1
+
+extras:
+  hooks: &hooks
+    failure:
+      - 'echo "[ERROR] Backup failed!"'
+    success:
+      - 'echo -e "[INFO] Backup completed in ${AUTORESTIC_PROCESSED_DURATION_HDD}\n
+                         Files added: ${AUTORESTIC_FILES_ADDED_HDD}\n
+                         Added Size: ${AUTORESTIC_ADDED_SIZE_HDD}"'
+
+locations:
+  all:
+    from: /home/debian
+    to:
+      - hdd
+      - remote
+    forget: prune
+    hooks:
+      <<: *hooks
+    options:
+      backup:
+        exclude:
+          - /home/debian/archives
+          - /home/debian/.*
+          - /home/debian/borgmatic
+
+  archives:
+    from: /home/debian/archives
+    to:
+      - hdd
+      - remote
+    forget: prune
+
+backends:
+  remote:
+    type: b2
+    path: "nas-server-restic"
+
+  hdd:
+    type: local
+    path: /mnt/kd/restic
