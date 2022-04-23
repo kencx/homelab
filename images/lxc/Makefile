@@ -1,4 +1,4 @@
-.PHONY: install check bootstrap
+.PHONY: install check image
 
 default: check
 
@@ -10,7 +10,7 @@ check: ../../inventory/hosts.yml
 		-i ../../inventory/hosts.yml \
 		-K --check
 
-bootstrap: ../../inventory/hosts.yml
+image: ../../inventory/hosts.yml
 	ANSIBLE_FORCE_COLOR=1 ansible-playbook main.yml \
 		-i ../../inventory/hosts.yml \
 		-K

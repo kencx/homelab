@@ -12,7 +12,7 @@ container.
 2. Ensure hosts file is defined. By default, we use the the global hosts file at
    `${BASE_DIR}/inventory/hosts.yml`.
 
-3. Run `make bootstrap`.
+3. Run `make image`.
 
 >This will prompt for `pve` sudo password.
 
@@ -21,4 +21,4 @@ When destroying and recreating a new LXC with the same IP, ensure that the ARP
 table is cleared. Otherwise, the recreated host will not be reachable.
 
 Ensure the Ansible playbook dependencies are installed and updated. Run `make
-galaxy-install`.
+install`.
