@@ -11,7 +11,7 @@
       api_token_id: "{{ proxmox_api_token_id }}"
       api_token_secret: "{{ proxmox_api_token_secret }}"
 
-      vmid: "{{ template_vmid }}"
+      vmid: "{{ temp_vmid }}"
       state: stopped
 
   - name: Create temp dump dir
@@ -21,7 +21,7 @@
 
   - name: Dump template to temp dir
     become: true
-    command: "vzdump {{ template_vmid }} --mode stop --compress gzip --dumpdir {{ temp_dir }}"
+    command: "vzdump {{ temp_vmid }} --mode stop --compress gzip --dumpdir {{ temp_dir }}"
 
   - name: Get template file
     find:
@@ -51,5 +51,5 @@
       api_token_id: "{{ proxmox_api_token_id }}"
       api_token_secret: "{{ proxmox_api_token_secret }}"
 
-      vmid: "{{ template_vmid }}"
+      vmid: "{{ temp_vmid }}"
       state: absent

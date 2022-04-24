@@ -25,17 +25,17 @@
         storage: "{{ proxmox_storage }}"
 
         node: "{{ proxmox_node }}"
-        vmid: "{{ template_vmid }}"
-        hostname: "{{ template_hostname }}"
+        vmid: "{{ temp_vmid }}"
+        hostname: "{{ temp_hostname }}"
         ostemplate: "local:vztmpl/{{ base_image }}"
         unprivileged: true
 
         cores: 1
         memory: 4096
         swap: 2048
-        disk: "{{ template_disk_size }}"
+        disk: "{{ temp_disk_size }}"
 
-        netif: '{"net0":"name=eth0,ip={{ ip_address }},gw={{ gateway }},bridge=vmbr1"}'
+        netif: '{"net0":"name=eth0,ip={{ temp_ip_address }},gw={{ temp_gateway }},bridge=vmbr1"}'
         password: "{{ random_password }}"
         pubkey: "{{ temp_ssh_key.public_key }}"
         state: present
@@ -46,5 +46,5 @@
         api_user: "{{ proxmox_api_user }}"
         api_token_id: "{{ proxmox_api_token_id }}"
         api_token_secret: "{{ proxmox_api_token_secret }}"
-        vmid: "{{ template_vmid }}"
+        vmid: "{{ temp_vmid }}"
         state: started

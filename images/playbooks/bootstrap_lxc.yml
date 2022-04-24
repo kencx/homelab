@@ -1,7 +1,7 @@
 ---
 - hosts: template
   vars_files:
-    - vars.yml
+    - "{{ bootstrap_vars_file }}"
   pre_tasks:
     - name: Update and upgrade packages
       become: true
@@ -37,7 +37,7 @@
     - name: Force reset password on first login
       become: true
       command: "chage -d 0 {{ template_user }}"
-      when: new_user.changed
+      when: new_user.changed and force_reset_password
 
     - name: Add new SSH authorized key to user
       authorized_key:

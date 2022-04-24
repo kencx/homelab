@@ -1,14 +1,17 @@
-.PHONY: pre-commit galaxy-install
+.PHONY: pre-commit install
 
 pre-commit:
 	pre-commit run --all-files
 
-galaxy-install: requirements.yml
+install: requirements.yml
 	ansible-galaxy install -f -r requirements.yml
 
-.PHONY: create-lxc-image provision-cmd new-env
+.PHONY: lxc-image provision-cmd new-env
 
-create-lxc-image:
+lxc-image-check:
+	make -C images/lxc check
+
+lxc-image:
 	make -C images/lxc
 
 provision-cmd:

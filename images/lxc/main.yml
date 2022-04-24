@@ -5,6 +5,8 @@
 
 - name: Bootstrap temp LXC
   import_playbook: ../playbooks/bootstrap_lxc.yml
+  vars:
+    bootstrap_vars_file: "../lxc/vars.yml"
   any_errors_fatal: true
   when: not ansible_check_mode
 

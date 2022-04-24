@@ -4,3 +4,4 @@ roles:
 collections:
   - name: https://github.com/kencx/ansible.git
     type: git
+    version: v0.1.0

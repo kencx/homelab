@@ -1,9 +1,6 @@
-.PHONY: install check image
+.PHONY: check image
 
-default: check
-
-install: ../../requirements.yml
-	ansible-galaxy install -f -r ../../requirements.yml
+default: image
 
 check: ../../inventory/hosts.yml
 	ANSIBLE_FORCE_COLOR=1 ansible-playbook main.yml \
