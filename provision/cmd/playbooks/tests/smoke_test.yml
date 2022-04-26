@@ -1,0 +1,40 @@
+---
+- hosts: cmd
+  vars_files:
+    - ../vars.yml
+  gather_facts: false
+  tasks:
+    - name: Test Github SSH connection
+      command: ssh -T git@github.com -o StrictHostKeyChecking=no
+      register: ssh_github_output
+      changed_when: false
+      failed_when: '"successfully authenticated" not in ssh_github_output.stderr'
+
+    # - name: Test SSH connection to other envs
+    #   command: "ssh debian@{{ item }} -o StrictHostKeyChecking=no 'hostname'"
+    #   with_items:
+    #     - dev.kencv.xyz
+    #     - prod.kencv.xyz
+    #   changed_when: false
+
+    - name: Test Terraform
+      command: terraform --version
+      register: terraform_output
+      changed_when: false
+      failed_when: '"command not found" in terraform_output.stderr'
+
+    - name: Test Ansible
+      command: ls /home/debian/.local/bin/ansible
+      register: ansible_output
+      changed_when: false
+      failed_when: "'ansible' not in ansible_output.stdout"
+
+    - name: Test traefik connection
+      uri:
+        url: "https://traefik.{{ domain_name }}"
+      register: traefik_output
+      # retry: 5
+      # delay: 10
+      # until: traefik_output is not failed
+      changed_when: false
+      failed_when: 'traefik_output.status != 200'

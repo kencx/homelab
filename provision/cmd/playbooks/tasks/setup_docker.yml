@@ -16,6 +16,8 @@
   file:
     path: "{{ docker_destination }}/{{ item.path }}"
     state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
   with_filetree: "../templates/"
   when: item.state == "directory" and item.path != "drone"
 
@@ -24,5 +26,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ docker_destination }}/{{ item.path | regex_replace('\\.j2$', '')}}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
   with_filetree: "../templates/"
   when: (item.state == "file") and (item.path | regex_search('drone') == none)

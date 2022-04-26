@@ -17,7 +17,7 @@ services:
       - 2222:22
     networks:
       - {{ proxy_network }}
-	labels:
+    labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.gitea-proxy.entrypoints=https"

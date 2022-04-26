@@ -8,21 +8,25 @@ proxmox_storage_pool     = "volumes"
 
 ssh_public_key = ""
 
-cmd_id            = 102
+cmd_id            = 105
 cmd_user          = "debian"
-cmd_drone_id      = 103
+cmd_drone_id      = 106
 cmd_drone_user    = "debian"
-lxc_template_name = "debian-11-docker-20220415.tar.gz"
+lxc_template_name = "debian-11-docker-20220426.tar.gz"
 ip_address        = "10.10.10."
 subnet_mask       = "/24"
 
 cmd_mounts = [{
+  key             = 0
+  slot            = "0"
   host_mountpoint = ""
   lxc_mountpoint  = ""
   mp_size         = "5G"
 }]
 
 cmd_drone_mounts = [{
+  key             = 0
+  slot            = "0"
   host_mountpoint = ""
   lxc_mountpoint  = ""
   mp_size         = "5G"

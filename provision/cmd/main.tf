@@ -11,10 +11,10 @@ locals {
   proxmox_api_url   = "https://${var.proxmox_ip}:8006/api2/json"
   lxc_template_name = "local:vztmpl/${var.lxc_template_name}"
 
-  gateway        = "${var.ip_address}1"
-  cmd_ip         = "${var.ip_address}${var.cmd_id}"
+  gateway        = "${var.network_address}1"
+  cmd_ip         = "${var.network_address}${var.cmd_id}"
   cmd_cidr       = "${local.cmd_ip}${var.subnet_mask}"
-  cmd_drone_ip   = "${var.ip_address}${var.cmd_drone_id}"
+  cmd_drone_ip   = "${var.network_address}${var.cmd_drone_id}"
   cmd_drone_cidr = "${local.cmd_drone_ip}${var.subnet_mask}"
 }
 
@@ -80,14 +80,13 @@ module "cmd_drone" {
   ssh_public_key = var.ssh_public_key
 }
 
-# resource "null_resource" "provisioning" {
-#
-#   provisioner "local-exec" {
-#     command     = <<EOT
-# 		ansible-galaxy -f -r ../../requirements.yml
-# 		ANSIBLE_FORCE_COLOR=1 ansible-playbook main.yml -K
-# 	EOT
-#     working_dir = "./playbooks/"
-#   }
-#   depends_on = [module.cmd-core, module.cmd_drone]
-# }
+resource "null_resource" "provisioning" {
+
+  provisioner "local-exec" {
+    command     = <<EOT
+		ANSIBLE_FORCE_COLOR=1 ansible-playbook tests/pre_test.yml
+	EOT
+    working_dir = "./playbooks/"
+  }
+  depends_on = [module.cmd-core, module.cmd_drone]
+}

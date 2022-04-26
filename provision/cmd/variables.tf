@@ -67,7 +67,7 @@ variable "lxc_template_name" {
   default     = "debian-10-standard_10.7-1_amd64.tar.gz"
 }
 
-variable "ip_address" {
+variable "network_address" {
   type        = string
   description = "IP address"
 }

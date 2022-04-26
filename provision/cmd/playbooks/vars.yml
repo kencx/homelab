@@ -8,7 +8,7 @@ ssh_key_file: "{{ ssh_path }}/github"
 domain_name: "cmd.kencv.xyz"
 proxy_network: "proxy"
 socket_proxy_network: "socket-proxy"
-docker_destination: "/home/{{ user }}/docker"
+docker_destination: "/mnt/docker"
 
 # traefik
 traefik_img_version: "v2.6.1"
@@ -20,7 +20,7 @@ portainer_data_dir: "./data"
 portainer_port: 9000
 
 # gitea
-gitea_img_version: "latest"
+gitea_img_version: "1.16"
 gitea_data_dir: "./gitea"
 gitea_port: 3000
 
@@ -28,5 +28,5 @@ gitea_port: 3000
 drone_img_version: "2.11.1"
 drone_data_dir: "./drone"
 drone_port: 8000
-drone_ip: ""
+drone_ip: "10.10.10.106"
 drone_url: "http://{{ drone_ip }}:{{ drone_port }}"

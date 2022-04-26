@@ -1,0 +1,9 @@
+---
+- name: Start docker containers
+  command:
+    cmd: "docker-compose -f {{ item }}/docker-compose.yml up -d "
+    chdir: "{{ docker_destination }}"
+  with_items:
+    - traefik
+    - gitea
+    - portainer

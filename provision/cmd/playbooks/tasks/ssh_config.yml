@@ -34,6 +34,7 @@
   community.general.github_key:
     name: PVE Access Key
     state: present
+    force: true
     token: "{{ github_access_token }}"
     pubkey: "{{ gh_pub_key.content | b64decode }}"
   when: ssh_keypair.changed

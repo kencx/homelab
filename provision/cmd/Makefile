@@ -24,3 +24,6 @@ bootstrap:
 mol = create converge verify test
 $(mol):
 	cd $(PLAYBOOK_DIR); ANSIBLE_FORCE_COLOR=1 molecule $@
+
+smoke:
+	cd $(PLAYBOOK_DIR); ANSIBLE_FORCE_COLOR=1 ansible-playbook tests/smoke_test.yml -K
