@@ -1,0 +1,42 @@
+---
+- name: Install docker module
+  pip:
+    name: docker
+
+- name: Create proxy docker network
+  community.docker.docker_network:
+    name: proxy
+
+- name: Create socket-proxy docker network
+  community.docker.docker_network:
+    name: socket-proxy
+
+- name: Ensure docker directory structure exists
+  become_user: "{{ user }}"
+  file:
+    path: "{{ docker_destination }}/{{ item.path }}"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+  with_filetree: "../templates/"
+  when: item.state == "directory" and item.path != "drone"
+
+- name: Copy compose files over
+  become_user: "{{ user }}"
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ docker_destination }}/{{ item.path | regex_replace('\\.j2$', '')}}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+  with_filetree: "../templates/"
+  when: (item.state == "file") and (item.path | regex_search('drone') == none)
+
+- name: Start docker containers
+  command:
+    cmd: "docker-compose -f {{ item }}/docker-compose.yml up -d "
+    chdir: "{{ docker_destination }}"
+  with_items:
+    - traefik
+    - gitea
+    - portainer
+  when: first_time_setup == false

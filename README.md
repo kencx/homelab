@@ -11,36 +11,27 @@ This repository contains Terraform code and Ansible playbooks for my Proxmox VE
 - Terraform
 - Ansible (and molecule)
 - Docker and docker-compose
+- make
 - pre-commit
 
 ## Golden Images
-All system configuration are implemented on golden images that are provisioned
-on all hosts. This prevents configuration drift between systems and allows for
-versioned changes that are easy to rollback.
+A key goal for this homelab is immutable infrastructure -
+servers are never modified directly once they are deployed. Instead, all
+configuration changes are implemented on golden images that are subsequently
+provisioned on all systems. This prevents configuration drift between systems
+and allows for versioned changes that are easy to rollback.
 
-1. Add new configuration to playbook
-2. Build the golden image
-3. Automated testing on new image
-4. Backup all persistent data
-5. Destroy existing servers and re-create with new images
+Refer to
+[docs/images.md](https://github.com/kencx/homelab-iac/blob/master/docs/images.md)
+for more details.
 
 ## Provisioning
 We provision our hosts with Terraform and implement application-specific
 configuration with Ansible.
 
-- `provision/cmd` provisions a command environment for running CI/CD pipelines
+- `terraform/cmd` provisions a command environment for running CI/CD pipelines
   with Gitea and Drone.
-- `provision/base` is a general base repository that describes a single environment. It can be considered a versioned artifact of an environment's infrastructure.
-
-## Usage
-1. (Optional) Provision `cmd` with a chosen base image.
-
-All subsequent steps are executed on `cmd` (or your workstation)
-
-2. Build and test base images
-3. Clone `base` folder and pass all relevant environment parameters (dev,
-   sit, prod).
-4. Provision your environment(s) with their parameters from `base`.
+- `terraform/base` is a general base repository that describes a single environment. It can be considered a versioned artifact of an environment's infrastructure.
 
 ## Notes
 

@@ -1,0 +1,24 @@
+proxmox_user     = ""
+proxmox_password = ""
+# proxmox_api_token_id     = ""
+# proxmox_api_token_secret = ""
+
+proxmox_ip           = ""
+target_node          = "pve"
+proxmox_storage_pool = "volumes"
+
+ssh_public_key = ""
+
+environment       = "dev"
+vmid              = 110
+lxc_template_name = "debian-11-docker-20220426.tar.gz"
+network_address   = ""
+subnet_mask       = "/24"
+
+mounts = [{
+  key             = 0
+  slot            = "0"
+  host_mountpoint = ""
+  lxc_mountpoint  = ""
+  mp_size         = "5G"
+}]

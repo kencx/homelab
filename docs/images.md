@@ -26,13 +26,12 @@ container.
 ### Usage
 1. Run `make install` to install all Ansible roles and collections.
 2. Add configuration to `images/lxc/vars.yml`
-3. Ensure hosts file is defined. By default, we use the the global hosts file at
-   `${BASE_DIR}/inventory/hosts.yml`.
-4. Run `make lxc-image`. This will prompt for your Proxmox sudo password.
+3. Run `make lxc-image`. This will prompt for your Proxmox sudo password.
 
 #### Notes
-When destroying and recreating a new LXC with the same IP, ensure that the ARP
-table is cleared. Otherwise, the recreated host will not be reachable.
+When testing or debugging, you might destroy and recreate a new LXC with the
+same IP in a short span of time. If the temp container is unreachable, ensure
+that your router's ARP table cache is cleared.
 
 ### Variables
 #### Authentication

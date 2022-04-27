@@ -1,0 +1,8 @@
+---
+- hosts: dev
+  become: false
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - import_tasks: tasks/compose_stacks.yml

@@ -6,7 +6,17 @@ pre-commit:
 install: requirements.yml
 	ansible-galaxy install -f -r requirements.yml
 
-.PHONY: lxc-image provision-cmd new-env
+# ansible inventory management
+# .PHONY: inv-list inv-graph
+
+# inv-list: inventory/hosts.yml
+# 	ansible-inventory -i inventory/hosts.yml --list
+#
+# inv-graph: inventory/hosts.yml
+# 	ansible-inventory -i inventory/hosts.yml --graph --vars
+
+# images
+.PHONY: lxc-image
 
 lxc-image-check:
 	make -C images/lxc check
@@ -14,19 +24,30 @@ lxc-image-check:
 lxc-image:
 	make -C images/lxc
 
-provision-cmd:
-	make -C provision/cmd
+# infra
+.PHONY: plan apply new-env
+e := dev
 
-new-env:
-	mkdir -p "$(p)"
-	cp -r provision/base/* "$(p)"
-	cd "$(p)" && cp terraform.tfvars.example terraform.tfvars
+plan:
+	make -C terraform/$(e)
 
-# inventory management
-.PHONY: inv-list inv-graph
+apply:
+	make -C terraform/$(e) apply
 
-inv-list: inventory/hosts.yml
-	ansible-inventory -i inventory/hosts.yml --list
+destroy:
+	make -C terraform/$(e) destroy
 
-inv-graph: inventory/hosts.yml
-	ansible-inventory -i inventory/hosts.yml --graph --vars
+# new-env:
+# 	mkdir -p "$(p)"
+# 	cp -r terraform/base/* "$(p)"
+# 	cd "$(p)" && cp terraform.tfvars.example terraform.tfvars
+
+# bootstrap
+.PHONY: bootstrap smoke
+	PLAYBOOK_DIR := playbooks
+
+bootstrap:
+	cd $(PLAYBOOK_DIR); ansible-playbook main.yml -K
+
+smoke:
+	cd $(PLAYBOOK_DIR); ansible-playbook tests/smoke_test.yml -K
