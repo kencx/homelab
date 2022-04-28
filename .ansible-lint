@@ -5,7 +5,8 @@ exclude_paths:
   - .cache/
   - .github/
   - terraform/
-  - ./provision/controller/playbooks/molecule/
+  - backups/
+  - docs/
   - ${HOME}/.ansible/roles/
 
 skip_list:

@@ -42,6 +42,6 @@
 
 - name: Start all compose services
   command:
-    cmd: "make start-all"
+    cmd: "./bin/start-all"
     chdir: "{{ stacks_directory }}"
   when: first_time_setup == false
