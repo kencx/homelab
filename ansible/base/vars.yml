@@ -1,15 +1,23 @@
+# CHANGE THIS
+env: "dev"
+
+# nfs mount
+env_nfs_share: "/home/debian/apps/{{ env }}-apps"
+nfs_mnt_path: "/mnt/docker"
 
 stacks_repo_url: "https://github.com/kencx/compose-stacks.git"
 stacks_version: "HEAD"
-stacks_directory: "/home/{{ user.stdout }}/docker"
+clone_repo: false  # set to true if no existing config
 
-first_time_setup: false
-clone_repo: false
-
+# docker
 domain_name: ""
 ca_email: ""
+proxy_network: "proxy"
+socket_proxy_network: "socket-proxy"
+docker_destination: "{{ nfs_mnt_path }}"
 
-started_stacks:
+# docker containers
+stacks:
   - traefik
   - miniflux
   - linkding

@@ -4,26 +4,25 @@
     name: docker
     state: present
 
-- name: Create proxy docker network
+- name: Create docker networks
   community.docker.docker_network:
-    name: proxy
-
-- name: Create socket-proxy docker network
-  community.docker.docker_network:
-    name: socket-proxy
+    name: "{{ item }}"
+  with_items:
+    - "{{ proxy_network }}"
+    - "{{ socket_proxy_network }}"
 
 # WARNING: this overwrites existing config and data if already exists
-# - name: Clone compose-stacks repo
-#   git:
-#     repo: "{{ stacks_repo_url }}"
-#     dest: "{{ stacks_directory }}"
-#     version: "{{ stacks_version }}"
-#   when: clone_repo
+- name: Clone compose-stacks repo
+  git:
+    repo: "{{ stacks_repo_url }}"
+    dest: "{{ docker_destination }}"
+    version: "{{ stacks_version }}"
+  when: clone_repo
 
 - name: Create .env file
   copy:
-    src: "{{ stacks_directory }}/.env.example"
-    dest: "{{ stacks_directory }}/.env"
+    src: "{{ docker_destination }}/.env.example"
+    dest: "{{ docker_destination }}/.env"
     remote_src: true
     force: false  # do not overwrite if exist
   register: env_file
@@ -31,7 +30,7 @@
 # dependence on .env in compose-stacks
 - name: Populate environment variables
   lineinfile:
-    path: "{{ stacks_directory }}/.env"
+    path: "{{ docker_destination }}/.env"
     regexp: "^{{ item.key }}"
     line: "{{ item.key }}{{ item.value }}"
     state: present
@@ -40,8 +39,9 @@
     - { key: "CA_EMAIL=", value: "{{ ca_email }}" }
   when: env_file.changed
 
-- name: Start all compose services
+- name: Start compose stacks
   command:
-    cmd: "./bin/start-all"
-    chdir: "{{ stacks_directory }}"
-  when: first_time_setup == false
+    cmd: "make up c={{ item }}"
+    chdir: "{{ docker_destination }}"
+  with_items:
+    - "{{ stacks }}"

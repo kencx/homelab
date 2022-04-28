@@ -25,13 +25,18 @@ container.
 
 ### Usage
 1. Run `make install` to install all Ansible roles and collections.
-2. Add configuration to `images/lxc/vars.yml`
-3. Run `make lxc-image`. This will prompt for your Proxmox sudo password.
+2. Input [variables](#variables) in `images/lxc/vars.yml`
+3. Run `make lxc-image`. This will prompt for your Proxmox sudo password (if not
+   root@pam).
 
-#### Notes
+### Notes
 When testing or debugging, you might destroy and recreate a new LXC with the
 same IP in a short span of time. If the temp container is unreachable, ensure
 that your router's ARP table cache is cleared.
+
+It is advisable to create a non-root user in Proxmox (eg. `ansible@pam`) and use
+an API token to authenticate with Proxmox. This are input in
+`inventory/hosts.yml`.
 
 ### Variables
 #### Authentication

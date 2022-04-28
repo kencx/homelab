@@ -3,7 +3,7 @@
   pip:
     name: docker
 
-- name: Create proxy docker network
+- name: Create docker networks
   community.docker.docker_network:
     name: "{{ item }}"
   with_items:

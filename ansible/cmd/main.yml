@@ -23,7 +23,6 @@
         state: present
 
 - hosts: drone
-  become: true
   tags: drone
   vars_files:
     - vars.yml
