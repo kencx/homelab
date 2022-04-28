@@ -22,19 +22,3 @@
     owner: "{{ user }}"
     group: "{{ user }}"
     path: "{{ ssh_key_file }}"
-  register: ssh_keypair
-
-- name: Read public key
-  slurp:
-    src: "{{ ssh_key_file }}.pub"
-  register: gh_pub_key
-  when: ssh_keypair.changed
-
-- name: Authorize public key on Github
-  community.general.github_key:
-    name: PVE Access Key
-    state: present
-    force: true
-    token: "{{ github_access_token }}"
-    pubkey: "{{ gh_pub_key.content | b64decode }}"
-  when: ssh_keypair.changed

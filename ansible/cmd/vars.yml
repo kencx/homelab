@@ -1,6 +1,13 @@
-user: debian
-first_time_setup: false
 
+# nfs mount
+cmd_nfs_share: "/home/debian/apps/cmd-apps"
+drone_nfs_share: "/home/debian/apps/drone"
+nfs_mnt_path: "/mnt/docker"
+
+user: debian
+latest_terraform_version: 1.1.9
+
+# ssh
 ssh_path: "/home/{{ user }}/.ssh"
 ssh_key_file: "{{ ssh_path }}/github"
 
@@ -8,7 +15,9 @@ ssh_key_file: "{{ ssh_path }}/github"
 domain_name: "cmd.kencv.xyz"
 proxy_network: "proxy"
 socket_proxy_network: "socket-proxy"
-docker_destination: "/mnt/docker"
+docker_destination: "{{ nfs_mnt_path }}"
+
+## docker containers
 
 # traefik
 traefik_img_version: "v2.6.1"

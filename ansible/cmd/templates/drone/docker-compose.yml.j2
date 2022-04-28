@@ -9,8 +9,6 @@ services:
     env_file: drone.env
     volumes:
       - {{ drone_data_dir }}:/data
-    networks:
-      - {{ proxy_network }}
     ports:
       - {{ drone_port }}:80
 
@@ -23,7 +21,3 @@ services:
       - drone-server
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
-networks:
-  {{ proxy_network }}:
-    external: true

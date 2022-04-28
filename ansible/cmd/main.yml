@@ -1,21 +1,20 @@
 ---
-- hosts: cmd # , drone
-  vars_files:
-    - vars.yml
-  tasks:
-    - import_tasks: tasks/ssh_config.yml
-
 - hosts: cmd
-  become: true
+  tags: cmd
   vars_files:
     - vars.yml
   roles:
     - role: kencx.ansible.terraform
-      vars:
-        - latest_terraform_version: 1.1.9
     - role: kencx.ansible.ansible
+    - role: kencx.ansible.nfs
+      vars:
+        - nfs_server_src_dir: "{{ cmd_nfs_share }}"
 
   tasks:
+    - import_tasks: tasks/ssh_config.yml
+    - import_tasks: tasks/setup_docker.yml
+      become: true
+
     - name: Install pre-commit
       become_user: "{{ user }}"
       community.general.pipx:
@@ -23,14 +22,17 @@
         install_deps: true
         state: present
 
-    - import_tasks: tasks/setup_docker.yml
-
 - hosts: drone
   become: true
+  tags: drone
   vars_files:
     - vars.yml
+  roles:
+    - role: kencx.ansible.nfs
+      vars:
+        - nfs_server_src_dir: "{{ drone_nfs_share }}"
+
   tasks:
     - import_tasks: tasks/setup_drone.yml
 
-# smoke tests
 - import_playbook: tests/smoke_test.yml

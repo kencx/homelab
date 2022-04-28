@@ -5,13 +5,13 @@
 
 - name: Create proxy docker network
   community.docker.docker_network:
-    name: proxy
-
-- name: Create socket-proxy docker network
-  community.docker.docker_network:
-    name: socket-proxy
+    name: "{{ item }}"
+  with_items:
+    - "{{ proxy_network }}"
+    - "{{ socket_proxy_network }}"
 
 - name: Ensure docker directory structure exists
+  become: true
   become_user: "{{ user }}"
   file:
     path: "{{ docker_destination }}/{{ item.path }}"
@@ -21,11 +21,12 @@
   with_filetree: "../templates/"
   when: item.state == "directory" and item.path != "drone"
 
-- name: Copy compose files over
+- name: Copy compose templates to remote
+  become: true
   become_user: "{{ user }}"
   template:
     src: "{{ item.src }}"
-    dest: "{{ docker_destination }}/{{ item.path | regex_replace('\\.j2$', '')}}"
+    dest: "{{ docker_destination }}/{{ item.path | regex_replace('\\.j2$', '') }}"
     owner: "{{ user }}"
     group: "{{ user }}"
   with_filetree: "../templates/"
@@ -39,4 +40,3 @@
     - traefik
     - gitea
     - portainer
-  when: first_time_setup == false
