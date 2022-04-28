@@ -13,7 +13,7 @@ locals {
 
   gateway      = "${var.network_address}1"
   cmd_ip       = "${var.network_address}${var.cmd_id}${var.subnet_mask}"
-  cmd_drone_ip = "${var.network_address}${var.cmd_drone_id}"
+  cmd_drone_ip = "${var.network_address}${var.cmd_drone_id}${var.subnet_mask}"
 }
 
 provider "proxmox" {
@@ -33,7 +33,7 @@ module "cmd-core" {
   target_node  = "pve"
   hostname     = "cmd"
   lxc_template = local.lxc_template_name
-  unprivileged = true
+  unprivileged = false
   onboot       = true
   start        = true
 
@@ -52,14 +52,14 @@ module "cmd-core" {
   ssh_public_key = var.ssh_public_key
 }
 
-module "cmd_drone" {
+module "cmd-drone" {
   source = "../modules/lxc"
 
   vm_id        = var.cmd_drone_id
   target_node  = "pve"
   hostname     = "cmd-drone"
   lxc_template = local.lxc_template_name
-  unprivileged = true
+  unprivileged = false
   onboot       = true
   start        = true
 
@@ -82,9 +82,9 @@ resource "null_resource" "provisioning" {
 
   provisioner "local-exec" {
     command     = <<EOT
-		ANSIBLE_FORCE_COLOR=1 ansible-playbook tests/pre_test.yml
+		ansible -m ping all
 	EOT
     working_dir = "../../ansible/cmd/"
   }
-  depends_on = [module.cmd-core, module.cmd_drone]
+  depends_on = [module.cmd-core, module.cmd-drone]
 }

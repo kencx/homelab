@@ -33,7 +33,7 @@ module "apps" {
   target_node  = "pve"
   hostname     = "${var.environment}-apps"
   lxc_template = local.lxc_template_name
-  unprivileged = true
+  unprivileged = false
   onboot       = true
   start        = true
 

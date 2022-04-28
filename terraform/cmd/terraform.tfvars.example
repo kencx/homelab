@@ -15,19 +15,3 @@ cmd_drone_user    = "debian"
 lxc_template_name = "debian-11-docker-20220426.tar.gz"
 ip_address        = "10.10.10."
 subnet_mask       = "/24"
-
-cmd_mounts = [{
-  key             = 0
-  slot            = "0"
-  host_mountpoint = ""
-  lxc_mountpoint  = ""
-  mp_size         = "5G"
-}]
-
-cmd_drone_mounts = [{
-  key             = 0
-  slot            = "0"
-  host_mountpoint = ""
-  lxc_mountpoint  = ""
-  mp_size         = "5G"
-}]

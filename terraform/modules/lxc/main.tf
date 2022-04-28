@@ -26,6 +26,7 @@ resource "proxmox_lxc" "lxc" {
 
   features {
     nesting = true
+    mount   = "nfs" # only allowed if unprivileged = false
   }
 
   # mandatory
