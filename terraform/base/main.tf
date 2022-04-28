@@ -13,7 +13,7 @@ locals {
   lxc_template_name = "local:vztmpl/${var.lxc_template_name}"
 
   gateway    = "${var.network_address}1"
-  ip_address = "${var.network_address}${var.vmid}${var.subnet_mask}"
+  ip_address = "${var.network_address}${var.vmid}/${var.subnet_mask}"
 }
 
 provider "proxmox" {
@@ -50,4 +50,15 @@ module "apps" {
   ip_address     = local.ip_address
   gateway        = local.gateway
   ssh_public_key = var.ssh_public_key
+}
+
+resource "null_resource" "provisioning" {
+
+  provisioner "local-exec" {
+    command     = <<EOT
+			ansible -m ping dev
+		EOT
+    working_dir = "../../ansible/base/"
+  }
+  depends_on = [module.apps]
 }

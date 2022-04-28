@@ -12,8 +12,8 @@ locals {
   lxc_template_name = "local:vztmpl/${var.lxc_template_name}"
 
   gateway      = "${var.network_address}1"
-  cmd_ip       = "${var.network_address}${var.cmd_id}${var.subnet_mask}"
-  cmd_drone_ip = "${var.network_address}${var.cmd_drone_id}${var.subnet_mask}"
+  cmd_ip       = "${var.network_address}${var.cmd_id}/${var.subnet_mask}"
+  cmd_drone_ip = "${var.network_address}${var.cmd_drone_id}/${var.subnet_mask}"
 }
 
 provider "proxmox" {

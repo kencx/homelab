@@ -1,4 +1,3 @@
-
 variable "proxmox_ip" {
   type        = string
   description = "IP of Proxmox server (mandatory)"
@@ -51,6 +50,11 @@ variable "environment" {
 variable "vmid" {
   type        = number
   description = "VM ID (mandatory)"
+
+  validation {
+    condition     = var.vmid >= 100
+    error_message = "VM ID must be >= 100."
+  }
 }
 
 variable "lxc_template_name" {
@@ -64,12 +68,24 @@ variable "network_address" {
 }
 
 variable "subnet_mask" {
-  type        = string
+  type        = number
   description = "Subnet Mask (mandatory)"
+
+  validation {
+    condition     = var.subnet_mask <= 32 && var.subnet_mask > 0
+    error_message = "Subnet mask must be between 0 and 32."
+  }
 }
 
 variable "mounts" {
-  type        = list(any)
+  type = list(object({
+    key     = number
+    slot    = string
+    storage = string
+    volume  = string
+    mp      = string
+    size    = string
+  }))
   description = "LXC mount points (optional)"
   default     = []
 }
