@@ -13,8 +13,16 @@
     - role: kencx.ansible.terraform
       vars:
         - latest_terraform_version: 1.1.9
+    - role: kencx.ansible.ansible
+
   tasks:
-    - import_tasks: tasks/install_ansible.yml
+    - name: Install pre-commit
+      become_user: "{{ user }}"
+      community.general.pipx:
+        name: pre-commit
+        install_deps: true
+        state: present
+
     - import_tasks: tasks/setup_docker.yml
 
 - hosts: drone
