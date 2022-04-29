@@ -5,6 +5,3 @@
 *.tfstate
 *.tfstate.*
 *.tfvars
-
-# ansible
-!*/*.example.yml

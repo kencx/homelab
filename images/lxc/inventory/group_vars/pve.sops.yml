@@ -1,0 +1,22 @@
+proxmox_api_token_id: ENC[AES256_GCM,data:aLFx1AN7BA1N2SPQb+tPBm1zVQ==,iv:86yXK3lKALYZHkKVRy0M9iSv+V7f6LMQCSgUKkOniHg=,tag:jGYXJp9HDtm9yEcSBYk8BA==,type:str]
+proxmox_api_token_secret: ENC[AES256_GCM,data:7wt5SBKy5NT+fQlNjXXbOUcQ4mnUDebKMsfAzimjnwD5wie6,iv:uVFoCTcU5Kv249dJ5Pkq/pKqIa8U/6BuNeoudypsjgg=,tag:XJX74o3UzmOBue2DBORKIg==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age1xsm57ruhucfmyuxgg7yyyj70x27yvse5fdjacgnpyhxs3p40rvcseuy5yu
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBrM01qR0sva0YrTitFaCt2
+            R0RYOGRsMTVQRldSby9YU0xBWEEwNG4ycjF3CmIwRHlpbG9NSWVZTEp3MmoyODB4
+            NVl0QVFKbmc5QjBRTHZVYzR0K3FwTDgKLS0tIHN3eFpDY1o4RXphbTZzblZpZXdX
+            L2FrTzgzQ1FabFdEa3lXU0d0T2d3c2cKt58py5GeSLzgaodmELP8+wyYStjOfote
+            0cKyrP0I0RFJo9w2j034hkW+pa2ZaLtJmELAkhWyuVbJmnTF5Td1+Q==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2022-04-29T14:50:55Z"
+    mac: ENC[AES256_GCM,data:Bpn85ctv/k6vmcIA1sCLPRAZN0zRBt/lWmUVM/+u4qHFDuSPCwRGgn6+SxUAdLNmoddcszxNqa8hQTP8abNB2h9/ybXQu+vyTK2ua8UKe7znKhnhNCvh4EiPT3nyCe/W43QxhTKx75y5D13Xag0p8U22mlsJdTyEfFm4JZPTttE=,iv:m2lMvkSnoESyqbbMMkV8wt2A5F2ArAlVLXDjXjrAbkc=,tag:wz+nMjwfLGcROFdVo9NRZQ==,type:str]
+    pgp: []
+    encrypted_regex: .*(token).*
+    version: 3.7.1

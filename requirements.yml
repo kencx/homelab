@@ -5,3 +5,4 @@ collections:
   - name: https://github.com/kencx/ansible.git
     type: git
     version: HEAD
+  - name: community.sops
