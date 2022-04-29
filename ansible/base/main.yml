@@ -2,11 +2,7 @@
 - hosts: "{{ env }}"
   vars_files:
     - vars.yml
-
   roles:
     - role: kencx.ansible.nfs
-      vars:
-        - nfs_server_src_dir: "{{ env_nfs_share }}"
-
   tasks:
     - import_tasks: tasks/setup_docker.yml

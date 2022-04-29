@@ -1,7 +1,13 @@
-.PHONY: bootstrap smoke inv-list inv-graph config
+.PHONY: check $(env) smoke inv-list inv-graph config
 
-bootstrap:
-	ansible-playbook main.yml -K
+default: check
+
+check:
+	ansible-playbook main.yml -K --check
+
+env = dev prod
+$(env):
+	ansible-playbook main.yml -K -e env=$(@)
 
 # smoke:
 # 	ansible-playbook tests/smoke_test.yml -K

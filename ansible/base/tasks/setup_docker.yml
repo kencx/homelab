@@ -15,14 +15,14 @@
 - name: Clone compose-stacks repo
   git:
     repo: "{{ stacks_repo_url }}"
-    dest: "{{ docker_destination }}"
+    dest: "{{ nfs_mount_point }}"
     version: "{{ stacks_version }}"
   when: clone_repo
 
 - name: Create .env file
   copy:
-    src: "{{ docker_destination }}/.env.example"
-    dest: "{{ docker_destination }}/.env"
+    src: "{{ nfs_mount_point }}/.env.example"
+    dest: "{{ nfs_mount_point }}/.env"
     remote_src: true
     force: false  # do not overwrite if exist
   register: env_file
@@ -30,7 +30,7 @@
 # dependence on .env in compose-stacks
 - name: Populate environment variables
   lineinfile:
-    path: "{{ docker_destination }}/.env"
+    path: "{{ nfs_mount_point }}/.env"
     regexp: "^{{ item.key }}"
     line: "{{ item.key }}{{ item.value }}"
     state: present
@@ -42,6 +42,6 @@
 - name: Start compose stacks
   command:
     cmd: "make up c={{ item }}"
-    chdir: "{{ docker_destination }}"
+    chdir: "{{ nfs_mount_point }}"
   with_items:
     - "{{ stacks }}"

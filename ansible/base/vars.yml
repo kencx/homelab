@@ -1,20 +1,19 @@
 # CHANGE THIS
-env: "dev"
+env: "prod"
 
 # nfs mount
-env_nfs_share: "/home/debian/apps/{{ env }}-apps"
-nfs_mnt_path: "/mnt/docker"
+nfs_server: "10.10.10.102"
+nfs_mount_point: "/mnt/docker"
 
 stacks_repo_url: "https://github.com/kencx/compose-stacks.git"
 stacks_version: "HEAD"
 clone_repo: false  # set to true if no existing config
 
 # docker
-domain_name: ""
-ca_email: ""
+domain_name: "dev.kencv.xyz"
+ca_email: "kennethcheo@pm.me"
 proxy_network: "proxy"
 socket_proxy_network: "socket-proxy"
-docker_destination: "{{ nfs_mnt_path }}"
 
 # docker containers
 stacks:
@@ -23,5 +22,5 @@ stacks:
   - linkding
   - calibre-web
   - firefly
-  # - paperless-ng
+  - paperless-ngx
   # - photoprism

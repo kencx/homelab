@@ -1,0 +1,11 @@
+nfs_share_mounts:
+  - src: "{{ nfs_server }}:/home/debian/apps/{{ env }}-apps"
+    path: "{{ nfs_mount_point }}"
+  - src: "{{ nfs_server }}:/home/debian/syncthing/sync/paper"
+    path: "/mnt/paper"
+  - src: "{{ nfs_server }}:/home/debian/syncthing/sync/books"
+    path: "/mnt/books"
+  - src: "{{ nfs_server }}:/home/debian/syncthing/sync/photos"
+    path: "/mnt/photos"
+
+domain_name: "kencv.xyz"

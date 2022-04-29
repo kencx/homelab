@@ -1,0 +1,5 @@
+nfs_share_mounts:
+  - src: "{{ nfs_server }}:/home/debian/apps/{{ env }}-apps"
+    path: "{{ nfs_mount_point }}"
+
+domain_name: "dev.kencv.xyz"
