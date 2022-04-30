@@ -35,8 +35,8 @@
     line: "{{ item.key }}{{ item.value }}"
     state: present
   with_items:
-    - { key: "DOMAIN_NAME=", value: "{{ domain_name }}" }
-    - { key: "CA_EMAIL=", value: "{{ ca_email }}" }
+    - {key: "DOMAIN_NAME=", value: "{{ domain_name }}"}
+    - {key: "CA_EMAIL=", value: "{{ ca_email }}"}
   when: env_file.changed
 
 - name: Start compose stacks

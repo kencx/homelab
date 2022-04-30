@@ -24,11 +24,12 @@ repos:
           - --args=-recursive
       - id: terraform_validate
 
-  - repo: https://github.com/ansible-community/ansible-lint
-    rev: v6.0.1
-    hooks:
-      - id: ansible-lint
-        args:
-          # relevant Ansible subdirectories
-          - images/playbooks
-          - provision/controller/playbooks
+  # - repo: https://github.com/ansible-community/ansible-lint
+  #   rev: v6.0.1
+  #   hooks:
+  #     - id: ansible-lint
+  #       args:
+  #         # relevant Ansible subdirectories
+  #         - images/lxc
+  #         - ansible/cmd
+  #         - ansible/base

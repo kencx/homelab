@@ -4,9 +4,7 @@
 exclude_paths:
   - .cache/
   - .github/
-  - terraform/
-  - backups/
-  - docs/
+  - inventory/
   - ${HOME}/.ansible/roles/
 
 skip_list:

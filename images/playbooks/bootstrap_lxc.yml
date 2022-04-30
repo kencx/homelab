@@ -70,13 +70,6 @@
         skip_handlers: true
 
   post_tasks:
-    - command:
-        cmd: "ls -la /home/{{ template_user }}"
-      register: debug_output
-
-    - debug:
-        msg: "{{ debug_output.stdout }}"
-
     - name: Clean up
       apt:
         autoremove: true

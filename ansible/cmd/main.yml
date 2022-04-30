@@ -16,6 +16,7 @@
       become: true
 
     - name: Install pre-commit
+      become: true
       become_user: "{{ user }}"
       community.general.pipx:
         name: pre-commit
