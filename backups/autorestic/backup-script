@@ -1,0 +1,35 @@
+#!/bin/bash
+
+DISK_UUID=""
+MOUNT_DIR="/mnt/kd"
+CONFIG_DIR=""
+AUTORESTIC_CONFIG_FILE="$CONFIG_DIR/.autorestic.yml"
+AUTORESTIC_LOG_FILE="$CONFIG_DIR/logs/autorestic.log"
+
+if [ ! -e "$AUTORESTIC_LOG_FILE" ]; then
+	mkdir -p "$(dirname $AUTORESTIC_LOG_FILE)"
+	touch "$AUTORESTIC_LOG_FILE"
+fi
+
+{
+	echo "-------------------------------------------"
+	echo "Starting backup at $(date '+%Y-%m-%d %H:%M:%S')."
+	SECONDS=0
+
+	# mount
+	if [ ! -e "/dev/disk/by-uuid/$DISK_UUID" ] ; then
+		echo "Backup disk not found! Exiting..."
+	fi
+	echo "Mounting backup disk"
+	sudo mount "/dev/disk/by-uuid/$DISK_UUID" "$MOUNT_DIR"
+
+	sudo autorestic -c "$AUTORESTIC_CONFIG_FILE" backup -av --ci
+
+	# unmount
+	echo "Unmounting backup disk"
+	sudo umount "$MOUNT_DIR"
+
+	duration="$SECONDS"
+	echo "Backup completed in $(($duration / 60))m $(($duration % 60))s"
+
+} 2>&1 | tee -a "$AUTORESTIC_LOG_FILE" # write to log file
