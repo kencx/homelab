@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export RESTIC_REPOSITORY=""
-export RESTIC_PASSWORD_FILE=""
-
-/home/restic/bin/restic "$@"
