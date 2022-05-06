@@ -1,8 +1,0 @@
----
-- hosts: "{{ env }}"
-  vars_files:
-    - vars.yml
-  roles:
-    - role: kencx.ansible.nfs
-  tasks:
-    - import_tasks: tasks/setup_docker.yml

@@ -1,0 +1,24 @@
+---
+- name: Ensure directory structure exists [TEMPLATE]
+  become: true
+  become_user: "{{ user }}"
+  file:
+    path: "{{ docker_dir }}/{{ item.path }}"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0755"
+  with_filetree: "../templates/"
+  when: item.state == "directory"
+
+- name: Source compose files [TEMPLATE]
+  become: true
+  become_user: "{{ user }}"
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ docker_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0644"
+  with_filetree: "../templates/"
+  when: item.state == "file"

@@ -1,0 +1,29 @@
+---
+user: "debian"
+docker_dir: "/mnt/docker"
+
+docker_proxy_network: proxy
+docker_socket_proxy_network: socket-proxy
+
+# "template", "git", "skip"
+docker_source_method: "skip"
+
+# git clone variables
+docker_git_repo: "https://github.com/kencx/compose-stacks.git"
+domain_name: ""
+ca_email: ""
+
+# template variables
+# traefik
+traefik_img_version: "v2.6.1"
+traefik_port: 8085
+
+# portainer
+portainer_img_version: "2.11.1"
+portainer_data_dir: "./data"
+portainer_port: 9000
+
+# gitea
+gitea_img_version: "1.16"
+gitea_data_dir: "./gitea"
+gitea_port: 3000

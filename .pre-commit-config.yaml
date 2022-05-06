@@ -28,8 +28,3 @@ repos:
   #   rev: v6.0.1
   #   hooks:
   #     - id: ansible-lint
-  #       args:
-  #         # relevant Ansible subdirectories
-  #         - images/lxc
-  #         - ansible/cmd
-  #         - ansible/base

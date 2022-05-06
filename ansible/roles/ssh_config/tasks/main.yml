@@ -1,3 +1,4 @@
+---
 - name: Create .ssh directory
   file:
     path: "{{ ssh_path }}"
@@ -7,8 +8,8 @@
     mode: 0700
 
 - name: Add SSH config file
-  copy:
-    src: "../files/ssh_config"
+  template:
+    src: "../templates/ssh_config.j2"
     dest: "{{ ssh_path }}/config"
     owner: "{{ user }}"
     group: "{{ user }}"
@@ -18,7 +19,7 @@
 - name: Generate public-private keypair
   community.crypto.openssh_keypair:
     state: present
-    type: ed25519
+    type: "{{ type }}"
     owner: "{{ user }}"
     group: "{{ user }}"
     path: "{{ ssh_key_file }}"

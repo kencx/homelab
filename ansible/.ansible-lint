@@ -15,10 +15,17 @@ warn_list:
   - parser-error
   - command-instead-of-module
   - git-latest
+  - yaml
+  - no-relative-paths
+  - risky-file-permissions
+
+mock_roles:
+  - kencx.ansible.ansible
+  - kencx.ansible.nfs
 
 kinds:
   - vars: "**/vars.yml"
-  - vars: "**/host_vars/*.yml"
-  - tasks: "**/playbooks/*.yml"
-  - playbook: "**/playbooks/main.yml"
+  - vars: "**/group_vars/*.yml"
+  - vars: "**/defaults/*.yml"
+  - tasks: "**/tasks/*.yml"
   - playbook: "**/*.{yml,yaml}"

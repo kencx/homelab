@@ -1,0 +1,37 @@
+# CHANGE THIS
+env: "dev"
+user: debian
+
+# nfs mount
+# nfs_share_mounts defined in group_vars/
+nfs_server: "10.10.10.102"
+nfs_mount_point: "/mnt/docker"
+
+# docker
+docker_proxy_network: "proxy"
+docker_socket_proxy_network: "socket-proxy"
+ca_email: "kennethcheo@pm.me"
+
+# traefik
+traefik_img_version: "v2.6.1"
+traefik_port: 8085
+
+# portainer
+portainer_img_version: "2.11.1"
+portainer_data_dir: "./data"
+portainer_port: 9000
+
+# gitea
+gitea_img_version: "1.16"
+gitea_data_dir: "./gitea"
+gitea_port: 3000
+
+# docker containers
+stacks:
+  - traefik
+  - miniflux
+  - linkding
+  - calibre-web
+  - firefly
+  - paperless-ngx
+  # - photoprism

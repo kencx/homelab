@@ -1,0 +1,40 @@
+---
+- name: Install docker module
+  pip:
+    name: docker
+
+- name: Create docker networks
+  community.docker.docker_network:
+    name: "{{ item }}"
+  with_items:
+    - "{{ docker_proxy_network }}"
+    - "{{ docker_socket_proxy_network }}"
+
+- name: Source compose files [TEMPLATE]
+  import_tasks: ./template.yml
+  when: docker_source_method == "template"
+
+- name: Source compose files [GIT REPO]
+  import_tasks: ./git_repo.yml
+  when: docker_source_method == "git"
+
+- name: Source compose files
+  debug:
+    msg: "Compose files already present, skipping..."
+  when: docker_source_method == "skip"
+
+# - name: Start docker containers [CMD]
+#   command:
+#     cmd: "docker-compose -f {{ item }}/docker-compose.yml up -d "
+#     chdir: "{{ docker_dir }}"
+#   with_items:
+#     - traefik
+#     - gitea
+#     - portainer
+#
+# - name: Start docker containers [DEV,PROD]
+#   command:
+#     cmd: "make up c={{ item }}"
+#     chdir: "{{ docker_dir }}"
+#   with_items:
+#     - "{{ stacks }}"

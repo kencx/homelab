@@ -1,7 +1,5 @@
 ---
 - hosts: cmd
-  vars_files:
-    - ../vars.yml
   gather_facts: false
   tasks:
     - name: Test Github SSH connection
