@@ -1,0 +1,14 @@
+---
+- name: Clean up
+  apt:
+    autoremove: true
+    autoclean: true
+
+- name: Delete temporary files
+  become: true
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "/var/tmp"
+    - "/tmp"

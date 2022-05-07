@@ -1,0 +1,15 @@
+---
+- name: Add new SSH authorized key to user
+  authorized_key:
+    user: "{{ template_user }}"
+    key: "{{ lookup('file', item) }}"
+    state: present
+  with_items:
+    - "{{ ssh_key_files }}"
+
+- name: Create new SSH key for user
+  user:
+    name: "{{ template_user }}"
+    generate_ssh_key: true
+    ssh_key_type: "ed25519"
+    ssh_key_file: ".ssh/id_ed25519"

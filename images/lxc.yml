@@ -1,0 +1,29 @@
+---
+- hosts: pve
+  any_errors_fatal: true
+  gather_facts: false
+  vars_files:
+    - vars.yml
+  roles:
+    - name: Create temp LXC
+      role: create_lxc
+
+- hosts: template
+  any_errors_fatal: true
+  vars_files:
+    - vars.yml
+  roles:
+    - name: Bootstrap LXC
+      role: bootstrap
+      when: not ansible_check_mode
+
+- hosts: pve
+  any_errors_fatal: true
+  gather_facts: false
+  vars_files:
+    - vars.yml
+  roles:
+    - name: Template temp LXC
+      role: template_lxc
+      vars:
+        date: "{{ lookup('pipe', 'date +%Y%m%d') }}"

@@ -1,0 +1,27 @@
+---
+- import_tasks: packages.yml
+- import_tasks: create_user.yml
+- import_tasks: ssh.yml
+
+- import_role:
+    name: geerlingguy.docker
+  vars:
+    docker_compose_version: "v2.2.2"
+    docker_compose_arch: x86_64
+    docker_users: ["{{ template_user }}"]
+
+- import_role:
+    name: kencx.ansible.python3
+
+- import_role:
+    name: kencx.ansible.dotfiles
+  vars:
+    user: "{{ template_user }}"
+
+- import_role:
+    name: kencx.ansible.security
+  vars:
+    ssh_disable_root_login: true
+    skip_handlers: true
+
+- import_tasks: cleanup.yml

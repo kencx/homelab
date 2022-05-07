@@ -1,0 +1,19 @@
+---
+- name: Create user
+  become: true
+  user:
+    name: "{{ template_user }}"
+    uid: "{{ template_uid | default(1000) }}"
+    create_home: true
+    groups: sudo
+    shell: /bin/bash
+    # set temp password that must be changed on first login
+    password: "{{ template_password | password_hash('sha512') }}"
+    update_password: on_create
+  register: new_user
+
+# https://github.com/ansible/ansible/issues/18917#issuecomment-520254763
+- name: Force reset password on first login
+  become: true
+  command: "chage -d 0 {{ template_user }}"
+  when: new_user.changed and force_reset_password

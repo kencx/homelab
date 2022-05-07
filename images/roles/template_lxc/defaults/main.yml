@@ -1,0 +1,14 @@
+---
+proxmox_node: "pve"
+proxmox_api_host: "pve"
+proxmox_api_user: "ansible@pam"
+proxmox_api_password: ""
+proxmox_api_token_id: ""
+proxmox_api_token_secret: ""
+temp_vmid: 900
+
+temp_dir: "/tmp/debian-tmp/"
+dump_dir: "/var/lib/vz/template/cache/"
+
+template_name: "debian-11-docker"
+date: ""

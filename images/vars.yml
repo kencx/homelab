@@ -7,22 +7,16 @@ proxmox_storage: "volumes"
 
 base_image: "debian-11-standard_11.3-1_amd64.tar.zst"
 temp_vmid: 900
-temp_hostname: "lxc-template"
 temp_disk_size: "volumes:5"
 temp_ip_address: "10.10.10.254/24"
 temp_gateway: "10.10.10.1"
 
 # template_lxc
-temp_dir: "/tmp/debian-tmp/"
 dump_dir: "/var/lib/vz/template/cache/"
-
 template_name: "debian-11-docker"
 
-# bootstrap_lxc
+# bootstrap
 template_user: "debian"
-template_password: "password"  # temp password to be changed on first login
-template_uid: 1000
-
 force_reset_password: false
 apps:
   - sudo
@@ -34,4 +28,5 @@ apps:
 
 git_email: "kennethcheo@pm.me"
 git_user: "kencx"
-ssh_key_file: "/home/kenc/.ssh/pve.pub"
+ssh_key_file:
+  - "/home/kenc/.ssh/pve.pub"
