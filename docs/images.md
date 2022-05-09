@@ -15,6 +15,12 @@ pipeline:
 4. Backup all persistent data
 5. Destroy existing servers and re-create with new images
 
+## Roles
+There exist three roles for building a golden image
+1. create_lxc - Create and start temporary LXC
+2. template_lxc - Stop and template temporary LXC
+3. bootstrap - Bootstrap temporary host with configuration
+
 ## LXC
 
 Ansible is used to build LXC templates.
@@ -25,8 +31,8 @@ container.
 
 ### Usage
 1. Run `make install` to install all Ansible roles and collections.
-2. Input [variables](#variables) in `images/lxc/vars.yml`
-3. Run `make lxc-image`. This will prompt for your Proxmox sudo password (if not
+2. Input [variables](#variables) in `images/vars.yml`
+3. Run `make image`. This will prompt for your Proxmox sudo password (if not
    root@pam).
 
 ### Notes
@@ -44,12 +50,9 @@ an API token to authenticate with Proxmox. This are input in
 | ------------------------ | ------ | -------------------------- |
 | proxmox_api_host         | string | Target host of PVE cluster |
 | proxmox_api_user         | string | User to authenticate with (eg. root@pam)  |
+| proxmox_api_password     | string | Password                   |
 | proxmox_api_token_id     | string | API token ID               |
 | proxmox_api_token_secret | string | API token secret           |
-
->`api_user` and `api_password` are supported in the [Proxmox
->module](https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_module.html),
->but not implemented here.
 
 #### Proxmox Parameters
 | Variable           | Type   | Description                  |
@@ -83,7 +86,10 @@ an API token to authenticate with Proxmox. This are input in
 | force_reset_password | bool   | Prompt user to reset password on first login   |
 | git_email            | string | Git email config                               |
 | git_user             | string | Git username config                            |
-| ssh_key_file         | string | Authorized SSH public key file for new account |
+| ssh_key_file         | list(string) | Absolute paths to SSH public key files that are to be added to template_user's authorized_keys file|
+
+>The `bootstrap` role also allows the direct addition of SSH public key files in
+>`bootstrap/files/` instead of passing a file path.
 
 ## VM
 TODO
