@@ -1,5 +1,13 @@
 ---
-- name: Add new SSH authorized key to user
+- name: Add public SSH keys from files
+  authorized_key:
+    user: "{{ template_user }}"
+    key: "{{ lookup('file', item) }}"
+    state: present
+  with_fileglob:
+    - "../files/ssh_key*"
+
+- name: Add public SSH keys from absolute path
   authorized_key:
     user: "{{ template_user }}"
     key: "{{ lookup('file', item) }}"

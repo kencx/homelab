@@ -28,5 +28,4 @@ apps:
 
 git_email: "kennethcheo@pm.me"
 git_user: "kencx"
-ssh_key_file:
-  - "/home/kenc/.ssh/pve.pub"
+ssh_key_file: []

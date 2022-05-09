@@ -2,6 +2,7 @@
 - hosts: pve
   any_errors_fatal: true
   gather_facts: false
+  tags: create
   vars_files:
     - vars.yml
   roles:
@@ -10,8 +11,18 @@
 
 - hosts: template
   any_errors_fatal: true
+  gather_facts: false
+  tags: bootstrap
   vars_files:
     - vars.yml
+  pre_tasks:
+    - name: Wait for connection
+      wait_for_connection:
+        delay: 5
+        timeout: 300
+    - name: Gather facts
+      setup:
+
   roles:
     - name: Bootstrap LXC
       role: bootstrap
@@ -20,6 +31,7 @@
 - hosts: pve
   any_errors_fatal: true
   gather_facts: false
+  tags: destroy
   vars_files:
     - vars.yml
   roles:

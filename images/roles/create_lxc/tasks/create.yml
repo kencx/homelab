@@ -28,6 +28,7 @@
     # api_token_id: "{{ proxmox_api_token_id }}"
     # api_token_secret: "{{ proxmox_api_token_secret }}"
     storage: "{{ proxmox_storage }}"
+    timeout: 120
 
     node: "{{ proxmox_node }}"
     vmid: "{{ temp_vmid }}"

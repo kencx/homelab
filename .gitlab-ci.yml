@@ -1,0 +1,71 @@
+
+stages:
+  - build
+  - test
+
+before_script:
+  - which ssh-agent || (apk update && apk add openssh-client)
+  - "eval $(ssh-agent -s)"
+  - echo "$SSH_PRIVATE_KEY" | base64 -d | ssh-add -
+  - apk add make
+
+image-build:
+  image: willhallonline/ansible:2.12-alpine-3.15
+  stage: build
+  variables:
+    TEMP_SSH_KEY_FILE: "/tmp/temp_ssh_key"
+  script:
+    - "chmod 755 ."
+    - make install
+    - ansible-playbook lxc.yml --tags create
+    - cat "$TEMP_SSH_KEY_FILE" | ssh-add -
+    - ansible-playbook lxc.yml --tags "bootstrap,destroy" -e "ansible_become_password=$ANSIBLE_BECOME_PASS"
+  only:
+    refs:
+      - master
+    changes:
+      - images/**/*
+
+image-test:
+  image: willhallonline/ansible:2.12-alpine-3.15
+  stage: test
+  needs: ["image-build"]
+  script:
+    - "chmod 755 ."
+    - ansible-playbook tests.yml
+
+# ---
+# infra-build:
+#   stage: build
+#   script:
+#     - make plan e=base
+#     - make apply e=base
+#   only:
+#     refs:
+#       - master
+#     changes:
+#       - terraform/**/*
+#
+# infra-test:
+#   stage: test
+#   needs: ["infra-build"]
+#
+# ---
+# infra-bootstrap:
+#   stage: build
+#   script:
+#     - make install
+#     - make bootstrap env=dev
+#   only:
+#     refs:
+#       - master
+#     changes:
+#       - ansible/**/*
+#     # and when infra-test runs
+#
+# test-infra-bootstrap:
+#   stage: test
+#   needs: ["infra-bootstrap"]
+#   script:
+#     - make install
+#     - make smoke
