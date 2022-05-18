@@ -27,3 +27,8 @@ portainer_port: 9000
 gitea_img_version: "1.16"
 gitea_data_dir: "./gitea"
 gitea_port: 3000
+
+# uptime-kuma
+uptime_kuma_img_version: "1.15.1-debian"
+uptime_kuma_data_dir: "./data"
+uptime_kuma_port: 3001
