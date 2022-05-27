@@ -12,9 +12,8 @@ extras:
     failure:
       - 'echo "[ERROR] Backup failed!"'
     success:
-      - 'echo -e "[INFO] Backup completed in ${AUTORESTIC_PROCESSED_DURATION_HDD}\n
-                         Files added: ${AUTORESTIC_FILES_ADDED_HDD}\n
-                         Added Size: ${AUTORESTIC_ADDED_SIZE_HDD}"'
+      - 'curl -m 10 --retry 5 [url]'
+      - 'echo "[INFO] Sent push notification to uptime-kuma"'
 
 locations:
   all:
@@ -38,6 +37,8 @@ locations:
       - hdd
       - remote
     forget: prune
+    hooks:
+      <<: *hooks
 
 backends:
   remote:
