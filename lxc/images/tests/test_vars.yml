@@ -1,0 +1,15 @@
+# create_lxc
+proxmox_node: "pve"
+proxmox_api_host: "pve"
+proxmox_api_user: "ansible@pam"
+proxmox_storage: "volumes"
+
+test_template_name: "debian-11-docker-20220425.tar.gz"
+test_vmid: 500
+test_hostname: "lxc-template-test"
+test_disk_size: "volumes:5"
+test_ip_address: "10.10.10.100/24"
+test_gateway: "10.10.10.1"
+
+template_user: "debian"
+template_uid: 1000

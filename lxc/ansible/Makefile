@@ -1,9 +1,6 @@
 .PHONY: check cmd $(env) smoke inv-list inv-graph config
 
-default: check
-
-check:
-	ansible-playbook main.yml -K --check
+default: config
 
 cmd:
 	ansible-playbook cmd.yml -K

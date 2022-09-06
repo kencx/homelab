@@ -1,3 +1,18 @@
+variable "proxmox_ip" {
+  type        = string
+  description = "IP of Proxmox server (mandatory)"
+}
+
+variable "proxmox_user" {
+  type    = string
+  default = "root@pam"
+}
+
+variable "proxmox_password" {
+  type      = string
+  sensitive = true
+}
+
 variable "target_node" {
   type        = string
   description = ""
@@ -18,7 +33,7 @@ variable "vmid" {
 
 variable "template_name" {
   type        = string
-  description = "VM Template Name"
+  description = "Template to clone"
 }
 
 variable "onboot" {
@@ -56,12 +71,12 @@ variable "ssh_user" {
   description = "SSH user"
 }
 
-variable "ssh_private_key" {
+variable "ssh_private_key_file" {
   type        = string
-  description = "Private SSH key"
+  description = "Private SSH key file"
 }
 
-variable "ssh_public_key" {
+variable "ssh_public_key_file" {
   type        = string
-  description = "Public SSH key"
+  description = "Public SSH key file"
 }

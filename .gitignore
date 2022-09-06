@@ -5,3 +5,6 @@
 *.tfstate
 *.tfstate.*
 *.tfvars
+
+# packer
+auto.pkrvars.hcl
