@@ -1,8 +1,0 @@
-#!/bin/bash
-set -e
-
-# remember to import gpg pubkey
-export SOPS_PGP_FP=E38B0567087A97C9AAD78FF6AFE249A48E9274B3
-
-BORGMATIC_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-sops -d "$BORGMATIC_PATH/.borg-passphrase.enc"

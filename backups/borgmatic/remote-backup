@@ -1,3 +1,0 @@
-#!/bin/bash
-
-borgmatic -c /home/borg/remote.yaml --verbosity -1 --syslog-verbosity -1 --log-file-verbosity 1 --log-file /home/borg/logs/borg.log --stats

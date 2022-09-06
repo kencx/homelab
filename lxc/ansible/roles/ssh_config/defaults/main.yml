@@ -1,6 +1,0 @@
----
-user: debian
-ssh_path: "/home/{{ user }}/.ssh"
-type: "ed25519"
-ssh_key_name: "id_{{ type }}"
-ssh_key_file: "{{ ssh_path }}/{{ ssh_key_name }}"

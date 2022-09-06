@@ -1,9 +1,0 @@
----
-- hosts: test_lxc
-  vars_files:
-    - test_vars.yml
-  tasks:
-    - name: User exists
-    - name: Home directory is owned by user
-    - name: python3.9 installed
-    - name: docker installed
