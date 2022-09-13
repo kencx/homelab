@@ -1,4 +1,5 @@
 .cache/*
+cloud-config
 
 # terraform
 **/.terraform/*
