@@ -28,11 +28,12 @@ resource "proxmox_vm_qemu" "base" {
   memory  = var.memory
   scsihw  = "virtio-scsi-pci"
 
-  # lifecycle {
-  #   ignore_changes = [
-  #     network,
-  #   ]
-  # }
+  lifecycle {
+    ignore_changes = [
+      network,
+      disk
+    ]
+  }
 
   os_type         = "cloud-init"
   ssh_user        = var.ssh_user

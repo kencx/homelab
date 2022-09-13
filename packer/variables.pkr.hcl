@@ -23,7 +23,7 @@ variable "clone_vm" {
 
 variable "vm_id" {
   type        = number
-  default     = 900
+  default     = 9000
   description = "ID of temp VM during build process"
 }
 
