@@ -9,3 +9,6 @@ cloud-config
 
 # packer
 auto.pkrvars.hcl
+
+# nomad
+input.vars

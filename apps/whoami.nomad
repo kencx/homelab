@@ -2,12 +2,11 @@ job "whoami" {
   datacenters = ["dc1"]
 
   group "whoami" {
-    count = 1
+    count = 2
 
     network {
-      port "http" {
-        static = "5678"
-      }
+	  mode = "bridge"
+      port "http" {}
     }
 
 	service {
@@ -15,11 +14,18 @@ job "whoami" {
 	  name = "${NOMAD_JOB_NAME}"
 	  port = "http"
 
+	  tags = [
+		"traefik.enable=true",
+		"traefik.http.routers.whoami-proxy.entrypoints=https",
+		"traefik.http.routers.whoami-proxy.tls=true",
+		"traefik.http.routers.whoami-proxy.rule=Host(`whoami.${}`)",
+	  ]
+
 	  check {
 	    type     = "http"
-	    path     = "/health"
+	    path     = "/"
 	    port     = "http"
-	    interval = "10s"
+	    interval = "30s"
 	    timeout  = "5s"
 
 	    success_before_passing   = "3"
