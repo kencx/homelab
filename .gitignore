@@ -1,6 +1,9 @@
 .cache/*
 cloud-config
 
+# ansible
+inventory/*
+
 # terraform
 **/.terraform/*
 *.tfstate

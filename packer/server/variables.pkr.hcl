@@ -23,21 +23,9 @@ variable "clone_vm" {
 
 variable "vm_id" {
   type        = number
-  default     = 9000
+  default     = 9001
   description = "ID of temp VM during build process"
 }
-
-/* variable "template_name" { */
-/*   type        = string */
-/*   default     = "packer-template" */
-/*   description = "Name of template after build process" */
-/* } */
-/**/
-/* variable "template_description" { */
-/*   type        = string */
-/*   default     = "Template from cloud image" */
-/*   description = "Description of template after build process" */
-/* } */
 
 variable "cores" {
   type        = number

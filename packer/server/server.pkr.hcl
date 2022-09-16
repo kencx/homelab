@@ -1,13 +1,5 @@
-packer {
-  required_plugins {
-    proxmox = {
-      version = ">= 1.0.6"
-      source  = "github.com/hashicorp/proxmox"
-    }
-  }
-}
 
-source "proxmox-clone" "base" {
+source "proxmox-clone" "server" {
   proxmox_url = var.proxmox_url
   username    = var.proxmox_username
   password    = var.proxmox_password
@@ -20,10 +12,9 @@ source "proxmox-clone" "base" {
   insecure_skip_tls_verify = true
 
   vm_id   = var.vm_id
-  vm_name = "base-${formatdate("YYYY-MM-DD", timestamp())}"
+  vm_name = "server-${formatdate("YYYY-MM-DD", timestamp())}"
 
   qemu_agent = true
-  cloud_init = true
 
   os              = "l26"
   cores           = var.cores
@@ -46,15 +37,18 @@ source "proxmox-clone" "base" {
 }
 
 build {
-  sources = ["source.proxmox-clone.base"]
+  sources = ["source.proxmox-clone.server"]
 
   provisioner "shell" {
-    script = "./scripts/base.sh"
+    inline = ["ip -br a"]
   }
 
-  /* provisioner "ansible-remote" { */
-  /*   playbook_file    = "./scripts/base.yml" */
-  /*   ansible_env_vars = ["ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_STDOUT_CALLBACK=yaml"] */
-  /*   galaxy_file      = "../requirements.yml" */
-  /* } */
+  provisioner "ansible" {
+    playbook_file = "../../ansible/server.yml"
+    user          = var.ssh_username
+    pause_before  = "3s"
+    ansible_env_vars = [
+      "ANSIBLE_STDOUT_CALLBACK=yaml"
+    ]
+  }
 }

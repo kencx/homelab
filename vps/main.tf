@@ -22,6 +22,12 @@ variable "ssh_key_path" {
   description = "Path to SSH public key"
 }
 
+variable "cloud_config_path" {
+  type        = string
+  description = "Path to cloud-config file"
+  default     = "./cloud-config"
+}
+
 output "ip_address" {
   value       = hcloud_server.main.ipv4_address
   description = "IP address of endpoint"
@@ -39,5 +45,5 @@ resource "hcloud_server" "main" {
   location    = "nbg1"
 
   ssh_keys  = [hcloud_ssh_key.main.id]
-  user_data = file("./cloud-config")
+  user_data = file(var.cloud_config_path)
 }

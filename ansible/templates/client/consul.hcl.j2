@@ -1,10 +1,11 @@
 datacenter  = "dc1"
 data_dir    = "/opt/consul"
-bind_addr   = "{{ GetInterfaceIP \"eth0\" }}"
+bind_addr   = {% raw %}"{{ GetInterfaceIP \"eth0\" }}"{% endraw %}
+
 client_addr = "0.0.0.0"
 
 server     = false
-start_join = ["10.10.10.201"]
+start_join = ["{{ consul_server_ip }}"]
 
 ui_config {
   enabled = true

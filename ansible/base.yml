@@ -1,0 +1,63 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+    - name: Update and upgrade packages
+      apt:
+        upgrade: false
+        update_cache: true
+        cache_valid_time: 86400
+
+    - name: Install packages
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - sudo
+        - curl
+        - git
+        - openssh-server
+        - vim
+        - make
+        - gnupg
+        - software-properties-common
+
+  roles:
+    - name: Install docker
+      role: geerlingguy.docker
+      become: true
+      vars:
+        - docker_compose_version: "v2.2.2"
+        - docker_compose_arch: x86_64
+        - docker_users: ["debian"]
+
+    - name: Security hardening
+      role: kencx.ansible.security
+      become: true
+      vars:
+        - ssh_disable_root_login: true
+        - skip_handlers: true
+
+  tasks:
+    - name: Add Hashicorp apt repository
+      block:
+        - name: Add Hashicorp APT repository key
+          apt_key:
+            url: https://apt.releases.hashicorp.com/gpg
+            state: present
+
+        - name: Add Hashicorp APT repository
+          apt_repository:
+            repo: "deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+            state: present
+
+    - name: Install Hashicorp tools
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+        cache_valid_time: 86400
+      with_items:
+        - nomad
+        - consul
+        - vault
