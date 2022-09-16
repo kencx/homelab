@@ -1,37 +1,35 @@
-# Homelab Infrastructure
-This repository contains Terraform code and Ansible playbooks for my Proxmox VE
-7 homelab.
-
-## Features
-- Automated golden image builds for LXCs and VMs
-- Declarative and idempotent provisioning
+# Hubble Homelab
+This repository contains all infrastructure-as-code and configuration for my Proxmox
+homelab and Hetzner VPS. It provisions a Nomad + Consul cluster for running various
+services.
 
 ## Requirements
-- Proxmox VE 7
+- Proxmox VE 7.1
+- Packer
+- Ansible
 - Terraform
-- Ansible (and molecule)
-- Docker and docker-compose
-- make
-- pre-commit
+- Goss
+- restic, autorestic
+- make, pre-commit
 
-## Golden Images
-A key goal for this homelab is immutable infrastructure -
-servers are never modified directly once they are deployed. Instead, all
-configuration changes are implemented on golden images that are subsequently
-provisioned on all systems. This prevents configuration drift between systems
-and allows for versioned changes that are easy to rollback.
+## Cluster Details
 
-Refer to
-[docs/images.md](https://github.com/kencx/homelab-iac/blob/master/docs/images.md)
-for more details.
+Packer is used to create images of Debian 11 (bullseye) VMs, with Ansible as a
+provisioner.
 
-## Provisioning
-We provision our hosts with Terraform and implement application-specific
-configuration with Ansible.
+- A base image is created and used to speedup the process
 
-- `terraform/cmd` provisions a command environment for running CI/CD pipelines
-  with Gitea and Drone.
-- `terraform/base` is a general base repository that describes a single environment. It can be considered a versioned artifact of an environment's infrastructure.
+Terraform is used to deploy the Hashicorp cluster.
+
+- Ansible mounts the required NFS shares to each host
+
+## VPS
+A Hetzner VPS is provisioned to run various web applications. It is bootstrapped
+with `cloud-config` and exposed via a Nginx reverse proxy.
+
+## Backups
+Autorestic performs daily backups to an external USB hard drive and Backblaze
+B2.
 
 ## Notes
 
