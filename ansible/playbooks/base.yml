@@ -82,11 +82,11 @@
       block:
         - name: Copy goss file
           template:
-            src: ../templates/goss/base.yml.j2
-            dest: /home/{{ user }}/goss.yml
+            src: ./templates/goss/base.yml.j2
+            dest: /tmp/goss.yml
             owner: "{{ user }}"
             group: "{{ user }}"
             mode: "0644"
 
         - name: Goss validate
-          shell: "goss -g /home/{{user}}/goss.yml validate"
+          shell: "goss -g /tmp/goss.yml validate"

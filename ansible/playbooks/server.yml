@@ -34,7 +34,7 @@
 
     - name: Copy service file
       copy:
-        src: "../templates/server/{{ item }}"
+        src: "./templates/server/{{ item }}"
         dest: "/etc/systemd/system/{{ item }}"
         owner: root
         group: root
@@ -47,7 +47,7 @@
 
     - name: Copy Nomad config files
       template:
-        src: "../templates/server/nomad.hcl.j2"
+        src: "./templates/server/nomad.hcl.j2"
         dest: "{{ nomad_config_dir }}/nomad.hcl"
         owner: nomad
         group: nomad
@@ -59,7 +59,7 @@
 
     - name: Copy Consul config files
       template:
-        src: "../templates/server/consul.hcl.j2"
+        src: "./templates/server/consul.hcl.j2"
         dest: "{{ consul_config_dir }}/consul.hcl"
         owner: consul
         group: consul
@@ -99,7 +99,7 @@
 
         - name: Copy goss file
           template:
-            src: ../templates/goss/server.yml.j2
+            src: ./templates/goss/server.yml.j2
             dest: "{{ goss_file_path }}"
 
         - name: Goss validate
