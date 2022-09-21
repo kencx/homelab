@@ -1,5 +1,5 @@
 
-source "proxmox-clone" "server" {
+source "proxmox-clone" "client" {
   proxmox_url = var.proxmox_url
   username    = var.proxmox_username
   password    = var.proxmox_password
@@ -12,7 +12,7 @@ source "proxmox-clone" "server" {
   insecure_skip_tls_verify = true
 
   vm_id   = var.vm_id
-  vm_name = "server-${formatdate("YYYY-MM-DD", timestamp())}"
+  vm_name = "client-${formatdate("YYYY-MM-DD", timestamp())}"
 
   qemu_agent = true
 
@@ -31,25 +31,21 @@ source "proxmox-clone" "server" {
     type = "serial0"
   }
 
-  ssh_host     = "10.10.10.250"
+  ssh_host     = "10.10.10.251"
   ssh_username = var.ssh_username
   ssh_timeout  = "10m"
 }
 
 build {
-  sources = ["source.proxmox-clone.server"]
+  sources = ["source.proxmox-clone.client"]
 
   provisioner "ansible" {
-    playbook_file = "../../ansible/playbooks/server.yml"
-    extra_arguments = [
-      "--extra-vars",
-      "reset_cluster_data=true"
-    ]
-    user         = var.ssh_username
+    playbook_file = "../../ansible/playbooks/client.yml"
+    user          = var.ssh_username
     galaxy_file  = "../../requirements.yml"
-    pause_before = "3s"
+    pause_before  = "3s"
     ansible_env_vars = [
-      "ANSIBLE_STDOUT_CALLBACK=yaml",
+      "ANSIBLE_STDOUT_CALLBACK=yaml"
       "ANSIBLE_HOST_KEY_CHECKING=False",
     ]
   }

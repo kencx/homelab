@@ -1,0 +1,6 @@
+---
+- name: "Install Goss binary"
+  get_url:
+    url: "{{ goss_url }}"
+    dest: "{{ goss_dest }}"
+    mode: "0755"

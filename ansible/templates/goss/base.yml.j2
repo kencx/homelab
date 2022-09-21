@@ -1,0 +1,48 @@
+port:
+  tcp:22:
+    listening: true
+    ip:
+      - 0.0.0.0
+service:
+  sshd:
+    enabled: true
+    running: true
+  fail2ban:
+    enabled: true
+    running: true
+  docker:
+    enabled: true
+    running: true
+
+user:
+  debian:
+    exists: true
+    groups:
+      - debian
+      - sudo
+      - docker
+    home: /home/debian
+
+file:
+  /mnt/storage:
+    exists: true
+    mode: "0755"
+    owner: debian
+    group: debian
+    filetype: directory
+
+package:
+  nomad:
+    installed: true
+  consul:
+    installed: true
+  vault:
+    installed: true
+  docker-ce:
+    installed: true
+  docker-ce-cli:
+    installed: true
+  docker-compose-plugin:
+    installed: true
+  nfs-common:
+    installed: true

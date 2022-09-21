@@ -1,0 +1,4 @@
+---
+goss_version: v0.3.18
+goss_url: https://github.com/aelsabbahy/goss/releases/download/{{ goss_version }}/goss-linux-amd64
+goss_dest: /bin/goss

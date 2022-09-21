@@ -2,14 +2,17 @@
 - hosts: all
   become: true
   pre_tasks:
-    - name: Update and upgrade packages
+    - name: Update apt packages
       apt:
-        upgrade: false
         update_cache: true
         cache_valid_time: 86400
+        upgrade: true
 
-    - name: Install packages
-      package:
+    - name: Wait for dpkg lock to be released
+      shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10 ; done;
+
+    - name: Update and install packages
+      apt:
         name: "{{ item }}"
         state: present
       with_items:
@@ -20,23 +23,28 @@
         - vim
         - make
         - gnupg
+        - nfs-common
         - software-properties-common
+      register: apt_action
+      retries: 10
+      until: apt_action is success or ('/var/lib/dpkg/lock-frontend' not in apt_action.msg)
 
   roles:
     - name: Install docker
       role: geerlingguy.docker
-      become: true
       vars:
-        - docker_compose_version: "v2.2.2"
-        - docker_compose_arch: x86_64
-        - docker_users: ["debian"]
+        # install docker compose plugin instead of docker-compose binary
+        - docker_install_compose_plugin: true
+        - docker_install_compose: false
+        - docker_users: ["{{ user }}"]
 
     - name: Security hardening
       role: kencx.ansible.security
-      become: true
       vars:
         - ssh_disable_root_login: true
-        - skip_handlers: true
+
+    - name: Install goss
+      role: ../roles/goss
 
   tasks:
     - name: Add Hashicorp apt repository
@@ -61,3 +69,24 @@
         - nomad
         - consul
         - vault
+
+    - name: Create NFS share directories
+      file:
+        path: "/mnt/storage"
+        mode: 0755
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        state: directory
+
+    - name: Goss smoke test
+      block:
+        - name: Copy goss file
+          template:
+            src: ../templates/goss/base.yml.j2
+            dest: /home/{{ user }}/goss.yml
+            owner: "{{ user }}"
+            group: "{{ user }}"
+            mode: "0644"
+
+        - name: Goss validate
+          shell: "goss -g /home/{{user}}/goss.yml validate"

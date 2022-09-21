@@ -58,3 +58,8 @@ EOF
     ]
   }
 }
+
+output "ip" {
+  value       = proxmox_vm_qemu.base.default_ipv4_address
+  description = "IP address"
+}
