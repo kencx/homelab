@@ -28,10 +28,16 @@ resource "proxmox_vm_qemu" "base" {
   memory  = var.memory
   scsihw  = "virtio-scsi-pci"
 
+  disk {
+    slot    = 0
+    size    = var.disk_size
+    type    = "scsi"
+    storage = "volumes"
+  }
+
   lifecycle {
     ignore_changes = [
       network,
-      disk
     ]
   }
 

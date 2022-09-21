@@ -24,9 +24,10 @@ module "server" {
   onboot        = var.onboot
   oncreate      = var.oncreate
 
-  cores   = 2
-  sockets = 2
-  memory  = 2048
+  cores     = 2
+  sockets   = 2
+  memory    = 2048
+  disk_size = "10G"
 
   ssh_user        = var.ssh_user
   ssh_private_key = file(var.ssh_private_key_file)
@@ -47,8 +48,9 @@ resource "null_resource" "server" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo systemctl start nomad",
-      "sudo systemctl start consul",
+      "echo 'Restarting cluster'",
+      "sudo systemctl restart nomad",
+      "sudo systemctl restart consul",
       # "goss -g /tmp/goss.yml validate",
     ]
   }
@@ -66,9 +68,10 @@ module "client" {
   onboot        = var.onboot
   oncreate      = var.oncreate
 
-  cores   = 2
-  sockets = 2
-  memory  = 4096
+  cores     = 2
+  sockets   = 2
+  memory    = 4096
+  disk_size = "10G"
 
   ssh_user        = var.ssh_user
   ssh_private_key = file(var.ssh_private_key_file)

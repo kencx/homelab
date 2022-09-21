@@ -51,6 +51,12 @@ variable "memory" {
   default     = 1024
 }
 
+variable "disk_size" {
+  type        = string
+  description = "VM bootdisk size"
+  default     = "10G"
+}
+
 variable "ssh_user" {
   type        = string
   description = "SSH user"
