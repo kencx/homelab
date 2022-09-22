@@ -12,6 +12,7 @@
 
     - name: Wait for dpkg lock to be released
       shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10 ; done;
+      changed_when: false
 
     - name: Update and install packages
       apt:

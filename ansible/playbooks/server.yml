@@ -37,6 +37,7 @@
         dest: "/etc/systemd/system/{{ item }}"
         owner: root
         group: root
+        mode: "0644"
       with_items:
         - "nomad.service"
         - "consul.service"
@@ -83,7 +84,8 @@
       register: consul_started
 
     # Apply all service and config changes
-    - meta: flush_handlers
+    - name: Run handlers now
+      meta: flush_handlers
 
     - name: Wait for Nomad port
       wait_for:

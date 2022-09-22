@@ -10,6 +10,8 @@
   template:
     src: "{{ goss_file_template }}"
     dest: "{{ goss_file_dest }}"
+    mode: "0755"
 
 - name: "Goss Validate"
-  shell: "goss -g {{ goss_file_dest }} validate"
+  command: "goss -g {{ goss_file_dest }} validate"
+  changed_when: false
