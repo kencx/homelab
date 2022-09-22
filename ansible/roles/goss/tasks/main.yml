@@ -4,3 +4,12 @@
     url: "{{ goss_url }}"
     dest: "{{ goss_dest }}"
     mode: "0755"
+
+- name: Copy Goss file
+  become: true
+  template:
+    src: "{{ goss_file_template }}"
+    dest: "{{ goss_file_dest }}"
+
+- name: "Goss Validate"
+  shell: "goss -g {{ goss_file_dest }} validate"

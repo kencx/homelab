@@ -1,12 +1,11 @@
 ---
-- hosts: all
+- hosts: "{{ host | default(omit) }}"
   become: true
   vars:
     nomad_config_dir: "/etc/nomad.d"
     nomad_data_dir: "/opt/nomad/data"
     consul_config_dir: "/etc/consul.d"
     consul_data_dir: "/opt/consul"
-    goss_file_path: "/tmp/goss.yml"
     reset_cluster_data: false
 
   tasks:
@@ -92,18 +91,10 @@
         state: started
 
     - name: Goss smoke test
-      block:
-        - name: Install goss
-          import_role:
-            name: ../roles/goss
-
-        - name: Copy goss file
-          template:
-            src: ./templates/goss/server.yml.j2
-            dest: "{{ goss_file_path }}"
-
-        - name: Goss validate
-          shell: "goss -g {{ goss_file_path }} validate"
+      import_role:
+        name: ../roles/goss
+      vars:
+        - goss_file_template: "./templates/goss/server.yml.j2"
 
     # WARNING! This clears all cluster node data.
     # This is only necessary when templating the server with Packer

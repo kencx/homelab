@@ -1,6 +1,8 @@
 ---
-- hosts: all
+- hosts: template
   become: true
+  vars:
+    - user: debian
   pre_tasks:
     - name: Update apt packages
       apt:
@@ -79,14 +81,7 @@
         state: directory
 
     - name: Goss smoke test
-      block:
-        - name: Copy goss file
-          template:
-            src: ./templates/goss/base.yml.j2
-            dest: /tmp/goss.yml
-            owner: "{{ user }}"
-            group: "{{ user }}"
-            mode: "0644"
-
-        - name: Goss validate
-          shell: "goss -g /tmp/goss.yml validate"
+      import_role:
+        name: ../roles/goss
+      vars:
+        - goss_file_template: "./templates/goss/base.yml.j2"

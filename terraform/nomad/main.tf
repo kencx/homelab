@@ -58,7 +58,7 @@ resource "null_resource" "server" {
 
 module "client" {
   source = "../modules/vm"
-  count  = 0
+  # count  = 1
 
   hostname    = "client-1"
   vmid        = 111
@@ -76,4 +76,26 @@ module "client" {
   ssh_user        = var.ssh_user
   ssh_private_key = file(var.ssh_private_key_file)
   ssh_public_key  = file(var.ssh_public_key_file)
+}
+
+resource "null_resource" "client" {
+  triggers = {
+    ansible_playbook = md5(file("../../ansible/playbooks/client-post.yml"))
+    server_ids       = "${join(",", module.client.*.ip)}"
+  }
+
+  connection {
+    type = "ssh"
+    user = var.ssh_user
+    host = module.client.ip
+  }
+
+  provisioner "local-exec" {
+    command     = "ansible-playbook playbooks/client-post.yml -u ${var.ssh_user}"
+    working_dir = "../../ansible"
+    environment = {
+      ANSIBLE_STDOUT_CALLBACK   = "yaml"
+      ANSIBLE_HOST_KEY_CHECKING = false
+    }
+  }
 }

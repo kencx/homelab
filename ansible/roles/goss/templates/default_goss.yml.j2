@@ -1,0 +1,33 @@
+---
+port:
+  tcp:22:
+    listening: true
+    ip:
+      - 0.0.0.0
+service:
+  sshd:
+    enabled: true
+    running: true
+  fail2ban:
+    enabled: true
+    running: true
+  docker:
+    enabled: true
+    running: true
+
+user:
+  debian:
+    exists: true
+    groups:
+      - debian
+      - sudo
+      - docker
+    home: /home/debian
+
+package:
+  docker-ce:
+    installed: true
+  docker-ce-cli:
+    installed: true
+  docker-compose-plugin:
+    installed: true

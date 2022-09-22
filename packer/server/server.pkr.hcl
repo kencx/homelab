@@ -43,7 +43,8 @@ build {
     playbook_file = "../../ansible/playbooks/server.yml"
     extra_arguments = [
       "--extra-vars",
-      "reset_cluster_data=true"
+      "reset_cluster_data=true",
+      "host=template",
     ]
     user         = var.ssh_username
     galaxy_file  = "../../requirements.yml"

@@ -31,7 +31,7 @@ source "proxmox-clone" "client" {
     type = "serial0"
   }
 
-  ssh_host     = "10.10.10.251"
+  ssh_host     = "10.10.10.250"
   ssh_username = var.ssh_username
   ssh_timeout  = "10m"
 }
@@ -42,10 +42,9 @@ build {
   provisioner "ansible" {
     playbook_file = "../../ansible/playbooks/client.yml"
     user          = var.ssh_username
-    galaxy_file  = "../../requirements.yml"
     pause_before  = "3s"
     ansible_env_vars = [
-      "ANSIBLE_STDOUT_CALLBACK=yaml"
+      "ANSIBLE_STDOUT_CALLBACK=yaml",
       "ANSIBLE_HOST_KEY_CHECKING=False",
     ]
   }
