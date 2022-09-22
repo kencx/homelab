@@ -1,0 +1,21 @@
+port:
+  # nomad ui
+  tcp6:4646:
+    listening: true
+  # consul ui
+  tcp6:8500:
+    listening: true
+  # consul dns
+  tcp6:8600:
+    listening: true
+
+service:
+  nomad:
+    enabled: true
+    running: true
+  consul:
+    enabled: true
+    running: true
+
+gossfile:
+  base.yml: {}

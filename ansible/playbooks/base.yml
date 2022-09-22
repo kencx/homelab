@@ -47,7 +47,10 @@
         - ssh_disable_root_login: true
 
     - name: Install goss
-      role: ../roles/goss
+      role: kencx.ansible.goss
+      vars:
+        - goss_dir: "./templates/goss"
+        - goss_file: "base.yml"
 
   tasks:
     - name: Add Hashicorp apt repository

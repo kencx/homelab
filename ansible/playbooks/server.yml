@@ -94,9 +94,10 @@
 
     - name: Goss smoke test
       import_role:
-        name: ../roles/goss
+        name: kencx.ansible.goss
       vars:
-        - goss_file_template: "./templates/goss/server.yml.j2"
+        - goss_dir: "./templates/goss"
+        - goss_file: "server.yml"
 
     # WARNING! This clears all cluster node data.
     # This is only necessary when templating the server with Packer

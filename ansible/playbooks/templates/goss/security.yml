@@ -1,0 +1,24 @@
+port:
+  tcp:22:
+    listening: true
+    ip:
+      - 0.0.0.0
+
+service:
+  sshd:
+    enabled: true
+    running: true
+  fail2ban:
+    enabled: true
+    running: true
+
+file:
+  /etc/ssh/sshd_config:
+    exists: true
+    mode: "0600"
+    owner: root
+    group: root
+    contains:
+      - "PermitRootLogin no"
+      - "PasswordAuthentication no"
+      - "PermitEmptyPasswords no"

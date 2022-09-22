@@ -53,9 +53,10 @@
 
     - name: Goss smoke test
       import_role:
-        name: ../roles/goss
-      # vars:
-      #   - goss_file_template: "./templates/goss/client.yml.j2"
+        name: kencx.ansible.goss
+      vars:
+        - goss_dir: "./templates/goss"
+        - goss_file: "client.yml"
 
   handlers:
     - name: reload nomad

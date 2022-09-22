@@ -1,0 +1,12 @@
+service:
+  docker:
+    enabled: true
+    running: true
+
+package:
+  docker-ce:
+    installed: true
+  docker-ce-cli:
+    installed: true
+  docker-compose-plugin:
+    installed: true
