@@ -1,10 +1,14 @@
 [Unit]
 Description=Nomad
-Documentation=https://www.nomadproject.io/docs/
 Wants=network-online.target
 After=network-online.target
 
 [Service]
+{% if server | bool %}
+User=nomad
+Group=nomad
+{% endif %}
+
 ExecReload=/bin/kill -HUP $MAINPID
 ExecStart=/usr/bin/nomad agent -config /etc/nomad.d
 KillMode=process
@@ -15,10 +19,8 @@ Restart=on-failure
 RestartSec=2
 
 # StartLimitBurst = 5
-
 ## StartLimitIntervalSec is used for systemd versions >= 230
 # StartLimitIntervalSec = 10s
-
 ## StartLimitInterval is used for systemd versions < 230
 # StartLimitInterval = 10s
 

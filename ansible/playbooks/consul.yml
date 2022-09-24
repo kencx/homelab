@@ -1,0 +1,94 @@
+---
+- hosts: all
+  become: true
+  vars:
+    consul_config_dir: "/etc/consul.d"
+    consul_data_dir: "/opt/consul"
+    start_cluster: false
+
+  tasks:
+    - name: Create Consul directories
+      file:
+        path: "{{ item }}"
+        mode: 0755
+        owner: consul
+        group: consul
+        state: directory
+      with_items:
+        - "{{ consul_config_dir }}"
+        - "{{ consul_data_dir }}"
+
+    # prepare secrets
+    # save gossip encryption key to vault
+    # vault write kv/cluster/consul_config gossip_key=$(consul keygen)
+    # setup gossip key rotation with vault
+    #
+    # tls encryption
+    # setup consul template + vault
+    # https://learn.hashicorp.com/tutorials/consul/vault-pki-consul-secure-tls?in=consul/vault-secure
+
+    - name: Copy service file
+      template:
+        src: "./templates/consul/consul.service.j2"
+        dest: "/etc/systemd/system/consul.service"
+        mode: 0644
+        owner: root
+        group: root
+
+    # only client post-provisioning after these steps
+    - name: Copy Consul config files
+      block:
+        - name: Common config
+          template:
+            src: "./templates/consul/consul.hcl.j2"
+            dest: "{{ consul_config_dir }}/consul.hcl"
+            mode: 0644
+            owner: consul
+            group: consul
+
+        - name: Server-only config
+          template:
+            src: "./templates/consul/server.hcl.j2"
+            dest: "{{ consul_config_dir }}/server.hcl"
+            mode: 0644
+            owner: consul
+            group: consul
+          vars:
+            - bootstrap_expect: 1
+          when: server|bool
+
+        - name: Client-only config
+          template:
+            src: "./templates/consul/client.hcl.j2"
+            dest: "{{ consul_config_dir }}/client.hcl"
+            mode: 0644
+            owner: consul
+            group: consul
+          when: not server|bool
+      notify:
+        - reload consul
+
+    - name: Start Consul
+      systemd:
+        name: consul
+        state: started
+        enabled: true
+        daemon_reload: true
+      register: consul_started
+
+    # Apply all service and config changes
+    - name: Run handlers now
+      meta: flush_handlers
+
+    - name: Wait for Consul port
+      wait_for:
+        port: 8500
+        state: started
+      when: start_cluster|bool and server|bool
+
+  handlers:
+    - name: reload consul
+      systemd:
+        name: consul
+        state: reloaded
+      when: not consul_started.changed

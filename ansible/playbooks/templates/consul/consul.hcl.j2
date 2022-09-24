@@ -1,11 +1,9 @@
 datacenter  = "dc1"
-data_dir    = "/opt/consul"
+data_dir    = "{{ consul_data_dir }}"
 bind_addr   = {% raw %}"{{ GetInterfaceIP \"eth0\" }}"{% endraw %}
-
 client_addr = "0.0.0.0"
 
-server           = true
-bootstrap_expect = 1
+encrypt = "{{ gossip_encryption_key }}"
 
 ui_config {
   enabled = true
