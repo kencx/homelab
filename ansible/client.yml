@@ -1,0 +1,13 @@
+---
+- hosts: template
+  become: true
+  tasks:
+    - name: Configure Vault
+      import_playbook: playbook/vault.yml
+
+    # configure but do not start Nomad
+    - name: Bootstrap Nomad
+      import_playbook: playbook/nomad.yml
+      vars:
+        server: false
+        start_cluster: false

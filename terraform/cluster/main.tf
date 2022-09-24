@@ -36,7 +36,7 @@ module "server" {
 
 resource "null_resource" "server" {
   triggers = {
-    ansible_playbook = md5(file("../../ansible/playbooks/server.yml"))
+    ansible_playbook = md5(file("../../ansible/server.yml"))
     server_ids       = "${join(",", module.server.*.ip)}"
   }
 
@@ -80,7 +80,7 @@ module "client" {
 
 resource "null_resource" "client" {
   triggers = {
-    ansible_playbook = md5(file("../../ansible/playbooks/client-post.yml"))
+    ansible_playbook = md5(file("../../ansible/client-post.yml"))
     server_ids       = "${join(",", module.client.*.ip)}"
   }
 
