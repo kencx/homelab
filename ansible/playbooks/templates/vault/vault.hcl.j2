@@ -1,12 +1,12 @@
 storage "raft" {
-  path    = "/opt/vault/data"
-  node_id = "server-1" # hostname
+  path    = "{{ vault_data_dir }}"
+  node_id = "{{ ansible_hostname }}" # hostname
 }
 
 listener "tcp" {
   address       = "0.0.0.0:8200"
-  tls_cert_file = "/opt/vault/tls/cert.pem"
-  tls_key_file  = "/opt/vault/tls/key.pem"
+  tls_cert_file = "{{ vault_certificate_dir }}/vault.crt"
+  tls_key_file  = "{{ vault_tls_dir }}/key.pem"
 }
 
 api_addr     = "https://127.0.0.1:8200"

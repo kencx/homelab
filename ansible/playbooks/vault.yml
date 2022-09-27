@@ -1,0 +1,188 @@
+---
+- hosts: all
+  become: true
+  vars:
+    vault_config_dir: "/etc/vault.d"
+    vault_data_dir: "/opt/vault/data"
+    vault_tls_dir: "/opt/vault/tls"
+    vault_certificate_dir: "/usr/share/ca-certificates/vault"
+
+  tasks:
+    - name: Create Vault directories
+      file:
+        path: "{{ item }}"
+        mode: 0755
+        owner: vault
+        group: vault
+        state: directory
+      with_items:
+        - "{{ vault_config_dir }}"
+        - "{{ vault_data_dir }}/raft"
+        - "{{ vault_tls_dir }}"
+        - "{{ vault_certificate_dir }}"
+
+    - name: Generate self-signed certificates for Vault TLS
+      block:
+        - name: Generate private key
+          community.crypto.openssl_privatekey:
+            path: "{{ vault_tls_dir }}/key.pem"
+            mode: 0600
+            owner: vault
+            group: vault
+
+        - name: Generate CSR
+          community.crypto.openssl_csr:
+            path: "{{ vault_tls_dir }}/ca.csr"
+            privatekey_path: "{{ vault_tls_dir }}/key.pem"
+            common_name: "127.0.0.1: Self-signed certificate"
+            subject_alt_name: "DNS:localhost,IP:127.0.0.1"
+            mode: 0644
+            owner: vault
+            group: vault
+
+        - name: Generate certificate
+          community.crypto.x509_certificate:
+            path: "{{ vault_certificate_dir }}/vault.crt"
+            privatekey_path: "{{ vault_tls_dir }}/key.pem"
+            csr_path: "{{ vault_tls_dir }}/ca.csr"
+            provider: selfsigned
+            mode: 0644
+            owner: vault
+            group: vault
+
+        - name: Add certificate to ca-certificates.conf
+          lineinfile:
+            path: "/etc/ca-certificates.conf"
+            line: "{{ vault_certificate_dir | basename }}/vault.crt"
+
+        - name: Update trusted certificates store
+          command: update-ca-certificates
+          register: update_cert_output
+          changed_when: '"1 added" in update_cert_output.stdout'
+
+    - name: Copy service file
+      copy:
+        src: "./templates/vault/vault.service"
+        dest: "/etc/systemd/system/vault.service"
+        mode: 0644
+        owner: root
+        group: root
+      notify:
+        - reload vault
+
+    - name: Copy Vault config files
+      template:
+        src: "./templates/vault/vault.hcl.j2"
+        dest: "{{ vault_config_dir }}/vault.hcl"
+        mode: 0644
+        owner: vault
+        group: vault
+      notify:
+        - reload vault
+
+    - name: Start Vault
+      systemd:
+        name: vault
+        state: started
+        enabled: true
+
+    - name: Wait for Vault port
+      wait_for:
+        port: 8200
+        state: started
+
+    - name: Check Vault status
+      command: vault status -format=json
+      register: vault_status_raw
+      changed_when: false
+      failed_when: vault_status_raw.rc == 1
+
+    - set_fact:
+        vault_status_json: "{{ vault_status_raw.stdout | from_json }}"
+
+    - name: Initialize Vault
+      command: vault operator init -key-shares=1 -key-threshold=1 -format=json
+      register: vault_init_raw
+      when: not vault_status_json.initialized
+
+    - set_fact:
+        vault_init_json: "{{ vault_init_raw.stdout | from_json }}"
+      when: vault_init_raw is defined and vault_init_raw.stdout is defined
+
+    - name: Save unseal keys
+      copy:
+        content: "{{ item.1 }}"
+        dest: "/root/.vault-unseal-keys-{{ item.0 }}"
+        mode: 0600
+      no_log: true
+      with_indexed_items: "{{ vault_init_json.unseal_keys_hex }}"
+      when: vault_init_json is defined and vault_init_json.unseal_keys_hex is defined
+
+    - name: Save root token
+      copy:
+        content: "{{ vault_init_json.root_token }}\n"
+        dest: "/root/.vault-root-token"
+        mode: 0600
+      no_log: true
+      when: vault_init_json is defined and vault_init_json.root_token is defined
+
+    - name: Unseal Vault
+      shell:
+        cmd: "vault operator unseal --format json $(cat /root/.vault-unseal-keys-0)"
+      register: vault_unseal_raw
+      when:
+        - vault_status_json is defined
+        - vault_status_json.sealed
+      changed_when: false
+      failed_when: vault_unseal_raw.rc == 1
+
+    # - set_fact:
+    #     vault_unseal_json: "{{ vault_unseal_raw.stdout | from_json }}"
+    #   when:
+    #     - vault_unseal_raw is defined
+    #     - vault_unseal_raw.stdout is defined
+    #     - vault_unseal_raw.rc == 0
+
+    # - debug:
+    #     var: vault_unseal_json
+    #   when: vault_unseal_raw is defined and vault_unseal_raw.stdout is defined
+
+    - name: Login to Vault
+      shell:
+        cmd: vault login --format json $(cat /root/.vault-root-token)
+      register: vault_login_raw
+      changed_when: false
+      failed_when: vault_login_raw.rc != 0
+
+    # - set_fact:
+    #     vault_login_json: "{{ vault_login_raw.stdout | from_json }}"
+    #   when:
+    #     - vault_login_raw is defined
+    #     - vault_login_raw.stdout is defined
+    #     - vault_login_raw.rc == 0
+
+    # - debug:
+    #     var: vault_login_json
+    #   when: vault_login_raw is defined and vault_login_raw.stdout is defined
+
+    - name: Check Vault post-login status
+      command: vault status -format=json
+      register: vault_post_status_raw
+      changed_when: false
+      failed_when: vault_post_status_raw.rc == 1
+
+    - set_fact:
+        vault_post_status_json: "{{ vault_post_status_raw.stdout | from_json }}"
+      when: vault_post_status_raw.stdout is defined
+
+    - name: Vault post-login status
+      debug:
+        var: vault_post_status_json
+      when: vault_post_status_json is defined
+
+  handlers:
+    - name: reload vault
+      systemd:
+        name: vault
+        state: reloaded
+      when: not vault_started.changed
