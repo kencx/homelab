@@ -1,0 +1,56 @@
+# https://github.com/hashicorp/consul-template/blob/main/docs/configuration.md#consul-template
+vault {
+  address = "https://localhost:8200"
+  token = "{{ vault_token }}"
+  unwrap_token = false
+  renew_token = false
+
+  ssl {
+    enabled = true
+	verify = false
+	cert = "{{ vault_certificate_dir }}/vault.crt"
+	key = "{{ vault_tls_dir }}/key.pem"
+  }
+}
+
+# consul
+template {
+  contents = <<EOF
+{% raw %}{{ with secret "pki_int/issue/consul-dc1" "common_name=server.dc1.consul" "ttl=24h" "alt_names=localhost" "ip_sans=127.0.0.1" }}
+{{ .Data.certificate }}
+{{ end }}
+{% endraw %}
+EOF
+  destination = "/opt/consul/tls/cert.crt"
+  perms = 0600
+  command = "sh -c 'date && consul reload'"
+  backup = true
+}
+
+template {
+  contents = <<EOF
+{% raw %}{{ with secret "pki_int/issue/consul-dc1" "common_name=server.dc1.consul" "ttl=24h" "alt_names=localhost" "ip_sans=127.0.0.1" }}
+{{ .Data.private_key }}
+{{ end }}
+{% endraw %}
+EOF
+  destination = "/opt/consul/tls/key.pem"
+  perms = 0400
+  command = "sh -c 'date && consul reload'"
+  backup = true
+}
+
+template {
+  contents = <<EOF
+{% raw %}{{ with secret "pki_int/issue/consul-dc1" "common_name=server.dc1.consul" "ttl=24h" }}
+{{ .Data.issuing_ca }}
+{{ end }}
+{% endraw %}
+EOF
+  destination = "/opt/consul/tls/ca.crt"
+  perms = 0600
+  command = "sh -c 'date && consul reload'"
+  backup = true
+}
+
+# nomad

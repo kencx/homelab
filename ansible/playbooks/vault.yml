@@ -85,6 +85,7 @@
         name: vault
         state: started
         enabled: true
+      register: vault_started
 
     - name: Wait for Vault port
       wait_for:
@@ -109,6 +110,7 @@
         vault_init_json: "{{ vault_init_raw.stdout | from_json }}"
       when: vault_init_raw is defined and vault_init_raw.stdout is defined
 
+    # TODO insecure
     - name: Save unseal keys
       copy:
         content: "{{ item.1 }}"
@@ -118,6 +120,7 @@
       with_indexed_items: "{{ vault_init_json.unseal_keys_hex }}"
       when: vault_init_json is defined and vault_init_json.unseal_keys_hex is defined
 
+    # TODO insecure
     - name: Save root token
       copy:
         content: "{{ vault_init_json.root_token }}\n"
@@ -179,6 +182,9 @@
       debug:
         var: vault_post_status_json
       when: vault_post_status_json is defined
+
+    - name: Setup root and intermediate CA
+      script: "./files/vault_ca.sh"
 
   handlers:
     - name: reload vault

@@ -1,0 +1,15 @@
+[Unit]
+Description=Consul-template
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/consul-template -config="/opt/consul/templates/consul_template.hcl"
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+KillSignal=SIGINT
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
