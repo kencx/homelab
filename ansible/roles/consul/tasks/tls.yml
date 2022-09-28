@@ -1,0 +1,57 @@
+---
+# TODO handle client node certificates
+- name: Add template stanza to consul-template
+  blockinfile:
+    path: "{{ consul_template_config }}"
+    marker: "# {mark} Consul TLS"
+    backup: true
+    validate: consul-template -config=%s -parse-only
+    block: |
+      template {
+        contents = <<EOF
+      {% raw %}{{ with secret "pki_int/issue/consul-dc1" "common_name=server.dc1.consul" "ttl=24h" "alt_names=localhost" "ip_sans=127.0.0.1" }}
+      {{ .Data.certificate }}
+      {{ end }}
+      {% endraw %}
+      EOF
+        destination = "{{ consul_tls_dir }}/cert.crt"
+        perms = 0600
+        user = "consul"
+        group = "consul"
+        command = "date && if systemctl is-active consul; then service consul reload; fi"
+      }
+
+      template {
+        contents = <<EOF
+      {% raw %}{{ with secret "pki_int/issue/consul-dc1" "common_name=server.dc1.consul" "ttl=24h" "alt_names=localhost" "ip_sans=127.0.0.1" }}
+      {{ .Data.private_key }}
+      {{ end }}
+      {% endraw %}
+      EOF
+        destination = "{{ consul_tls_dir }}/key.pem"
+        perms = 0400
+        user = "consul"
+        group = "consul"
+        command = "date && if systemctl is-active consul; then service consul reload; fi"
+      }
+
+      template {
+        contents = <<EOF
+      {% raw %}{{ with secret "pki_int/issue/consul-dc1" "common_name=server.dc1.consul" "ttl=24h" }}
+      {{ .Data.issuing_ca }}
+      {{ end }}
+      {% endraw %}
+      EOF
+        destination = "{{ consul_tls_dir }}/ca.crt"
+        perms = 0600
+        user = "consul"
+        group = "consul"
+        command = "date && if systemctl is-active consul; then service consul reload; fi"
+      }
+  notify: reload consul-template
+
+- name: Restart consul-template
+  systemd:
+    name: consul_template
+    state: reloaded
+    enabled: true

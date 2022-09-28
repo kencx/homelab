@@ -1,0 +1,28 @@
+---
+- hosts: template
+  become: true
+  vars:
+    user: debian
+
+  roles:
+    - name: Install Common
+      role: common
+
+    - name: Install docker
+      role: geerlingguy.docker
+      vars:
+        # install docker compose plugin instead of docker-compose binary
+        - docker_install_compose_plugin: true
+        - docker_install_compose: false
+        - docker_users: ["{{ user }}"]
+
+    - name: Security hardening
+      role: kencx.ansible.security
+      vars:
+        - ssh_disable_root_login: true
+
+    - name: Install goss
+      role: kencx.ansible.goss
+      vars:
+        - goss_dir: "./goss"
+        - goss_file: "base.yml"

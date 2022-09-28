@@ -1,0 +1,6 @@
+---
+- name: reload vault
+  systemd:
+    name: vault
+    state: reloaded
+  when: not vault_started.changed

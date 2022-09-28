@@ -1,0 +1,11 @@
+---
+consul_config_dir: "/etc/consul.d"
+consul_data_dir: "/opt/consul"
+consul_tls_dir: "{{ consul_data_dir }}/tls"
+consul_template_config: "{{ consul_data_dir }}/templates/consul_template.hcl"
+
+# server
+consul_bootstrap_expect: 1
+
+# client
+consul_server_ip: ""

@@ -1,0 +1,36 @@
+---
+# TODO if already exists, do nothing (client)
+- name: Save gossip key to Vault
+  shell:
+    cmd: vault write kv/cluster/nomad_config gossip_key=$(nomad operator keygen)
+
+# TODO setup gossip key rotation with vault
+# requires helper-script
+- name: Add gossip key to Nomad configuration
+  blockinfile:
+    path: "{{ consul_template_config }}"
+    marker: "# {mark} Nomad gossip"
+    backup: true
+    validate: consul-template -config=%s -parse-only
+    block: |
+      template {
+        contents = <<EOF
+      {% raw %}{{ with secret "kv/cluster/nomad_config" }}
+      server {
+        encrypt = "{{ .Data.gossip_key }}"
+      }
+      {{ end }}
+      {% endraw %}
+      EOF
+        destination = "{{ nomad_config_dir }}/gossip.hcl"
+        perms = 0640
+        user = "nomad"
+        group = "nomad"
+        error_on_missing_key = true
+        command = "date && if systemctl is-active nomad; then service nomad reload; fi"
+      }
+
+- name: Restart consul-template
+  systemd:
+    name: consul_template
+    state: reloaded

@@ -1,0 +1,11 @@
+---
+- name: reload consul
+  systemd:
+    name: consul
+    state: reloaded
+  when: not consul_started.changed
+
+- name: reload consul-template
+  systemd:
+    name: consul_template
+    state: reloaded

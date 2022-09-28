@@ -1,65 +1,29 @@
 ---
-- hosts: "{{ host | default(omit) }}"
+- hosts: server
   become: true
-  vars:
-    reset_cluster_data: false
+
+  roles:
+    - name: Configure Vault
+      role: vault
+
+    - name: Install consul-template
+      role: consul-template
+
+    - name: Configure Consul
+      role: consul
+
+    - name: Configure Nomad
+      role: nomad
 
   tasks:
-    - name: Configure and start Consul
-      import_playbook: playbook/consul.yml
-      vars:
-        server: true
-        start_cluster: true
-        gossip_encryption_key: ""
-
-    - name: Configure and start Nomad
-      import_playbook: playbook/nomad.yml
-      vars:
-        server: true
-        start_cluster: true
+    - name: Restart Vault
+      systemd:
+        name: vault
+        state: reloaded
 
     - name: Goss smoke test
       import_role:
         name: kencx.ansible.goss
       vars:
-        - goss_dir: "./playbooks/templates/goss"
+        - goss_dir: "./goss"
         - goss_file: "server.yml"
-
-    # WARNING! This clears all cluster node data.
-    # This is only necessary when templating the server with Packer
-    # Do not run this with Terraform
-    - name: Reset cluster
-      when: reset_cluster_data|bool
-      block:
-        - name: Stop Nomad, Consul
-          systemd:
-            name: "{{ item }}"
-            state: stopped
-            enabled: true
-          with_items:
-            - nomad
-            - consul
-
-        - name: Delete Nomad, Consul data directories
-          file:
-            path: "{{ item }}"
-            state: absent
-          with_items:
-            - "{{ nomad_data_dir }}"
-            - "{{ consul_data_dir }}"
-
-        - name: Create Nomad directories
-          file:
-            path: "{{ nomad_data_dir }}"
-            mode: 0755
-            owner: nomad
-            group: nomad
-            state: directory
-
-        - name: Create Consul directories
-          file:
-            path: "{{ consul_data_dir }}"
-            mode: 0755
-            owner: consul
-            group: consul
-            state: directory

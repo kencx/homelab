@@ -1,0 +1,39 @@
+---
+# Vault must be installed and started
+# Vault Root CA and Intermediate CA must be initialized and configured
+
+# TODO insecure
+- name: Read token
+  command: cat /root/.vault-root-token
+  register: vault_token_raw
+  no_log: true
+
+- set_fact:
+    vault_token: "{{ vault_token_raw.stdout }}"
+  no_log: true
+
+- name: Create consul-template directory
+  file:
+    path: "{{ consul_template_dir }}"
+    state: directory
+    mode: 0755
+    owner: consul
+    group: consul
+
+- name: Copy consul-template service file
+  copy:
+    src: "consul-template.service"
+    dest: "/etc/systemd/system/consul_template.service"
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Copy consul-template config
+  template:
+    src: "consul-template.hcl.j2"
+    dest: "{{ consul_template_dir }}/consul_template.hcl"
+    mode: 0644
+    owner: consul
+    group: consul
+
+# consul-template is started after TLS in Consul and Nomad are configured

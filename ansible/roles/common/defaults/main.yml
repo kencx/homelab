@@ -1,0 +1,15 @@
+---
+common_nfs_dir: "/mnt/storage"
+common_packages:
+  - sudo
+  - curl
+  - git
+  - openssh-server
+  - vim
+  - make
+  - gnupg
+  - nfs-common
+  - software-properties-common
+  - jq
+  - unzip
+user: debian

@@ -1,0 +1,51 @@
+---
+- name: Create Vault directories
+  file:
+    path: "{{ item }}"
+    mode: 0755
+    owner: vault
+    group: vault
+    state: directory
+  with_items:
+    - "{{ vault_config_dir }}"
+    - "{{ vault_data_dir }}/raft"
+    - "{{ vault_tls_dir }}"
+    - "{{ vault_certificate_dir }}"
+
+- name: Generate self-signed certificates for Vault TLS
+  import_tasks: self_signed.yml
+
+- name: Copy service file
+  copy:
+    src: "vault.service"
+    dest: "/etc/systemd/system/vault.service"
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - reload vault
+
+- name: Copy Vault config files
+  template:
+    src: "vault.hcl.j2"
+    dest: "{{ vault_config_dir }}/vault.hcl"
+    mode: 0644
+    owner: vault
+    group: vault
+  notify:
+    - reload vault
+
+- name: Start Vault
+  systemd:
+    name: vault
+    state: started
+    enabled: true
+  register: vault_started
+
+- name: Wait for Vault port
+  wait_for:
+    port: 8200
+    state: started
+
+- name: Vault Setup
+  import_tasks: init.yml

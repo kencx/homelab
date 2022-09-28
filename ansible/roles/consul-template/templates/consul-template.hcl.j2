@@ -1,0 +1,14 @@
+# https://github.com/hashicorp/consul-template/blob/main/docs/configuration.md#consul-template
+vault {
+  address = "https://localhost:8200"
+  token = "{{ vault_token }}"
+  unwrap_token = false
+  renew_token = false
+
+  ssl {
+    enabled = true
+	verify = false
+	cert = "{{ vault_certificate_dir }}/vault.crt"
+	key = "{{ vault_tls_dir }}/key.pem"
+  }
+}

@@ -1,0 +1,20 @@
+---
+- name: Create directory
+  file:
+    path: "/opt/cni/bin"
+    mode: 0775
+    owner: root
+    group: root
+    state: directory
+
+- name: CNI bridge plugin exists
+  stat:
+    path: "/opt/cni/bin/bridge"
+  register: cni_bridge
+
+- name: Unarchive CNI plugins
+  unarchive:
+    src: "https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz"
+    dest: "/opt/cni/bin"
+    remote_src: true
+  when: not cni_bridge.stat.exists

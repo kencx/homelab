@@ -1,0 +1,98 @@
+---
+- name: Check Vault status
+  command: vault status -format=json
+  register: vault_status_raw
+  changed_when: false
+  failed_when: vault_status_raw.rc == 1
+
+- set_fact:
+    vault_status_json: "{{ vault_status_raw.stdout | from_json }}"
+
+- name: Initialize Vault
+  command: vault operator init -key-shares=1 -key-threshold=1 -format=json
+  register: vault_init_raw
+  when: not vault_status_json.initialized
+
+- set_fact:
+    vault_init_json: "{{ vault_init_raw.stdout | from_json }}"
+  when: vault_init_raw is defined and vault_init_raw.stdout is defined
+
+# TODO insecure
+- name: Save unseal keys
+  copy:
+    content: "{{ item.1 }}"
+    dest: "/root/.vault-unseal-keys-{{ item.0 }}"
+    mode: 0600
+  no_log: true
+  with_indexed_items: "{{ vault_init_json.unseal_keys_hex }}"
+  when: vault_init_json is defined and vault_init_json.unseal_keys_hex is defined
+
+# TODO insecure
+- name: Save root token
+  copy:
+    content: "{{ vault_init_json.root_token }}\n"
+    dest: "/root/.vault-root-token"
+    mode: 0600
+  no_log: true
+  when: vault_init_json is defined and vault_init_json.root_token is defined
+
+- name: Unseal Vault
+  shell:
+    cmd: "vault operator unseal --format json $(cat /root/.vault-unseal-keys-0)"
+  register: vault_unseal_raw
+  when:
+    - vault_status_json is defined
+    - vault_status_json.sealed
+  changed_when: false
+  failed_when: vault_unseal_raw.rc == 1
+
+# - set_fact:
+#     vault_unseal_json: "{{ vault_unseal_raw.stdout | from_json }}"
+#   when:
+#     - vault_unseal_raw is defined
+#     - vault_unseal_raw.stdout is defined
+#     - vault_unseal_raw.rc == 0
+
+# - debug:
+#     var: vault_unseal_json
+#   when: vault_unseal_raw is defined and vault_unseal_raw.stdout is defined
+
+- name: Login to Vault
+  shell:
+    cmd: vault login --format json $(cat /root/.vault-root-token)
+  register: vault_login_raw
+  changed_when: false
+  failed_when: vault_login_raw.rc != 0
+
+# - set_fact:
+#     vault_login_json: "{{ vault_login_raw.stdout | from_json }}"
+#   when:
+#     - vault_login_raw is defined
+#     - vault_login_raw.stdout is defined
+#     - vault_login_raw.rc == 0
+
+# - debug:
+#     var: vault_login_json
+#   when: vault_login_raw is defined and vault_login_raw.stdout is defined
+
+- name: Check Vault post-login status
+  command: vault status -format=json
+  register: vault_post_status_raw
+  changed_when: false
+  failed_when: vault_post_status_raw.rc == 1
+
+- set_fact:
+    vault_post_status_json: "{{ vault_post_status_raw.stdout | from_json }}"
+  when: vault_post_status_raw.stdout is defined
+
+- name: Vault post-login status
+  debug:
+    var: vault_post_status_json
+  when: vault_post_status_json is defined
+
+# Enable PKI secrets engine
+# Create Root CA, Intermediate CA
+# Create Vault role for deploying certificates
+# Requires jq
+- name: Setup root and intermediate CA
+  script: "../files/vault_ca.sh"

@@ -1,0 +1,6 @@
+---
+consul_data_dir: "/opt/consul"
+consul_template_dir: "{{ consul_data_dir }}/templates"
+
+vault_tls_dir: "/opt/vault/tls"
+vault_certificate_dir: "/usr/share/ca-certificates/vault"

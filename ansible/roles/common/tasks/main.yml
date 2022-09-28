@@ -1,0 +1,57 @@
+---
+- name: Update apt packages
+  apt:
+    update_cache: true
+    cache_valid_time: 86400
+    upgrade: true
+
+- name: Wait for dpkg lock to be released
+  shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10 ; done;
+  changed_when: false
+
+- name: Update and install packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items: common_packages
+  register: apt_action
+  retries: 10
+  until: apt_action is success or ('/var/lib/dpkg/lock-frontend' not in apt_action.msg)
+
+
+- name: Add Hashicorp apt repository
+  block:
+    - name: Add Hashicorp APT repository key
+      apt_key:
+        url: https://apt.releases.hashicorp.com/gpg
+        state: present
+
+    - name: Add Hashicorp APT repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+        state: present
+
+- name: Install Hashicorp tools
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 86400
+  with_items:
+    - nomad
+    - consul
+    - vault
+
+- name: Install consul-template
+  unarchive:
+    src: "https://releases.hashicorp.com/consul-template/0.29.2/consul-template_0.29.2_linux_amd64.zip"
+    dest: "/usr/bin"
+    remote_src: true
+
+- name: Create NFS share directories
+  file:
+    path: "{{ common_nfs_dir }}"
+    mode: 0755
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    state: directory

@@ -1,0 +1,11 @@
+---
+- name: reload nomad
+  systemd:
+    name: nomad
+    state: reloaded
+  when: not nomad_started.changed
+
+- name: reload consul-template
+  systemd:
+    name: consul_template
+    state: reloaded

@@ -1,0 +1,15 @@
+datacenter = "dc1"
+data_dir   = "{{ nomad_data_dir }}"
+bind_addr  = "0.0.0.0"
+
+tls {
+  http = true
+  rpc = true
+
+  ca_file = "{{ nomad_tls_dir }}/ca.crt"
+  cert_file = "{{ nomad_tls_dir }}/cert.crt"
+  key_file = "{{ nomad_tls_dir }}/key.pem"
+
+  verify_server_hostname = true
+  verify_https_client = false
+}

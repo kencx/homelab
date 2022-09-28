@@ -1,13 +1,37 @@
 ---
-- hosts: template
+- hosts: client
   become: true
-  tasks:
-    - name: Configure Vault
-      import_playbook: playbook/vault.yml
+  vars:
+    - server_ip: "10.10.10.110"
+    - nfs_ip: "10.10.10.102"
+    - nfs_share_mounts:
+        - src: "{{ nfs_ip }}:/home/debian/apps/test-apps"
+          path: "/mnt/storage"
+          state: mounted
 
-    # configure but do not start Nomad
-    - name: Bootstrap Nomad
-      import_playbook: playbook/nomad.yml
+  roles:
+    - name: Install consul-template
+      role: consul-template
+
+    - name: Configure Consul
+      role: consul
       vars:
-        server: false
-        start_cluster: false
+        consul_server_ip: "{{ server_ip }}"
+
+    - name: Configure Nomad
+      role: nomad
+      vars:
+        nomad_server_ip: "{{ server_ip }}"
+
+    - name: Mount NFS shares
+      become: true
+      import_role:
+        name: kencx.ansible.nfs
+
+  tasks:
+    - name: Goss smoke test
+      import_role:
+        name: kencx.ansible.goss
+      vars:
+        - goss_dir: "./goss"
+        - goss_file: "client.yml"

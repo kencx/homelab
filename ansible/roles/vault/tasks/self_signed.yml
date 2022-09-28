@@ -1,0 +1,39 @@
+---
+# Only Ubuntu/Debian systems are supported
+
+- name: Generate private key
+  community.crypto.openssl_privatekey:
+    path: "{{ vault_tls_dir }}/key.pem"
+    mode: 0600
+    owner: vault
+    group: vault
+
+- name: Generate CSR
+  community.crypto.openssl_csr:
+    path: "{{ vault_tls_dir }}/ca.csr"
+    privatekey_path: "{{ vault_tls_dir }}/key.pem"
+    common_name: "127.0.0.1: Self-signed certificate"
+    subject_alt_name: "DNS:localhost,IP:127.0.0.1"
+    mode: 0644
+    owner: vault
+    group: vault
+
+- name: Generate certificate
+  community.crypto.x509_certificate:
+    path: "{{ vault_certificate_dir }}/vault.crt"
+    privatekey_path: "{{ vault_tls_dir }}/key.pem"
+    csr_path: "{{ vault_tls_dir }}/ca.csr"
+    provider: selfsigned
+    mode: 0644
+    owner: vault
+    group: vault
+
+- name: Add certificate to ca-certificates.conf
+  lineinfile:
+    path: "/etc/ca-certificates.conf"
+    line: "{{ vault_certificate_dir | basename }}/vault.crt"
+
+- name: Update trusted certificates store
+  command: update-ca-certificates
+  register: update_cert_output
+  changed_when: '"1 added" in update_cert_output.stdout'
