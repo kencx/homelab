@@ -13,7 +13,7 @@
   apt:
     name: "{{ item }}"
     state: present
-  with_items: common_packages
+  with_items: "{{ common_packages }}"
   register: apt_action
   retries: 10
   until: apt_action is success or ('/var/lib/dpkg/lock-frontend' not in apt_action.msg)
