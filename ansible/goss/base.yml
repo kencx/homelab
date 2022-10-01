@@ -24,6 +24,10 @@ package:
     installed: true
   nfs-common:
     installed: true
+  jq:
+    installed: true
+  unzip:
+    installed: true
 
 gossfile:
   docker.yml: {}

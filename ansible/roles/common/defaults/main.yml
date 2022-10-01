@@ -12,4 +12,5 @@ common_packages:
   - software-properties-common
   - jq
   - unzip
+  - ca-certificates
 user: debian

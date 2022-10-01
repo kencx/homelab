@@ -12,9 +12,6 @@
     - "{{ vault_tls_dir }}"
     - "{{ vault_certificate_dir }}"
 
-- name: Generate self-signed certificates for Vault TLS
-  import_tasks: self_signed.yml
-
 - name: Copy service file
   copy:
     src: "vault.service"

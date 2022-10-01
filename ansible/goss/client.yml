@@ -8,18 +8,12 @@ port:
   # consul dns
   tcp6:8600:
     listening: true
-  # vault
-  tcp:8200:
-    listening: true
 
 service:
   nomad:
     enabled: true
     running: true
   consul:
-    enabled: true
-    running: true
-  vault:
     enabled: true
     running: true
   consul_template:

@@ -1,8 +1,23 @@
 ---
 - hosts: server
   become: true
+  vars:
+    vault_tls_dir: "/opt/vault/tls"
+    vault_certificate_dir: "/usr/share/ca-certificates/vault"
 
   roles:
+    # requires localhost root
+    - name: Setup Vault TLS certificates
+      role: kencx.ansible.ssl
+      vars:
+        ssl_remote_user: "vault"
+        ssl_remote_tls_dir: "{{ vault_tls_dir }}"
+        ssl_remote_trust_store_dir: "{{ vault_certificate_dir }}"
+        ssl_remote_cert_name: "vault"
+        ssl_remote_cert_common_name: "vault"
+        ssl_remote_cert_subject_alt_name: ""
+        ssl_remote_cert_ttl: "+365d"
+
     - name: Configure Vault
       role: vault
 

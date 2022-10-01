@@ -24,9 +24,7 @@
         nomad_server_ip: "{{ server_ip }}"
 
     - name: Mount NFS shares
-      become: true
-      import_role:
-        name: kencx.ansible.nfs
+      role: kencx.ansible.nfs
 
   tasks:
     - name: Goss smoke test
