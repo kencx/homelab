@@ -80,7 +80,7 @@ module "client" {
 
 resource "null_resource" "client" {
   triggers = {
-    ansible_playbook = md5(file("../../ansible/client-post.yml"))
+    ansible_playbook = md5(file("../../ansible/client.yml"))
     server_ids       = "${join(",", module.client.*.ip)}"
   }
 
@@ -91,7 +91,7 @@ resource "null_resource" "client" {
   }
 
   provisioner "local-exec" {
-    command     = "ansible-playbook playbooks/client-post.yml -u ${var.ssh_user}"
+    command     = "ansible-playbook client.yml -u ${var.ssh_user}"
     working_dir = "../../ansible"
     environment = {
       ANSIBLE_STDOUT_CALLBACK   = "yaml"
