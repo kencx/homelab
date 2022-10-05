@@ -1,0 +1,39 @@
+---
+# TODO replace with Vault Terraform provider
+# Enable PKI secrets engine
+# Create Root CA, Intermediate CA in Vault
+# Create Vault role for deploying certificates
+- name: Create personal CA in Vault
+  script: "../files/vault_ca.sh"
+
+- name: Create Vault log file
+  file:
+    path: "{{ vault_log_file }}"
+    mode: 0640
+    owner: vault
+    group: vault
+    state: present
+
+# TODO setup logrotate
+- name: Enable file audit
+  command: "vault audit enable file file_path={{ vault_log_file }}"
+
+- name: Enable cert auth
+  command: "vault auth enable cert"
+
+# This should have 2FA, limited validity period, strong audit
+- name: Read admin policy
+  copy:
+    src: "admin_policy.hcl"
+    dest: "{{ vault_config_dir }}/admin_policy.hcl"
+
+- name: Create admin policy
+  command: "vault policy write admin {{ vault_config_dir }}/admin_policy.hcl"
+  register: create_admin_policy
+  failed_when: create_admin_policy.rc != 0
+
+- name: Setup admin role
+  script: "../files/admin_auth_role.sh"
+
+# - name: Revoke root token (Optional)
+#   when: vault_revoke_root_token|bool

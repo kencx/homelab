@@ -10,7 +10,7 @@
     - "{{ vault_config_dir }}"
     - "{{ vault_data_dir }}/raft"
     - "{{ vault_tls_dir }}"
-    - "{{ vault_certificate_dir }}"
+    - "{{ vault_ca_cert_dir }}"
 
 - name: Copy service file
   copy:
@@ -44,5 +44,13 @@
     port: 8200
     state: started
 
-- name: Vault Setup
+- name: Vault Initialization
   import_tasks: init.yml
+
+# Setup CA, file audit, cert auth, admin role
+- name: Root token setup
+  import_tasks: root.yml
+
+# TODO consider moving to consul-template role
+- name: Consul-template setup
+  import_tasks: consul_template.yml

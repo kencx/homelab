@@ -57,7 +57,7 @@
 #     var: vault_unseal_json
 #   when: vault_unseal_raw is defined and vault_unseal_raw.stdout is defined
 
-- name: Login to Vault
+- name: Login to Vault with root token
   shell:
     cmd: vault login --format json $(cat /root/.vault-root-token)
   register: vault_login_raw
@@ -89,10 +89,3 @@
   debug:
     var: vault_post_status_json
   when: vault_post_status_json is defined
-
-# Enable PKI secrets engine
-# Create Root CA, Intermediate CA
-# Create Vault role for deploying certificates
-# Requires jq
-- name: Setup root and intermediate CA
-  script: "../files/vault_ca.sh"
