@@ -1,14 +1,41 @@
 # https://github.com/hashicorp/consul-template/blob/main/docs/configuration.md#consul-template
 vault {
-  address = "https://localhost:8200"
-  token = "{{ vault_token }}"
+  address = "https://{{ vault_address }}:8200"
+  # token = ""
   unwrap_token = false
   renew_token = false
 
+{% if 'server' in group_names %}
   ssl {
     enabled = true
 	verify = false
-	cert = "{{ vault_certificate_dir }}/vault.crt"
+	cert = "{{ vault_tls_dir }}/vault.crt"
 	key = "{{ vault_tls_dir }}/key.pem"
   }
+{% endif %}
+}
+
+# self-reload consul-template auth certs
+template {
+  contents = <<EOF
+{{ with secret "pki_int/issue/client" "common_name=ctemplate" "ttl=30d" }}
+{{ .Data.private_key }}
+{{ end }}
+EOF
+  destination = "/opt/consul-template/consul_template_key.pem"
+  user = "consul-template"
+  group = "consul-template"
+}
+
+template {
+  contents = <<EOF
+{{ with secret "pki_int/issue/client" "common_name=ctemplate" "ttl=30d" }}
+{{ .Data.certificate }}
+{{ end }}
+EOF
+  destination = "/opt/consul-template/consul_template_cert.pem"
+  user = "consul-template"
+  group = "consul-template"
+  # reload certs in consul_template auth role
+  command = "date; vault write auth/cert/certs/consul_template certificate=@/opt/consul-template/consul_template_cert.pem"
 }

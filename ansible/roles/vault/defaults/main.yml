@@ -3,5 +3,5 @@ vault_config_dir: "/etc/vault.d"
 vault_data_dir: "/opt/vault/data"
 vault_tls_dir: "/opt/vault/tls"
 vault_ca_cert_dir: "/usr/share/ca-certificates/vault"
-
+vault_policy_dir: "{{ vault_config_dir }}/policies"
 vault_log_file: "{{ vault_data_dir }}/vault.log"

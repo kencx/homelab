@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-# TODO pass ansible variables
-ADMIN_KEY_FILE="admin_key.pem"
-ADMIN_CERT_FILE="admin_cert.pem"
+# TODO set permissions and ownership
+ADMIN_KEY_FILE="/opt/vault/tls/admin_key.pem"
+ADMIN_CERT_FILE="/opt/vault/tls/admin_cert.pem"
 
 # generate key pair, save to file
 vault write -format=json pki_int/issue/client "common_name=admin" "ttl=365d" | tee \
@@ -18,4 +18,4 @@ vault write auth/cert/certs/admin \
 	token_policies=admin \
 	token_ttl=2h \
 	token_max_ttl=24h \
-	certificate=@admin.pem
+	certificate=@"$ADMIN_CERT_FILE"

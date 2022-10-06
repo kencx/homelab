@@ -17,7 +17,8 @@
     vault_init_json: "{{ vault_init_raw.stdout | from_json }}"
   when: vault_init_raw is defined and vault_init_raw.stdout is defined
 
-# TODO insecure
+# TODO Store Vault root token and unseal key shards in bw password manager
+# instead of plain text
 - name: Save unseal keys
   copy:
     content: "{{ item.1 }}"
@@ -27,11 +28,10 @@
   with_indexed_items: "{{ vault_init_json.unseal_keys_hex }}"
   when: vault_init_json is defined and vault_init_json.unseal_keys_hex is defined
 
-# TODO insecure
 - name: Save root token
   copy:
     content: "{{ vault_init_json.root_token }}\n"
-    dest: "/root/.vault-root-token"
+    dest: "/root/.vault-token"
     mode: 0600
   no_log: true
   when: vault_init_json is defined and vault_init_json.root_token is defined
@@ -59,7 +59,7 @@
 
 - name: Login to Vault with root token
   shell:
-    cmd: vault login --format json $(cat /root/.vault-root-token)
+    cmd: vault login --format json $(cat /root/.vault-token)
   register: vault_login_raw
   changed_when: false
   failed_when: vault_login_raw.rc != 0

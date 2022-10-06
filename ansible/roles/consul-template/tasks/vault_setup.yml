@@ -1,11 +1,11 @@
 ---
-- name: Read consul-template policy
+- name: Copy consul-template policy
   copy:
     src: "consul_template_policy.hcl"
-    dest: "{{ vault_config_dir }}/consul_template_policy.hcl"
+    dest: "{{ vault_policies_dir }}/consul_template_policy.hcl"
 
 - name: Create consul-template policy
-  command: "vault policy write consul_template {{ vault_config_dir }}/consul_template_policy.hcl"
+  command: "vault policy write consul_template {{ vault_policies_dir }}/consul_template_policy.hcl"
   register: create_ct_policy
   failed_when: create_ct_policy.rc != 0
 

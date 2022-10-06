@@ -2,8 +2,6 @@
 
 set -e
 
-vault secrets enable kv
-
 # Root CA
 vault secrets enable pki
 vault secrets tune -max-lease-ttl=87600h pki
@@ -35,10 +33,17 @@ intermediate=$(vault write -format=json pki/root/sign-intermediate csr="$interme
 vault write pki_int/intermediate/set-signed certificate="$intermediate"
 echo "Intermediate certificate generated"
 
-# create role
-vault write pki_int/roles/consul-dc1 \
-	allowed_domains="localhost,dc1.consul,dc1.nomad,global.nomad" \
+# TODO tweak allowed_domains
+# create role for nomad,consul tls certs
+vault write pki_int/roles/cluster \
+	allowed_domains="localhost,dc1.consul,dc1.nomad,dc1.vault,service.consul,global.nomad" \
 	allow_subdomains=true \
 	generate_lease=true \
 	max_ttl="720h"
-echo "Intermediate CA role created"
+
+# TODO allow any name for now
+# create role for authentication tls certs
+vault write pki_int/roles/client \
+	allow_any_name=true \
+	generate_lease=true \
+	max_ttl="720h"

@@ -11,6 +11,7 @@
     - "{{ vault_data_dir }}/raft"
     - "{{ vault_tls_dir }}"
     - "{{ vault_ca_cert_dir }}"
+    - "{{ vault_policy_dir }}"
 
 - name: Copy service file
   copy:
@@ -50,7 +51,3 @@
 # Setup CA, file audit, cert auth, admin role
 - name: Root token setup
   import_tasks: root.yml
-
-# TODO consider moving to consul-template role
-- name: Consul-template setup
-  import_tasks: consul_template.yml

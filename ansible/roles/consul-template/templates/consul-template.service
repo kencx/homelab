@@ -4,7 +4,9 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-ExecStart=/usr/bin/consul-template -config="/opt/consul/templates/consul_template.hcl"
+User=consul-template
+Group=consul-template
+ExecStart={{ vault_login_script }} /usr/bin/consul-template -config="{{ consul_template_dir }}/consul_template.hcl"
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 KillSignal=SIGINT

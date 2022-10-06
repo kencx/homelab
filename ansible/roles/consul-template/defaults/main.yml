@@ -1,6 +1,6 @@
 ---
-consul_data_dir: "/opt/consul"
-consul_template_dir: "{{ consul_data_dir }}/templates"
-
+consul_template_dir: "/opt/consul-template"
+vault_login_script: "{{ consul_template_dir }}/login.sh"
+vault_address: "{{ ansible_default_ipv4.address }}"
 vault_tls_dir: "/opt/vault/tls"
-vault_certificate_dir: "/usr/share/ca-certificates/vault"
+vault_policies_dir: "/etc/vault.d/policies"
