@@ -2,10 +2,12 @@
 nomad_config_dir: "/etc/nomad.d"
 nomad_data_dir: "/opt/nomad/data"
 nomad_tls_dir: "{{ nomad_data_dir }}/tls"
-consul_template_config: "/opt/consul/templates/consul_template.hcl"
+consul_template_config: "/opt/consul-template/consul_template.hcl"
 
 # server
 nomad_bootstrap_expect: 1
 
 # client
 nomad_server_ip: ""
+
+nomad_ip_sans: "127.0.0.1"

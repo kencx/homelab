@@ -1,6 +1,5 @@
 ---
-# TODO handle client node certificates
-- name: Add template stanza to consul-template
+- name: Add TLS template stanza to consul-template
   blockinfile:
     path: "{{ consul_template_config }}"
     marker: "# {mark} Nomad TLS"
@@ -9,10 +8,9 @@
     block: |
       template {
         contents = <<EOF
-      {% raw %}{{ with secret "pki_int/issue/consul-dc1" "common_name=server.global.nomad" "ttl=24h" "alt_names=localhost" "ip_sans=127.0.0.1" }}
-      {{ .Data.certificate }}
-      {{ end }}
-      {% endraw %}
+      {{ '{{' }} with secret "pki_int/issue/cluster" "common_name=server.global.nomad" "ttl=24h" "alt_names=localhost" "ip_sans={{ nomad_ip_sans }}" {{ '}}' }}
+      {{ '{{' }} .Data.certificate {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
       EOF
         destination = "{{ nomad_tls_dir }}/cert.crt"
         perms = 0600
@@ -23,10 +21,9 @@
 
       template {
         contents = <<EOF
-      {% raw %}{{ with secret "pki_int/issue/consul-dc1" "common_name=server.global.nomad" "ttl=24h" "alt_names=localhost" "ip_sans=127.0.0.1" }}
-      {{ .Data.private_key }}
-      {{ end }}
-      {% endraw %}
+      {{ '{{' }} with secret "pki_int/issue/cluster" "common_name=server.global.nomad" "ttl=24h" "alt_names=localhost" "ip_sans={{ nomad_ip_sans }}" {{ '}}' }}
+      {{ '{{' }} .Data.private_key {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
       EOF
         destination = "{{ nomad_tls_dir }}/key.pem"
         perms = 0400
@@ -37,21 +34,24 @@
 
       template {
         contents = <<EOF
-      {% raw %}{{ with secret "pki_int/issue/consul-dc1" "common_name=server.global.nomad" "ttl=24h" }}
+      {% raw %}{{ with secret "pki_int/issue/cluster" "common_name=server.global.nomad" "ttl=24h" }}
       {{ .Data.issuing_ca }}
       {{ end }}
       {% endraw %}
       EOF
         destination = "{{ nomad_tls_dir }}/ca.crt"
-        perms = 0600
+        perms = 0640
         user = "nomad"
-        group = "nomad"
+        group = "debian"
         command = "date && if systemctl is-active nomad; then service nomad reload; fi"
       }
   notify: reload consul-template
 
-- name: Restart consul-template
-  systemd:
-    name: consul_template
-    state: reloaded
-    enabled: true
+# TODO
+- name: Set environment variables
+  lineinfile:
+    path: "/etc/environment"
+    line: "{{ item }}"
+  with_items:
+    - "NOMAD_ADDR=https://{{ ansible_default_ipv4.address }}:4646"
+    - "NOMAD_CACERT={{ nomad_tls_dir }}/ca.crt"

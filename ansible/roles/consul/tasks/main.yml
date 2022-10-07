@@ -13,6 +13,7 @@
 
 - name: Setup Consul Gossip Encryption
   import_tasks: gossip.yml
+  when: "'server' in group_names"
 
 - name: Setup Consul TLS
   import_tasks: tls.yml

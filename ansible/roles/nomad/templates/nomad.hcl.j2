@@ -10,6 +10,6 @@ tls {
   cert_file = "{{ nomad_tls_dir }}/cert.crt"
   key_file = "{{ nomad_tls_dir }}/key.pem"
 
-  verify_server_hostname = true
+  verify_server_hostname = false
   verify_https_client = false
 }

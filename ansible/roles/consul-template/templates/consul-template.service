@@ -11,7 +11,10 @@ ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 KillSignal=SIGINT
 Restart=on-failure
-RestartSec=2
+RestartSec=60
+
+StartLimitBurst = 1
+StartLimitIntervalSec = 60
 
 [Install]
 WantedBy=multi-user.target

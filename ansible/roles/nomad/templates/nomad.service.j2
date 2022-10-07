@@ -16,14 +16,10 @@ KillSignal=SIGINT
 LimitNOFILE=65536
 LimitNPROC=infinity
 Restart=on-failure
-RestartSec=2
+RestartSec=10
 
-# StartLimitBurst = 5
-## StartLimitIntervalSec is used for systemd versions >= 230
-# StartLimitIntervalSec = 10s
-## StartLimitInterval is used for systemd versions < 230
-# StartLimitInterval = 10s
-
+StartLimitBurst = 3
+StartLimitIntervalSec = 30
 TasksMax=infinity
 
 [Install]
