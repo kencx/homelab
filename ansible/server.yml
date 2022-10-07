@@ -5,6 +5,11 @@
     server_address: "{{ ansible_default_ipv4.address }}"
     vault_tls_dir: "/opt/vault/tls"
     vault_ca_cert_dir: "/usr/share/ca-certificates/vault"
+    nfs_ip: "10.10.10.102"
+    nfs_share_mounts:
+      - src: "{{ nfs_ip }}:/home/debian/apps/tls"
+        path: "/opt/consul-template/tls"
+        state: mounted
 
   roles:
     # requires localhost root
@@ -22,6 +27,9 @@
         ssl_remote_cert_common_name: "vault"
         ssl_remote_cert_subject_alt_name: "IP:{{ server_address }}"
         ssl_remote_cert_ttl: "+365d"
+
+    - name: Mount NFS shares
+      role: kencx.ansible.nfs
 
     - role: vault
     - role: consul-template

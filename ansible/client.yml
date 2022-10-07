@@ -2,29 +2,55 @@
 - hosts: client
   become: true
   vars:
-    - server_ip: "10.10.10.110"
-    - nfs_ip: "10.10.10.102"
-    - nfs_share_mounts:
-        - src: "{{ nfs_ip }}:/home/debian/apps/test-apps"
-          path: "/mnt/storage"
-          state: mounted
+    client_address: "{{ ansible_default_ipv4.address }}"
+    server_ip: "10.10.10.130"
+    nfs_ip: "10.10.10.102"
+    nfs_share_mounts:
+      - src: "{{ nfs_ip }}:/home/debian/apps/test-apps"
+        path: "/mnt/storage"
+        state: mounted
+      - src: "{{ nfs_ip }}:/home/debian/apps/tls"
+        path: "/opt/consul-template/tls"
+        state: mounted
+
+  pre_tasks:
+    # TODO too dependent on server.yml playbook
+    - name: Copy certificate-chain to remote host
+      copy:
+        src: "/tmp/certs/vault.crt"
+        dest: "/usr/share/ca-certificates/vault/vault.crt"
+        mode: "0640"
+        owner: "vault"
+        group: "vault"
+    - name: Add certificate-chain to remote ca-certificates.conf
+      lineinfile:
+        path: "/etc/ca-certificates.conf"
+        line: "vault/vault.crt"
+    - name: Update remote trust store
+      command: update-ca-certificates
+      register: update_cert_output
+      changed_when: '"1 added" in update_cert_output.stdout'
 
   roles:
+    - name: Mount NFS shares
+      role: kencx.ansible.nfs
+
     - name: Install consul-template
       role: consul-template
+      vars:
+        vault_address: "{{ server_ip }}"
 
     - name: Configure Consul
       role: consul
       vars:
         consul_server_ip: "{{ server_ip }}"
+        consul_ip_sans: "127.0.0.1,{{ client_address }}"
 
     - name: Configure Nomad
       role: nomad
       vars:
         nomad_server_ip: "{{ server_ip }}"
-
-    - name: Mount NFS shares
-      role: kencx.ansible.nfs
+        nomad_ip_sans: "127.0.0.1,{{ client_address }}"
 
   tasks:
     - name: Goss smoke test
