@@ -3,13 +3,23 @@ data_dir    = "{{ consul_data_dir }}"
 bind_addr   = {% raw %}"{{ GetInterfaceIP \"eth0\" }}"{% endraw %}
 client_addr = "0.0.0.0"
 
-ca_file = "{{ consul_data_dir }}/tls/ca.crt"
-cert_file = "{{ consul_data_dir }}/tls/cert.crt"
-key_file = "{{ consul_data_dir }}/tls/key.pem"
+ports {
+  https = 8501
+}
 
-verify_incoming = true
-verify_outgoing = true
-verify_server_hostname = true
+tls {
+  defaults {
+    ca_file = "{{ consul_data_dir }}/tls/ca.crt"
+    cert_file = "{{ consul_data_dir }}/tls/cert.crt"
+    key_file = "{{ consul_data_dir }}/tls/key.pem"
+	verify_incoming = true
+	verify_outgoing = true
+  }
+
+  internal_rpc {
+    verify_server_hostname = false
+  }
+}
 
 ui_config {
   enabled = true

@@ -1,10 +1,19 @@
 ---
-# TODO if already exists, do nothing (client)
 - name: Save gossip key to Vault
   shell:
-    cmd: vault write kv/cluster/consul_config gossip_key=$(consul keygen)
+    cmd: |
+      if ! vault kv get -field=gossip_key kv/cluster/consul_config >/dev/null 2>&1; then
+        vault kv put kv/cluster/consul_config gossip_key=$(consul keygen)
+      else
+        echo "gossip_key present"
+      fi
+  register: prepare_gossip_key
+  changed_when: "'present' not in prepare_gossip_key.stdout"
 
-# TODO setup gossip key rotation with vault
+# TODO setup gossip key rotation with vault:
+# consul-template only triggers reload in consul, it does not
+# renew the secret for us. we need to run a cronjob to trigger this renewal manually.
+# the secret also has no ttl so old versions will never expire.
 # requires helper-script
 - name: Add gossip key to Consul configuration
   blockinfile:
@@ -15,15 +24,16 @@
     block: |
       template {
         contents = <<EOF
-      {% raw %}{{ with secret "kv/cluster/consul_config" }}
-      encrypt = "{{ .Data.gossip_key }}"
+      {% raw %}{{ with secret "kv/data/cluster/consul_config" }}
+      encrypt = "{{ .Data.data.gossip_key }}"
       {{ end }}
       {% endraw %}
       EOF
         destination = "{{ consul_config_dir }}/gossip.hcl"
-        perms = 0640
+        perms = 0600
         user = "consul"
         group = "consul"
         error_on_missing_key = true
         command = "date && if systemctl is-active consul; then service consul reload; fi"
       }
+  notify: reload consul-template
