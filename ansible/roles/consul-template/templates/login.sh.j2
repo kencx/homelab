@@ -1,0 +1,17 @@
+#!/bin/bash
+# https://github.com/hashicorp/consul-template/issues/318
+set -euo pipefail
+
+VAULT_ADDR="https://{{ vault_address }}:8200"
+KEY_FILE="{{ consul_template_dir }}/tls/consul_template_key.pem"
+CERT_FILE="{{ consul_template_dir }}/tls/consul_template_cert.pem"
+
+VAULT_TOKEN="$(VAULT_ADDR="${VAULT_ADDR}" vault login -method=cert \
+	-client-cert="$CERT_FILE" \
+	-client-key="$KEY_FILE" \
+	-format=json \
+	-no-store=true \
+	2> /dev/null \
+	| jq -r '.auth.client_token')"
+
+exec env VAULT_TOKEN="${VAULT_TOKEN}" VAULT_ADDR="${VAULT_ADDR}" "${@}"

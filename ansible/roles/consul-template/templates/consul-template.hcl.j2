@@ -15,6 +15,7 @@ vault {
 {% endif %}
 }
 
+{% if 'server' in group_names %}
 # self-reload consul-template auth certs
 template {
   contents = <<EOF
@@ -41,3 +42,4 @@ EOF
   # reload certs in consul_template auth role
   command = "date; vault write auth/cert/certs/consul_template certificate=@/opt/consul-template/consul_template_cert.pem"
 }
+{% endif %}

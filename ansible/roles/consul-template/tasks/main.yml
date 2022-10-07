@@ -10,13 +10,16 @@
 #     create_home: false
 #     state: present
 
-- name: Create consul-template directory
+- name: Create consul-template directories
   file:
-    path: "{{ consul_template_dir }}"
+    path: "{{ item }}"
     state: directory
     mode: 0755
     owner: root
     group: root
+  with_items:
+    - "{{ consul_template_dir }}"
+    - "{{ consul_template_dir }}/tls"
 
 - name: Copy consul-template service file
   template:
@@ -26,7 +29,6 @@
     owner: root
     group: root
 
-# TODO Requires read permission to Vault TLS private key
 - name: Copy consul-template config
   template:
     src: "consul-template.hcl.j2"
@@ -36,8 +38,8 @@
     group: root
 
 - name: Copy login script
-  copy:
-    src: "login.sh"
+  template:
+    src: "login.sh.j2"
     dest: "{{ vault_login_script }}"
     mode: 0700
     owner: root
@@ -45,3 +47,11 @@
 
 - name: Vault setup
   import_tasks: vault_setup.yml
+  when: "'server' in group_names"
+
+- name: Start consul-template
+  systemd:
+    name: consul_template
+    state: started
+    enabled: true
+    daemon_reload: true

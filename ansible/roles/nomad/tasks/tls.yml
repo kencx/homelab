@@ -47,7 +47,7 @@
       }
   notify: reload consul-template
 
-# TODO
+# TODO set in ~/.profile instead
 - name: Set environment variables
   lineinfile:
     path: "/etc/environment"
@@ -55,3 +55,7 @@
   with_items:
     - "NOMAD_ADDR=https://{{ ansible_default_ipv4.address }}:4646"
     - "NOMAD_CACERT={{ nomad_tls_dir }}/ca.crt"
+
+# - name: Source file
+#   shell: |
+#     source /etc/environment

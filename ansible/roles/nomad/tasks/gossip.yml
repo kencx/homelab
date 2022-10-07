@@ -9,6 +9,7 @@
       fi
   register: prepare_gossip_key
   changed_when: "'present' not in prepare_gossip_key.stdout"
+  when: "'server' in group_names"
 
 # TODO setup gossip key rotation with vault:
 # consul-template only triggers reload in consul, it does not

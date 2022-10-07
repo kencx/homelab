@@ -17,7 +17,6 @@
 
 - name: Setup Nomad Gossip Encryption
   import_tasks: gossip.yml
-  when: "'server' in group_names"
 
 - name: Setup Nomad TLS
   import_tasks: tls.yml
