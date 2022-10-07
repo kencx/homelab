@@ -18,24 +18,26 @@ vault {
 # self-reload consul-template auth certs
 template {
   contents = <<EOF
-{{ with secret "pki_int/issue/client" "common_name=ctemplate" "ttl=30d" }}
+{% raw %}{{ with secret "pki_int/issue/client" "common_name=ctemplate" "ttl=30d" }}
 {{ .Data.private_key }}
 {{ end }}
+{% endraw %}
 EOF
   destination = "/opt/consul-template/consul_template_key.pem"
-  user = "consul-template"
-  group = "consul-template"
+  user = "root"
+  group = "root"
 }
 
 template {
   contents = <<EOF
-{{ with secret "pki_int/issue/client" "common_name=ctemplate" "ttl=30d" }}
+{% raw %}{{ with secret "pki_int/issue/client" "common_name=ctemplate" "ttl=30d" }}
 {{ .Data.certificate }}
 {{ end }}
+{% endraw %}
 EOF
   destination = "/opt/consul-template/consul_template_cert.pem"
-  user = "consul-template"
-  group = "consul-template"
+  user = "root"
+  group = "root"
   # reload certs in consul_template auth role
   command = "date; vault write auth/cert/certs/consul_template certificate=@/opt/consul-template/consul_template_cert.pem"
 }

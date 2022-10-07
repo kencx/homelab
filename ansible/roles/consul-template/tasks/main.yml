@@ -2,21 +2,21 @@
 # Vault Root CA and Intermediate CA must be initialized and configured
 # consul-template requires write access to all template destination directories.
 
-- name: Create consul-template user
-  user:
-    name: consul-template
-    groups: ["vault", "consul", "nomad"]
-    append: true
-    create_home: false
-    state: present
+# - name: Create consul-template user
+#   user:
+#     name: consul-template
+#     groups: ["vault", "consul", "nomad"]
+#     append: true
+#     create_home: false
+#     state: present
 
 - name: Create consul-template directory
   file:
     path: "{{ consul_template_dir }}"
     state: directory
     mode: 0755
-    owner: consul-template
-    group: consul-template
+    owner: root
+    group: root
 
 - name: Copy consul-template service file
   template:
@@ -31,17 +31,17 @@
   template:
     src: "consul-template.hcl.j2"
     dest: "{{ consul_template_dir }}/consul_template.hcl"
-    mode: 0644
-    owner: consul-template
-    group: consul-template
+    mode: 0640
+    owner: root
+    group: root
 
 - name: Copy login script
   copy:
     src: "login.sh"
     dest: "{{ vault_login_script }}"
-    mode: 0740
-    owner: consul-template
-    group: consul-template
+    mode: 0700
+    owner: root
+    group: root
 
 - name: Vault setup
   import_tasks: vault_setup.yml
