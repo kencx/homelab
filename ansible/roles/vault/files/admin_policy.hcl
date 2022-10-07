@@ -41,6 +41,11 @@ path "sys/auth" {
 
 ## KV Secrets Engine
 
+# manage kv secrets engine
+path "kv/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
 # Manage secrets engine
 path "sys/mounts/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
