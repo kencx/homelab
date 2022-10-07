@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-CONSUL_TEMPLATE_KEY_FILE="/opt/consul-template/consul_template_key.pem"
-CONSUL_TEMPLATE_CERT_FILE="/opt/consul-template/consul_template_cert.pem"
+CONSUL_TEMPLATE_KEY_FILE="/opt/consul-template/tls/consul_template_key.pem"
+CONSUL_TEMPLATE_CERT_FILE="/opt/consul-template/tls/consul_template_cert.pem"
 
 # generate key pair, save to file
 vault write -format=json pki_int/issue/client "common_name=ctemplate" "ttl=30d" | tee \

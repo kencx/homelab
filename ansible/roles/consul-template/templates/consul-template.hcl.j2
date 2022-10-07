@@ -24,7 +24,7 @@ template {
 {{ end }}
 {% endraw %}
 EOF
-  destination = "/opt/consul-template/consul_template_key.pem"
+  destination = "{{ consul_template_dir }}/tls/consul_template_key.pem"
   user = "root"
   group = "root"
 }
@@ -36,10 +36,10 @@ template {
 {{ end }}
 {% endraw %}
 EOF
-  destination = "/opt/consul-template/consul_template_cert.pem"
+  destination = "{{ consul_template_dir }}/tls/consul_template_cert.pem"
   user = "root"
   group = "root"
   # reload certs in consul_template auth role
-  command = "date; vault write auth/cert/certs/consul_template certificate=@/opt/consul-template/consul_template_cert.pem"
+  command = "date; vault write auth/cert/certs/consul_template certificate=@{{ consul_template_dir }}/tls/consul_template_cert.pem"
 }
 {% endif %}

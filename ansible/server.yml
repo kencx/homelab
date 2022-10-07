@@ -2,14 +2,15 @@
 - hosts: server
   become: true
   vars:
-    server_address: "{{ ansible_default_ipv4.address }}"
-    vault_tls_dir: "/opt/vault/tls"
-    vault_ca_cert_dir: "/usr/share/ca-certificates/vault"
     nfs_ip: "10.10.10.102"
     nfs_share_mounts:
       - src: "{{ nfs_ip }}:/home/debian/apps/tls"
-        path: "/opt/consul-template/tls"
+        path: "{{ consul_template_dir }}/tls"
         state: mounted
+    server_address: "{{ ansible_default_ipv4.address }}"
+    vault_tls_dir: "/opt/vault/tls"
+    vault_ca_cert_dir: "/usr/share/ca-certificates/vault"
+    consul_template_dir: "/opt/consul-template"
 
   roles:
     # requires localhost root
@@ -32,6 +33,7 @@
       role: kencx.ansible.nfs
 
     - role: vault
+
     - role: consul-template
       vars:
         vault_address: "{{ server_address }}"
