@@ -9,9 +9,24 @@
   with_items:
     - "{{ vault_config_dir }}"
     - "{{ vault_data_dir }}/raft"
-    - "{{ vault_tls_dir }}"
     - "{{ vault_ca_cert_dir }}"
     - "{{ vault_policy_dir }}"
+
+- name: Create Vault TLS directory
+  file:
+    path: "{{ vault_tls_dir }}"
+    mode: 0755
+    owner: vault
+    group: vault
+    state: directory
+
+- name: Delete existing TLS cert and key
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ vault_tls_dir }}/tls.key"
+    - "{{ vault_tls_dir }}/tls.crt"
 
 - name: Copy service file
   copy:

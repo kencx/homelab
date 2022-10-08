@@ -20,7 +20,6 @@
   blockinfile:
     path: "{{ consul_template_config }}"
     marker: "# {mark} Consul gossip"
-    backup: true
     validate: consul-template -config=%s -parse-only
     block: |
       template {

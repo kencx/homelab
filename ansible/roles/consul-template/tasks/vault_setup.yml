@@ -3,6 +3,9 @@
   copy:
     src: "consul_template_policy.hcl"
     dest: "{{ vault_policies_dir }}/consul_template_policy.hcl"
+    mode: 0640
+    owner: vault
+    group: vault
 
 - name: Create consul-template policy
   command: "vault policy write consul_template {{ vault_policies_dir }}/consul_template_policy.hcl"

@@ -29,6 +29,9 @@
   copy:
     src: "admin_policy.hcl"
     dest: "{{ vault_policy_dir }}/admin.hcl"
+    mode: 0640
+    owner: vault
+    group: vault
 
 - name: Create admin policy
   command: "vault policy write admin {{ vault_policy_dir }}/admin.hcl"

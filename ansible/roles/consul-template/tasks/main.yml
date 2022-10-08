@@ -19,7 +19,14 @@
     group: root
   with_items:
     - "{{ consul_template_dir }}"
-    - "{{ consul_template_dir }}/tls"
+
+- name: Create consul-template TLS directory
+  file:
+    path: "{{ consul_template_dir }}/tls"
+    state: directory
+    mode: 0700
+    owner: root
+    group: root
 
 - name: Copy consul-template service file
   template:

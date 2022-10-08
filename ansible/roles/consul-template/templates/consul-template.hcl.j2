@@ -27,6 +27,7 @@ EOF
   destination = "{{ consul_template_dir }}/tls/consul_template_key.pem"
   user = "root"
   group = "root"
+  perms = 0400
 }
 
 template {
@@ -39,6 +40,7 @@ EOF
   destination = "{{ consul_template_dir }}/tls/consul_template_cert.pem"
   user = "root"
   group = "root"
+  perms = 0600
   # reload certs in consul_template auth role
   command = "date; vault write auth/cert/certs/consul_template certificate=@{{ consul_template_dir }}/tls/consul_template_cert.pem"
 }

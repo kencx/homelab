@@ -9,7 +9,14 @@
   with_items:
     - "{{ nomad_config_dir }}"
     - "{{ nomad_data_dir }}"
-    - "{{ nomad_tls_dir }}"
+
+- name: Create Consul TLS directory
+  file:
+    path: "{{ nomad_tls_dir }}"
+    mode: 0700
+    owner: nomad
+    group: nomad
+    state: directory
 
 - name: Install CNI plugins
   import_tasks: cni_plugins.yml

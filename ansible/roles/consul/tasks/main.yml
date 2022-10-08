@@ -9,7 +9,14 @@
   with_items:
     - "{{ consul_config_dir }}"
     - "{{ consul_data_dir }}"
-    - "{{ consul_tls_dir }}"
+
+- name: Create Consul TLS directory
+  file:
+    path: "{{ consul_tls_dir }}"
+    mode: 0700
+    owner: consul
+    group: consul
+    state: directory
 
 - name: Setup Consul Gossip Encryption
   import_tasks: gossip.yml

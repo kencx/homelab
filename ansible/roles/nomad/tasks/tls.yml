@@ -3,7 +3,6 @@
   blockinfile:
     path: "{{ consul_template_config }}"
     marker: "# {mark} Nomad TLS"
-    backup: true
     validate: consul-template -config=%s -parse-only
     block: |
       template {
@@ -40,9 +39,9 @@
       {% endraw %}
       EOF
         destination = "{{ nomad_tls_dir }}/ca.crt"
-        perms = 0640
+        perms = 0600
         user = "nomad"
-        group = "debian"
+        group = "nomad"
         command = "date && if systemctl is-active nomad; then service nomad reload; fi"
       }
   notify: reload consul-template
