@@ -1,5 +1,18 @@
 ---
-- name: Create Vault directories
+- name: Create Vault restricted directories
+  file:
+    path: "{{ item }}"
+    mode: 0700
+    owner: vault
+    group: vault
+    state: directory
+  with_items:
+    - "{{ vault_data_dir }}"
+    - "{{ vault_data_dir }}/raft"
+    - "{{ vault_tls_dir }}"
+    - "{{ vault_policy_dir }}"
+
+- name: Create Vault config directories
   file:
     path: "{{ item }}"
     mode: 0755
@@ -8,19 +21,9 @@
     state: directory
   with_items:
     - "{{ vault_config_dir }}"
-    - "{{ vault_data_dir }}/raft"
     - "{{ vault_ca_cert_dir }}"
-    - "{{ vault_policy_dir }}"
 
-- name: Create Vault TLS directory
-  file:
-    path: "{{ vault_tls_dir }}"
-    mode: 0755
-    owner: vault
-    group: vault
-    state: directory
-
-- name: Delete existing TLS cert and key
+- name: Remove default TLS cert and key
   file:
     path: "{{ item }}"
     state: absent
