@@ -2,8 +2,8 @@ port:
   # nomad ui
   tcp6:4646:
     listening: true
-  # consul ui
-  tcp6:8500:
+  # consul https ui
+  tcp6:8501:
     listening: true
   # consul dns
   tcp6:8600:

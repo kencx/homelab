@@ -1,0 +1,98 @@
+---
+- name: Check if Vault's client certificate for Consul exists
+  stat:
+    path: "{{ vault_tls_dir }}/consul-cert.crt"
+  register: vault_consul_cert
+  changed_when: false
+
+- name: Create Vault client certificate for Consul
+  block:
+    - name: Issue new certificate
+      shell:
+        cmd: |
+          vault write -format=json pki_int/issue/cluster \
+          "common_name=vault-client.dc1.consul" \
+          "ttl=24h" \
+      register: vault_consul_tls_raw
+
+    - set_fact:
+        vault_consul_tls_json: "{{ vault_consul_tls_raw.stdout | from_json }}"
+      when: vault_consul_tls_raw is defined and vault_consul_tls_raw.stdout is defined
+
+    - name: Create certificate
+      copy:
+        content: "{{ vault_consul_tls_json.data.certificate }}"
+        dest: "{{ vault_tls_dir }}/consul-cert.crt"
+        mode: 0600
+        owner: vault
+        group: vault
+      when: vault_consul_tls_json is defined and vault_consul_tls_json.data is defined
+
+    - name: Create private key
+      copy:
+        content: "{{ vault_consul_tls_json.data.private_key }}"
+        dest: "{{ vault_tls_dir }}/consul-key.pem"
+        mode: 0400
+        owner: vault
+        group: vault
+      when: vault_consul_tls_json is defined and vault_consul_tls_json.data is defined
+
+    - name: Create CA
+      copy:
+        content: "{{ vault_consul_tls_json.data.issuing_ca }}"
+        dest: "{{ vault_tls_dir }}/consul-ca.crt"
+        mode: 0640
+        owner: vault
+        group: vault
+      when: vault_consul_tls_json is defined and vault_consul_tls_json.data is defined
+  when: vault_consul_cert is defined and not vault_consul_cert.stat.exists
+
+- name: Vault service registration
+  blockinfile:
+    path: "{{ vault_config_dir }}/vault.hcl"
+    marker: "# {mark} Consul Service Registration"
+    block: |
+      service_registration "consul" {
+        address       = "127.0.0.1:8501"
+        scheme        = "https"
+        tls_ca_file   = "{{ vault_tls_dir }}/consul-ca.crt"
+        tls_cert_file = "{{ vault_tls_dir }}/consul-cert.crt"
+        tls_key_file  = "{{ vault_tls_dir }}/consul-key.pem"
+      }
+
+- name: Add TLS template stanza for Vault client to consul-template
+  blockinfile:
+    path: "{{ consul_template_dir }}/consul_template.hcl"
+    marker: "# {mark} Vault Consul TLS"
+    validate: consul-template -config=%s -parse-only
+    block: |
+      template {
+        contents = <<EOF
+      {{ '{{' }} with pkiCert "pki_int/issue/cluster" "common_name=vault-client.dc1.consul" "ttl=24h" {{ '}}' }}
+      {{ '{{' }} .Cert {{ '}}' }}
+      {{ '{{' }} if .CA {{ '}}' }}
+      {{ '{{' }} .CA | writeToFile "{{ vault_tls_dir }}/consul-ca.crt" "vault" "vault" "0600" {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
+      {{ '{{' }} if .Key {{ '}}' }}
+      {{ '{{' }} .Key | writeToFile "{{ vault_tls_dir }}/consul-key.pem" "vault" "vault" "0400" {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
+      EOF
+        destination = "{{ vault_tls_dir }}/consul-cert.crt"
+        perms = 0600
+        user = "vault"
+        group = "vault"
+        command = "date && if systemctl is-active vault; then service vault reload; fi"
+      }
+  when: "'server' in group_names"
+
+- name: Reload consul-template
+  systemd:
+    name: consul_template
+    state: reloaded
+
+# TODO restarting will affect next task
+- name: Restart Vault
+  systemd:
+    name: vault
+    state: restarted

@@ -1,4 +1,54 @@
 ---
+- name: Check if Nomad TLS certificate exists
+  stat:
+    path: "{{ nomad_tls_dir }}/cert.crt"
+  register: nomad_cert
+  changed_when: false
+
+- name: Create CA, certificate and private key for Nomad TLS
+  block:
+    - name: Issue new certificate
+      shell:
+        cmd: |
+          vault write -format=json pki_int/issue/cluster \
+          "common_name={{ nomad_common_name }}" \
+          "ttl=24h" \
+          "alt_names=localhost" \
+          "ip_sans={{ nomad_ip_sans }}"
+      register: nomad_tls_raw
+
+    - set_fact:
+        nomad_tls_json: "{{ nomad_tls_raw.stdout | from_json }}"
+      when: nomad_tls_raw is defined and nomad_tls_raw.stdout is defined
+
+    - name: Create certificate
+      copy:
+        content: "{{ nomad_tls_json.data.certificate }}"
+        dest: "{{ nomad_tls_dir }}/cert.crt"
+        mode: 0600
+        owner: nomad
+        group: nomad
+      when: nomad_tls_json is defined and nomad_tls_json.data is defined
+
+    - name: Create private key
+      copy:
+        content: "{{ nomad_tls_json.data.private_key }}"
+        dest: "{{ nomad_tls_dir }}/key.pem"
+        mode: 0400
+        owner: nomad
+        group: nomad
+      when: nomad_tls_json is defined and nomad_tls_json.data is defined
+
+    - name: Create CA
+      copy:
+        content: "{{ nomad_tls_json.data.issuing_ca }}"
+        dest: "{{ nomad_tls_dir }}/ca.crt"
+        mode: 0640
+        owner: nomad
+        group: nomad
+      when: nomad_tls_json is defined and nomad_tls_json.data is defined
+  when: nomad_cert is defined and not nomad_cert.stat.exists
+
 - name: Add TLS template stanza to consul-template
   blockinfile:
     path: "{{ consul_template_config }}"
@@ -7,8 +57,14 @@
     block: |
       template {
         contents = <<EOF
-      {{ '{{' }} with secret "pki_int/issue/cluster" "common_name=server.global.nomad" "ttl=24h" "alt_names=localhost" "ip_sans={{ nomad_ip_sans }}" {{ '}}' }}
-      {{ '{{' }} .Data.certificate {{ '}}' }}
+      {{ '{{' }} with pkiCert "pki_int/issue/cluster" "common_name={{ nomad_common_name }}" "ttl=24h" "alt_names=localhost" "ip_sans={{ nomad_ip_sans }}" {{ '}}' }}
+      {{ '{{' }} .Cert {{ '}}' }}
+      {{ '{{' }} if .CA {{ '}}' }}
+      {{ '{{' }} .CA | writeToFile "{{ nomad_tls_dir }}/ca.crt" "nomad" "nomad" "0600" {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
+      {{ '{{' }} if .Key {{ '}}' }}
+      {{ '{{' }} .Key | writeToFile "{{ nomad_tls_dir }}/key.pem" "nomad" "nomad" "0400" {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
       {{ '{{' }} end {{ '}}' }}
       EOF
         destination = "{{ nomad_tls_dir }}/cert.crt"
@@ -17,43 +73,16 @@
         group = "nomad"
         command = "date && if systemctl is-active nomad; then service nomad reload; fi"
       }
-
-      template {
-        contents = <<EOF
-      {{ '{{' }} with secret "pki_int/issue/cluster" "common_name=server.global.nomad" "ttl=24h" "alt_names=localhost" "ip_sans={{ nomad_ip_sans }}" {{ '}}' }}
-      {{ '{{' }} .Data.private_key {{ '}}' }}
-      {{ '{{' }} end {{ '}}' }}
-      EOF
-        destination = "{{ nomad_tls_dir }}/key.pem"
-        perms = 0400
-        user = "nomad"
-        group = "nomad"
-        command = "date && if systemctl is-active nomad; then service nomad reload; fi"
-      }
-
-      template {
-        contents = <<EOF
-      {% raw %}{{ with secret "pki_int/issue/cluster" "common_name=server.global.nomad" "ttl=24h" }}
-      {{ .Data.issuing_ca }}
-      {{ end }}
-      {% endraw %}
-      EOF
-        destination = "{{ nomad_tls_dir }}/ca.crt"
-        perms = 0600
-        user = "nomad"
-        group = "nomad"
-        command = "date && if systemctl is-active nomad; then service nomad reload; fi"
-      }
   notify: reload consul-template
 
 # TODO set in ~/.profile instead
-- name: Set environment variables
-  lineinfile:
-    path: "/etc/environment"
-    line: "{{ item }}"
-  with_items:
-    - "NOMAD_ADDR=https://{{ ansible_default_ipv4.address }}:4646"
-    - "NOMAD_CACERT={{ nomad_tls_dir }}/ca.crt"
+# - name: Set environment variables
+#   lineinfile:
+#     path: "/etc/environment"
+#     line: "{{ item }}"
+#   with_items:
+#     - "NOMAD_ADDR=https://{{ ansible_default_ipv4.address }}:4646"
+#     - "NOMAD_CACERT={{ nomad_tls_dir }}/ca.crt"
 
 # - name: Source file
 #   shell: |

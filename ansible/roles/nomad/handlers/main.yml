@@ -1,4 +1,10 @@
 ---
+- name: restart nomad
+  systemd:
+    name: nomad
+    state: restarted
+  when: not nomad_started.changed
+
 - name: reload nomad
   systemd:
     name: nomad

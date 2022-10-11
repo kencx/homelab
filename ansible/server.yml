@@ -8,12 +8,17 @@
         path: "{{ consul_template_dir }}/tls"
         state: mounted
     server_address: "{{ ansible_default_ipv4.address }}"
+    vault_config_dir: "/etc/vault.d"
     vault_tls_dir: "/opt/vault/tls"
     vault_ca_cert_dir: "/usr/share/ca-certificates/vault"
     consul_template_dir: "/opt/consul-template"
+    nomad_config_dir: "/etc/nomad.d"
+    nomad_tls_dir: "/opt/nomad/data/tls"
 
   roles:
     # requires localhost root
+    # NOTE: /tmp/certs must already exist with 1000:1000
+    # NOTE: /tmp/certs/vault.crt ca-chain must already exist with 1000:1000
     - name: Setup Vault TLS certificates
       role: kencx.ansible.ssl
       vars:
@@ -40,16 +45,20 @@
 
     - role: consul
       vars:
+        consul_common_name: "server.dc1.consul"
         consul_ip_sans: "127.0.0.1,{{ server_address }}"
+
     - role: nomad
       vars:
+        nomad_common_name: "server.global.nomad"
         nomad_ip_sans: "127.0.0.1,{{ server_address }}"
 
   tasks:
-    - name: Restart Vault
-      systemd:
-        name: vault
-        state: reloaded
+    - name: Register Vault as Consul service
+      import_tasks: vault_consul_register.yml
+
+    - name: Register Nomad as Consul service
+      import_tasks: nomad_consul_register.yml
 
     - name: Goss smoke test
       import_role:

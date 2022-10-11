@@ -13,6 +13,8 @@
     server_address: "10.10.10.130"
     client_address: "{{ ansible_default_ipv4.address }}"
     consul_template_dir: "/opt/consul-template"
+    nomad_config_dir: "/etc/nomad.d"
+    nomad_tls_dir: "/opt/nomad/data/tls"
 
   pre_tasks:
     # TODO too dependent on server.yml playbook
@@ -55,14 +57,19 @@
     - role: consul
       vars:
         consul_server_ip: "{{ server_address }}"
+        consul_common_name: "client.dc1.consul"
         consul_ip_sans: "127.0.0.1,{{ client_address }}"
 
     - role: nomad
       vars:
         nomad_server_ip: "{{ server_address }}"
+        nomad_common_name: "client.global.nomad"
         nomad_ip_sans: "127.0.0.1,{{ client_address }}"
 
   tasks:
+    - name: Register Nomad client as Consul service
+      import_tasks: nomad_consul_register.yml
+
     - name: Goss smoke test
       import_role:
         name: kencx.ansible.goss

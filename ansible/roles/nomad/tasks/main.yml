@@ -10,7 +10,7 @@
     - "{{ nomad_config_dir }}"
     - "{{ nomad_data_dir }}"
 
-- name: Create Consul TLS directory
+- name: Create Nomad TLS directory
   file:
     path: "{{ nomad_tls_dir }}"
     mode: 0700
@@ -24,6 +24,7 @@
 
 - name: Setup Nomad Gossip Encryption
   import_tasks: gossip.yml
+  when: "'server' in group_names"
 
 - name: Setup Nomad TLS
   import_tasks: tls.yml
@@ -36,7 +37,7 @@
     owner: root
     group: root
   notify:
-    - reload nomad
+    - restart nomad
 
 - name: Copy Nomad config files
   block:
@@ -84,4 +85,3 @@
   wait_for:
     port: 4646
     state: started
-  when: "'server' in group_names"

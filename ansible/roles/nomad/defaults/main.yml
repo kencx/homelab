@@ -10,4 +10,5 @@ nomad_bootstrap_expect: 1
 # client
 nomad_server_ip: ""
 
+nomad_common_name: "server.global.nomad"
 nomad_ip_sans: "127.0.0.1"
