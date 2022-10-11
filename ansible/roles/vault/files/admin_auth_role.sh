@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-# TODO set permissions and ownership
 ADMIN_KEY_FILE="/opt/vault/tls/admin_key.pem"
 ADMIN_CERT_FILE="/opt/vault/tls/admin_cert.pem"
 
@@ -9,6 +8,10 @@ ADMIN_CERT_FILE="/opt/vault/tls/admin_cert.pem"
 vault write -format=json pki_int/issue/client "common_name=admin" "ttl=365d" | tee \
 	>(jq -r .data.private_key > "$ADMIN_KEY_FILE") \
 	>(jq -r .data.certificate > "$ADMIN_CERT_FILE")
+
+chown vault:vault $ADMIN_KEY_FILE $ADMIN_CERT_FILE
+chmod 0600 $ADMIN_CERT_FILE
+chmod 0400 $ADMIN_KEY_FILE
 
 # add certificate to auth/cert
 # each login instance last for 2h by default,

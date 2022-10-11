@@ -35,6 +35,7 @@
     mode: 0644
     owner: root
     group: root
+  notify: reload consul_template
 
 - name: Copy consul-template config
   template:
@@ -43,14 +44,7 @@
     mode: 0640
     owner: root
     group: root
-
-- name: Copy login script
-  template:
-    src: "login.sh.j2"
-    dest: "{{ vault_login_script }}"
-    mode: 0700
-    owner: root
-    group: root
+  notify: reload consul_template
 
 - name: Vault setup
   import_tasks: vault_setup.yml

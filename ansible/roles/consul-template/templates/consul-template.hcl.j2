@@ -1,41 +1,28 @@
 # https://github.com/hashicorp/consul-template/blob/main/docs/configuration.md#consul-template
 vault {
   address = "https://{{ vault_address }}:8200"
-  # token = ""
   unwrap_token = false
   renew_token = false
 
 {% if 'server' in group_names %}
   ssl {
     enabled = true
-	verify = false
-	cert = "{{ vault_tls_dir }}/vault.crt"
-	key = "{{ vault_tls_dir }}/key.pem"
+    verify = true
+    cert = "{{ vault_tls_dir }}/vault.crt"
+    key = "{{ vault_tls_dir }}/key.pem"
   }
 {% endif %}
 }
 
 {% if 'server' in group_names %}
-# self-reload consul-template auth certs
 template {
   contents = <<EOF
-{% raw %}{{ with secret "pki_int/issue/client" "common_name=ctemplate" "ttl=30d" }}
-{{ .Data.private_key }}
-{{ end }}
-{% endraw %}
-EOF
-  destination = "{{ consul_template_dir }}/tls/consul_template_key.pem"
-  user = "root"
-  group = "root"
-  perms = 0400
-}
-
-template {
-  contents = <<EOF
-{% raw %}{{ with secret "pki_int/issue/client" "common_name=ctemplate" "ttl=30d" }}
-{{ .Data.certificate }}
-{{ end }}
-{% endraw %}
+{{ '{{' }} with pkiCert "pki_int/issue/client" "common_name=ctemplate" "ttl=30d" {{ '}}' }}
+{{ '{{' }} .Cert {{ '}}' }}
+{{ '{{' }} if .Key {{ '}}' }}
+{{ '{{' }} .Key | writeToFile "{{ consul_template_dir }}/tls_consul_template_key.pem" "root" "root" "0400" {{ '}}' }}
+{{ '{{' }} end {{ '}}' }}
+{{ '{{' }} end {{ '}}' }}
 EOF
   destination = "{{ consul_template_dir }}/tls/consul_template_cert.pem"
   user = "root"
@@ -43,5 +30,18 @@ EOF
   perms = 0600
   # reload certs in consul_template auth role
   command = "date; vault write auth/cert/certs/consul_template certificate=@{{ consul_template_dir }}/tls/consul_template_cert.pem"
+}
+
+template {
+  contents = <<EOF
+{% raw %}{{ with secret "auth/token/lookup-self" }}
+{{ .Data.accessor }}
+{{ end }}
+{% endraw %}
+EOF
+  destination = "{{ consul_template_dir }}/accessor"
+  user = "root"
+  group = "root"
+  perms = 0400
 }
 {% endif %}

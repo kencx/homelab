@@ -39,6 +39,7 @@ vault write pki_int/roles/cluster \
 	allowed_domains="localhost,dc1.consul,dc1.nomad,dc1.vault,service.consul,global.nomad" \
 	allow_subdomains=true \
 	generate_lease=true \
+	ttl="24h" \
 	max_ttl="720h"
 
 # TODO allow any name for now
@@ -46,4 +47,5 @@ vault write pki_int/roles/cluster \
 vault write pki_int/roles/client \
 	allow_any_name=true \
 	generate_lease=true \
+	ttl="24h" \
 	max_ttl="720h"
