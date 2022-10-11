@@ -10,4 +10,6 @@ consul_bootstrap_expect: 1
 # client
 consul_server_ip: ""
 
+# certificate generation
+consul_common_name: "server.dc1.consul"
 consul_ip_sans: "127.0.0.1"

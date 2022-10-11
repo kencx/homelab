@@ -1,4 +1,54 @@
 ---
+- name: Check if consul TLS certificate exists
+  stat:
+    path: "{{ consul_tls_dir }}/cert.crt"
+  register: consul_cert
+  changed_when: false
+
+- name: Create CA, certificate and private key for Consul TLS
+  block:
+    - name: Issue new certificate
+      shell:
+        cmd: |
+          vault write -format=json pki_int/issue/cluster \
+          "common_name={{ consul_common_name }}" \
+          "ttl=24h" \
+          "alt_names=localhost" \
+          "ip_sans={{ consul_ip_sans }}"
+      register: consul_tls_raw
+
+    - set_fact:
+        consul_tls_json: "{{ consul_tls_raw.stdout | from_json }}"
+      when: consul_tls_raw is defined and consul_tls_raw.stdout is defined
+
+    - name: Create certificate
+      copy:
+        content: "{{ consul_tls_json.data.certificate }}"
+        dest: "{{ consul_tls_dir }}/cert.crt"
+        mode: 0600
+        owner: consul
+        group: consul
+      when: consul_tls_json is defined and consul_tls_json.data is defined
+
+    - name: Create private key
+      copy:
+        content: "{{ consul_tls_json.data.private_key }}"
+        dest: "{{ consul_tls_dir }}/key.pem"
+        mode: 0400
+        owner: consul
+        group: consul
+      when: consul_tls_json is defined and consul_tls_json.data is defined
+
+    - name: Create CA
+      copy:
+        content: "{{ consul_tls_json.data.issuing_ca }}"
+        dest: "{{ consul_tls_dir }}/ca.crt"
+        mode: 0640
+        owner: consul
+        group: consul
+      when: consul_tls_json is defined and consul_tls_json.data is defined
+  when: consul_cert is defined and not consul_cert.stat.exists
+
 - name: Add TLS template stanza to consul-template
   blockinfile:
     path: "{{ consul_template_config }}"
@@ -7,38 +57,17 @@
     block: |
       template {
         contents = <<EOF
-      {{ '{{' }} with secret "pki_int/issue/cluster" "common_name=server.dc1.consul" "ttl=24h" "alt_names=localhost" "ip_sans={{ consul_ip_sans }}" {{ '}}' }}
-      {{ '{{' }} .Data.certificate {{ '}}' }}
+      {{ '{{' }} with pkiCert "pki_int/issue/cluster" "common_name={{ consul_common_name }}" "ttl=24h" "alt_names=localhost" "ip_sans={{ consul_ip_sans }}" {{ '}}' }}
+      {{ '{{' }} .Cert {{ '}}' }}
+      {{ '{{' }} if .CA {{ '}}' }}
+      {{ '{{' }} .CA | writeToFile "{{ consul_tls_dir }}/ca.crt" "consul" "consul" "0600" {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
+      {{ '{{' }} if .Key {{ '}}' }}
+      {{ '{{' }} .Key | writeToFile "{{ consul_tls_dir }}/key.pem" "consul" "consul" "0400" {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
       {{ '{{' }} end {{ '}}' }}
       EOF
         destination = "{{ consul_tls_dir }}/cert.crt"
-        perms = 0600
-        user = "consul"
-        group = "consul"
-        command = "date && if systemctl is-active consul; then service consul reload; fi"
-      }
-
-      template {
-        contents = <<EOF
-      {{ '{{' }} with secret "pki_int/issue/cluster" "common_name=server.dc1.consul" "ttl=24h" "alt_names=localhost" "ip_sans={{ consul_ip_sans }}" {{ '}}' }}
-      {{ '{{' }} .Data.private_key {{ '}}' }}
-      {{ '{{' }} end {{ '}}' }}
-      EOF
-        destination = "{{ consul_tls_dir }}/key.pem"
-        perms = 0400
-        user = "consul"
-        group = "consul"
-        command = "date && if systemctl is-active consul; then service consul reload; fi"
-      }
-
-      template {
-        contents = <<EOF
-      {% raw %}{{ with secret "pki_int/issue/cluster" "common_name=server.dc1.consul" "ttl=24h" }}
-      {{ .Data.issuing_ca }}
-      {{ end }}
-      {% endraw %}
-      EOF
-        destination = "{{ consul_tls_dir }}/ca.crt"
         perms = 0600
         user = "consul"
         group = "consul"

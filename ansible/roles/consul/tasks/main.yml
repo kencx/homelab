@@ -19,18 +19,22 @@
     state: directory
 
 - name: Setup Consul Gossip Encryption
+  become: true
   import_tasks: gossip.yml
 
 - name: Setup Consul TLS
+  become: true
   import_tasks: tls.yml
 
 - name: Copy service file
+  become: true
   template:
     src: "consul.service.j2"
     dest: "/etc/systemd/system/consul.service"
     mode: 0644
     owner: root
     group: root
+  notify: restart consul
 
 - name: Copy Consul config files
   block:
@@ -63,6 +67,7 @@
     - reload consul
 
 - name: Start Consul
+  become: true
   systemd:
     name: consul
     state: started
@@ -76,5 +81,5 @@
 
 - name: Wait for Consul port
   wait_for:
-    port: 8500
+    port: 8501
     state: started

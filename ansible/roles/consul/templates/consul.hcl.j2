@@ -1,23 +1,30 @@
 datacenter  = "dc1"
 data_dir    = "{{ consul_data_dir }}"
-bind_addr   = {% raw %}"{{ GetInterfaceIP \"eth0\" }}"{% endraw %}
+bind_addr   = {% raw %}"{{ GetInterfaceIP \"eth0\" }}"
+{% endraw %}
 client_addr = "0.0.0.0"
 
 ports {
+  http = -1
   https = 8501
 }
 
 tls {
   defaults {
-    ca_file = "{{ consul_data_dir }}/tls/ca.crt"
+    ca_file   = "{{ consul_data_dir }}/tls/ca.crt"
     cert_file = "{{ consul_data_dir }}/tls/cert.crt"
-    key_file = "{{ consul_data_dir }}/tls/key.pem"
-	verify_incoming = true
-	verify_outgoing = true
+    key_file  = "{{ consul_data_dir }}/tls/key.pem"
+    verify_incoming = true
+    verify_outgoing = true
+  }
+
+  https {
+    verify_incoming = false
   }
 
   internal_rpc {
-    verify_server_hostname = false
+    verify_incoming        = true
+    verify_server_hostname = true
   }
 }
 

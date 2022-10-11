@@ -1,4 +1,11 @@
 ---
+- name: restart consul
+  systemd:
+    name: consul
+    state: restarted
+    daemon_reload: true
+  when: not consul_started.changed
+
 - name: reload consul
   systemd:
     name: consul
