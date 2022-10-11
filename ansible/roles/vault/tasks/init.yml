@@ -17,28 +17,41 @@
     vault_init_json: "{{ vault_init_raw.stdout | from_json }}"
   when: vault_init_raw is defined and vault_init_raw.stdout is defined
 
-# TODO Store Vault root token and unseal key shards in bw password manager
-# instead of plain text
-- name: Save unseal keys
-  copy:
-    content: "{{ item.1 }}"
-    dest: "/root/.vault-unseal-keys-{{ item.0 }}"
-    mode: 0600
-  no_log: true
-  with_indexed_items: "{{ vault_init_json.unseal_keys_hex }}"
-  when: vault_init_json is defined and vault_init_json.unseal_keys_hex is defined
+# - name: Install Bitwarden CLI
+#   become: true
+#   unarchive:
+#     src: "https://vault.bitwarden.com/download/?app=cli&platform=linux"
+#     dest: "/usr/bin"
+#     remote_src: true
+#     mode: 0755
+#     owner: root
+#     group: root
 
-- name: Save root token
-  copy:
-    content: "{{ vault_init_json.root_token }}\n"
-    dest: "/root/.vault-token"
-    mode: 0600
+- name: Store unseal keys in Bitwarden
+  become_user: debian
+  script: "bw_store.sh 'Vault Unseal Key' {{ vault_init_json.unseal_keys_hex[0] }} {{ bw_password }}"
+  when: vault_init_json is defined and vault_init_json.unseal_keys_hex is defined
   no_log: true
+  register: bw_vault_unseal_key
+  failed_when: bw_vault_unseal_key.stdout == "bw get failed"
+
+# - debug:
+#     var: bw_vault_unseal_key.stdout
+
+- name: Save root token in Bitwarden
+  become_user: debian
+  script: "bw_store.sh 'Vault Root Token' {{ vault_init_json.root_token }} {{ bw_password }}"
   when: vault_init_json is defined and vault_init_json.root_token is defined
+  no_log: true
+  register: bw_vault_root_token
+  failed_when: bw_vault_root_token.stdout == "bw get failed"
+
+# - debug:
+#     var: bw_vault_root_token.stdout
 
 - name: Unseal Vault
   shell:
-    cmd: "vault operator unseal --format json $(cat /root/.vault-unseal-keys-0)"
+    cmd: "vault operator unseal --format json {{ vault_init_json.unseal_keys_hex[0] }}"
   register: vault_unseal_raw
   when:
     - vault_status_json is defined
@@ -59,7 +72,7 @@
 
 - name: Login to Vault with root token
   shell:
-    cmd: vault login --format json $(cat /root/.vault-token)
+    cmd: vault login --format json {{ vault_init_json.root_token }}
   register: vault_login_raw
   changed_when: false
   failed_when: vault_login_raw.rc != 0
