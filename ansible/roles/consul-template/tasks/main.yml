@@ -49,6 +49,31 @@
 - name: Vault setup
   import_tasks: vault_setup.yml
   when: "'server' in group_names"
+  run_once: true
+
+- name: Copy login script
+  template:
+    src: "login.sh.j2"
+    dest: "{{ vault_login_script }}"
+    mode: 0700
+    owner: root
+    group: root
+
+- name: Copy renew token script
+  template:
+    src: "renew_token.sh.j2"
+    dest: "{{ consul_template_dir }}/renew_token.sh"
+    mode: 0700
+    owner: root
+    group: root
+
+- name: Add cronjob to renew Vault token
+  cron:
+    name: "Renew Vault token"
+    user: root
+    state: present
+    hour: "*/10"
+    job: "{{ consul_template_dir }}/renew_token.sh"
 
 - name: Start consul-template
   systemd:
