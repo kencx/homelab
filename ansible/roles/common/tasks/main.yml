@@ -47,6 +47,18 @@
     src: "https://releases.hashicorp.com/consul-template/0.29.2/consul-template_0.29.2_linux_amd64.zip"
     dest: "/usr/bin"
     remote_src: true
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Install Bitwarden CLI
+  unarchive:
+    src: "https://vault.bitwarden.com/download/?app=cli&platform=linux"
+    dest: "/usr/bin"
+    remote_src: true
+    mode: 0755
+    owner: root
+    group: root
 
 - name: Create NFS share directories
   file:

@@ -17,16 +17,8 @@
     vault_init_json: "{{ vault_init_raw.stdout | from_json }}"
   when: vault_init_raw is defined and vault_init_raw.stdout is defined
 
-# - name: Install Bitwarden CLI
-#   become: true
-#   unarchive:
-#     src: "https://vault.bitwarden.com/download/?app=cli&platform=linux"
-#     dest: "/usr/bin"
-#     remote_src: true
-#     mode: 0755
-#     owner: root
-#     group: root
-
+# TODO BW must be logged in
+# Must run as specific user
 - name: Store unseal keys in Bitwarden
   become_user: debian
   script: "bw_store.sh 'Vault Unseal Key' {{ vault_init_json.unseal_keys_hex[0] }} {{ bw_password }}"
