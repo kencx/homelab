@@ -72,6 +72,7 @@
     name: "Renew Vault token"
     user: root
     state: present
+    minute: 0
     hour: "*/10"
     job: "{{ consul_template_dir }}/renew_token.sh"
 

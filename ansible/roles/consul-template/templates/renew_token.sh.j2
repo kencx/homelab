@@ -5,6 +5,6 @@ KEY_FILE="{{ consul_template_dir }}/tls/consul_template_key.pem"
 CERT_FILE="{{ consul_template_dir }}/tls/consul_template_cert.pem"
 
 vault token renew \
-	-client-cert="$KEY_FILE" \
-	-client-key="$CERT_FILE" \
+	-client-cert="$CERT_FILE" \
+	-client-key="$KEY_FILE" \
 	-accessor "$(cat {{ consul_template_dir }}/accessor)"
