@@ -14,7 +14,7 @@ KillSignal=SIGINT
 Restart=on-failure
 RestartSec=60
 
-StartLimitBurst=1
+StartLimitBurst=3
 StartLimitInterval=60
 
 [Install]
