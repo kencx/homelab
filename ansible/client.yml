@@ -11,7 +11,7 @@
         path: "{{ consul_template_dir }}/tls"
         state: mounted
 
-    cluster_server_ip: "10.10.10.130"
+    cluster_server_ip: "10.10.10.110"
     cluster_client_ip: "{{ ansible_default_ipv4.address }}"
 
     consul_template_dir: "/opt/consul-template"
@@ -50,6 +50,28 @@
         VAULT_ADDR: "https://{{ cluster_server_ip }}:8200"
       changed_when: false
 
+    - name: Vault login
+      block:
+        - name: Get root token from Bitwarden
+          script: "./roles/vault/files/bw_get.sh 'Vault Root Token' {{ bw_password }}"
+          register: vault_root_token_raw
+
+        - set_fact:
+            vault_root_token_json: "{{ vault_root_token_raw.stdout | from_json }}"
+
+        - name: Login
+          shell:
+            cmd: "vault login --format json {{ vault_root_token_json.data.data }}"
+          environment:
+            VAULT_ADDR: "https://{{ cluster_server_ip }}:8200"
+          register: vault_login_operation
+          when:
+            - vault_root_token_json is defined
+            - vault_root_token_json.data.data is defined
+            - vault_root_token_json.success
+          changed_when: false
+          failed_when: vault_login_operation.rc == 1
+
   roles:
     - name: Mount NFS shares
       role: kencx.ansible.nfs
@@ -61,12 +83,14 @@
     - role: consul
       vars:
         consul_server_ip: "{{ cluster_server_ip }}"
+        consul_vault_addr: "https://{{ cluster_server_ip }}:8200"
         consul_common_name: "client.dc1.consul"
         consul_ip_sans: "127.0.0.1,{{ cluster_client_ip }}"
 
     - role: nomad
       vars:
         nomad_server_ip: "{{ cluster_server_ip }}"
+        nomad_vault_addr: "https://{{ cluster_server_ip }}:8200"
         nomad_common_name: "client.global.nomad"
         nomad_ip_sans: "127.0.0.1,{{ cluster_client_ip }}"
 
