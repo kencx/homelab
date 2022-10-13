@@ -27,3 +27,16 @@
       vars:
         - goss_dir: "./goss"
         - goss_file: "base.yml"
+
+  tasks:
+    - name: Reset Nomad
+      block:
+        - name: Stop Nomad
+          systemd:
+            name: nomad
+            state: stopped
+
+        - name: Delete Nomad data
+          file:
+            path: /opt/nomad/data
+            state: absent

@@ -18,7 +18,6 @@
   retries: 10
   until: apt_action is success or ('/var/lib/dpkg/lock-frontend' not in apt_action.msg)
 
-
 - name: Add Hashicorp apt repository
   block:
     - name: Add Hashicorp APT repository key
