@@ -1,3 +1,7 @@
+variable "domain_name" {
+  type = string
+}
+
 job "linkding" {
   datacenters = ["dc1"]
 
@@ -7,20 +11,20 @@ job "linkding" {
     network {
       mode = "bridge"
       port "http" {
-      	to = "9090"
+        to = "9090"
       }
     }
 
     service {
       provider = "consul"
-      name = "${NOMAD_JOB_NAME}"
-      port = "http"
+      name     = NOMAD_JOB_NAME
+      port     = "http"
 
       tags = [
         "traefik.enable=true",
         "traefik.http.routers.linkding-proxy.entrypoints=https",
         "traefik.http.routers.linkding-proxy.tls=true",
-        "traefik.http.routers.linkding-proxy.rule=Host(`linkding.${}`)",
+        "traefik.http.routers.linkding-proxy.rule=Host(`[[ .app.linkding.domain ]].[[ .common.domain ]]`)",
       ]
 
       check {
@@ -39,25 +43,25 @@ job "linkding" {
       driver = "docker"
 
       config {
-        image = "sissbruecker/linkding:1.15.0"
+        image = "sissbruecker/linkding:1.15.1"
         ports = ["http"]
 
-    	volumes = [
-    	  "${pathexpand("~/data/linkding")}:/etc/linkding/data",
-    	]
+        volumes = [
+          "[[ .app.linkding.volumes.data ]]:/etc/linkding/data",
+        ]
       }
 
       env {
-    	LD_DISABLE_BACKGROUND_TASKS = "False"
-    	LD_DISABLE_URL_VALIDATION = "False"
-		LD_SUPERUSER_NAME = ""
-		LD_SUPERUSER_PASSWORD = ""
+        LD_DISABLE_BACKGROUND_TASKS = "False"
+        LD_DISABLE_URL_VALIDATION   = "False"
+        LD_SUPERUSER_NAME           = ""
+        LD_SUPERUSER_PASSWORD       = ""
       }
 
       resources {
         cpu    = 35
         memory = 512
       }
-	}
+    }
   }
 }

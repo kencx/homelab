@@ -1,0 +1,24 @@
+---
+common:
+  domain: dev.example.com
+
+app:
+  linkding:
+    domain: linkding
+    volumes:
+      data: "/mnt/storage/linkding"
+  traefik:
+    domain: traefik
+    provider:
+      address: "localhost:8500"
+    acme:
+      email: ""
+      caServer: ""
+    volumes:
+      acme: "/mnt/storage/traefik/acme"
+      tls: "/mnt/storage/traefik/tls"
+    do_token: ""
+    pihole_ip: ""
+
+  whoami:
+    domain: whoami
