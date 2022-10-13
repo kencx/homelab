@@ -5,17 +5,19 @@
   register: consul_cert
   changed_when: false
 
-# TODO requires vault addr and login
+# Ensure logged into Vault
 - name: Create CA, certificate and private key for Consul TLS
   block:
     - name: Issue new certificate
       shell:
         cmd: |
-          VAULT_ADDR="https://10.10.10.130:8200" vault write -format=json pki_int/issue/cluster \
+          vault write -format=json pki_int/issue/cluster \
           "common_name={{ consul_common_name }}" \
           "ttl=24h" \
           "alt_names=localhost" \
           "ip_sans={{ consul_ip_sans }}"
+      environment:
+        VAULT_ADDR: "{{ consul_vault_addr }}"
       register: consul_tls_raw
 
     - set_fact:
@@ -76,5 +78,6 @@
       }
   notify: reload consul-template
 
+# TODO
 # generate client certs for CLI
 # generate client certs for UI (maybe)

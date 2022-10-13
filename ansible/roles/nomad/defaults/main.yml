@@ -10,5 +10,7 @@ nomad_bootstrap_expect: 1
 # client
 nomad_server_ip: ""
 
+# certificate generation
+nomad_vault_addr: "https://localhost:8200"
 nomad_common_name: "server.global.nomad"
 nomad_ip_sans: "127.0.0.1"

@@ -7,11 +7,14 @@
       - src: "{{ nfs_ip }}:/home/debian/apps/tls"
         path: "{{ consul_template_dir }}/tls"
         state: mounted
-    server_address: "{{ ansible_default_ipv4.address }}"
+
+    cluster_server_ip: "{{ ansible_default_ipv4.address }}"
+
     vault_config_dir: "/etc/vault.d"
     vault_tls_dir: "/opt/vault/tls"
     vault_ca_cert_dir: "/usr/share/ca-certificates/vault"
     consul_template_dir: "/opt/consul-template"
+
     nomad_config_dir: "/etc/nomad.d"
     nomad_tls_dir: "/opt/nomad/data/tls"
 
@@ -31,7 +34,7 @@
         ssl_ca_chain_name: "vault"
         ssl_remote_cert_name: "vault"
         ssl_remote_cert_common_name: "vault"
-        ssl_remote_cert_subject_alt_name: "IP:{{ server_address }}"
+        ssl_remote_cert_subject_alt_name: "IP:{{ cluster_server_ip }}"
         ssl_remote_cert_ttl: "+365d"
 
     - name: Mount NFS shares
@@ -41,17 +44,19 @@
 
     - role: consul-template
       vars:
-        vault_address: "{{ server_address }}"
+        vault_address: "{{ cluster_server_ip }}"
 
     - role: consul
       vars:
+        consul_vault_addr: "https://{{ cluster_server_ip }}:8200"
         consul_common_name: "server.dc1.consul"
-        consul_ip_sans: "127.0.0.1,{{ server_address }}"
+        consul_ip_sans: "127.0.0.1,{{ cluster_server_ip }}"
 
     - role: nomad
       vars:
+        nomad_vault_addr: "https://{{ cluster_server_ip }}:8200"
         nomad_common_name: "server.global.nomad"
-        nomad_ip_sans: "127.0.0.1,{{ server_address }}"
+        nomad_ip_sans: "127.0.0.1,{{ cluster_server_ip }}"
 
   tasks:
     - name: Register Vault as Consul service
@@ -59,6 +64,11 @@
 
     - name: Register Nomad as Consul service
       import_tasks: nomad_consul_register.yml
+
+    # - name: Sign out of Vault root
+    #   file:
+    #     path: /root/.vault-token
+    #     state: absent
 
     - name: Goss smoke test
       import_role:

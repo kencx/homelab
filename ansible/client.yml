@@ -10,9 +10,12 @@
       - src: "{{ nfs_ip }}:/home/debian/apps/tls"
         path: "{{ consul_template_dir }}/tls"
         state: mounted
-    server_address: "10.10.10.130"
-    client_address: "{{ ansible_default_ipv4.address }}"
+
+    cluster_server_ip: "10.10.10.130"
+    cluster_client_ip: "{{ ansible_default_ipv4.address }}"
+
     consul_template_dir: "/opt/consul-template"
+
     nomad_config_dir: "/etc/nomad.d"
     nomad_tls_dir: "/opt/nomad/data/tls"
 
@@ -42,8 +45,9 @@
       changed_when: '"1 added" in update_cert_output.stdout'
 
     - name: Vault status check
-      shell:
-        cmd: "VAULT_ADDR=https://{{ server_address }}:8200 vault status"
+      command: "vault status"
+      environment:
+        VAULT_ADDR: "https://{{ cluster_server_ip }}:8200"
       changed_when: false
 
   roles:
@@ -52,19 +56,19 @@
 
     - role: consul-template
       vars:
-        vault_address: "{{ server_address }}"
+        vault_address: "{{ cluster_server_ip }}"
 
     - role: consul
       vars:
-        consul_server_ip: "{{ server_address }}"
+        consul_server_ip: "{{ cluster_server_ip }}"
         consul_common_name: "client.dc1.consul"
-        consul_ip_sans: "127.0.0.1,{{ client_address }}"
+        consul_ip_sans: "127.0.0.1,{{ cluster_client_ip }}"
 
     - role: nomad
       vars:
-        nomad_server_ip: "{{ server_address }}"
+        nomad_server_ip: "{{ cluster_server_ip }}"
         nomad_common_name: "client.global.nomad"
-        nomad_ip_sans: "127.0.0.1,{{ client_address }}"
+        nomad_ip_sans: "127.0.0.1,{{ cluster_client_ip }}"
 
   tasks:
     - name: Register Nomad client as Consul service

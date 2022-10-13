@@ -5,6 +5,7 @@
   register: nomad_consul_cert
   changed_when: false
 
+# TODO vault login
 - name: Create Nomad client certificate for Consul
   block:
     - name: Issue new certificate
@@ -13,6 +14,8 @@
           vault write -format=json pki_int/issue/cluster \
           "common_name=nomad-client.dc1.consul" \
           "ttl=24h" \
+      environment:
+        VAULT_ADDR: "https://{{ cluster_server_ip }}:8200"
       register: nomad_consul_tls_raw
 
     - set_fact:
@@ -84,8 +87,8 @@
         group = "nomad"
         command = "date && if systemctl is-active nomad; then service nomad reload; fi"
       }
-  when: "'server' in group_names"
 
+# might fail if Vault is sealed for too long
 - name: Reload consul-template
   systemd:
     name: consul_template

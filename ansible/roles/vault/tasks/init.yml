@@ -18,9 +18,7 @@
   when: vault_init_raw is defined and vault_init_raw.stdout is defined
 
 # TODO BW must be logged in
-# Must run as specific user
 - name: Store unseal keys in Bitwarden
-  become_user: debian
   script: "bw_store.sh 'Vault Unseal Key' {{ vault_init_json.unseal_keys_hex[0] }} {{ bw_password }}"
   when: vault_init_json is defined and vault_init_json.unseal_keys_hex is defined
   no_log: true
@@ -31,7 +29,6 @@
 #     var: bw_vault_unseal_key.stdout
 
 - name: Save root token in Bitwarden
-  become_user: debian
   script: "bw_store.sh 'Vault Root Token' {{ vault_init_json.root_token }} {{ bw_password }}"
   when: vault_init_json is defined and vault_init_json.root_token is defined
   no_log: true
