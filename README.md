@@ -1,95 +1,91 @@
 # Hubble Homelab
-This repository contains all infrastructure-as-code and configuration for my Proxmox
-homelab and Hetzner VPS. It provisions a Nomad + Consul cluster for running various
-services.
 
-## Requirements
-- Proxmox VE 7.1
-- Packer
-- Ansible
-- Terraform
-- Goss
-- restic, autorestic
+This repository contains infrastructure-as-code and configuration for the automated
+provisioning of my Proxmox homelab. It provisions a Nomad + Consul + Vault mini-cluster
+for personal use.
 
-## Cluster
-The cluster exists on a single Proxmox host with multiple Debian VMs.
+## Overview
 
-The cluster creation process is a declarative, fully automated process with
-Packer, Ansible and Terraform. At the moment, not all processes are fully
-idempotent.
+The cluster is provisioned on multiple Debian VMs on a single Proxmox instance. It comprises
+minimally of one server node and one client node with NFS mounted storage from a separate
+NAS instance.
 
-Our end goal is a fully functional Nomad and Consul cluster with secure access
-to Vault:
+### Features
+- [ ] Nomad container scheduling and orchestration
+- [ ] Consul service discovery
+- [ ] Secure node communication via mTLS
+- [ ] Personal Certificate Authority hosted on Vault
+- [ ] Automated certificate management with consul-template, Traefik
 
-- All Nomad, Consul and Vault nodes should be discoverable by Consul.
-- Clients should communicate with their server nodes via TLS.
+## Provisioning
 
+The infrastructure-as-code in this project aims to allow the user to provision a fully
+functional cluster from scratch with minimal manual intervention. The cluster requires
+at least two hosts: one server and one client node.
 
-### Image Creation
-A base Debian 11 (bullseye) image is created with Packer and Ansible. It installs common
-packages, perform basic security hardening and creates the necessary directories for
-mounting of NFS shares.
+The three key provisioning steps are:
 
-### Provisioning
-A cluster of VMs are provisioned with Terraform. Two types of VMs are created from the
-base image: server and client. They differ in the later post-provisioning steps
-performed by Ansible. Multiples are type of VM can be started.
+1. VM image creation with Packer & Ansible
+2. Provisioning with Terraform
+3. Post-provisioning with Ansible
 
-For server hosts, Ansible performs the following:
+### Packer Image Creation
 
-0. A root CA and intermediate CA is created on the controller node if they do not
-	 already exist. This CA will then deploy TLS certificates to be used by Vault.
-1. Vault is configured and started with TLS encryption. Vault is then initialized and
-	 unsealed for [first-time setup and hardening](#vault-first-time-setup). On successful
-	 setup, future logins to Vault will be using a non-root admin identity with TLS cert
-	 authentication.
-2. Consul-template is configured and started with limited access to Vault. It will be
-	 used for Vault credential rotation in Consul and Nomad.
-3. Consul is configured and started with gossip and TLS encryption in server mode.
-4. Nomad is configured and started with gossip and TLS encryption in server mode.
-5. Vault is restarted to allow for service discovery by Consul.
-6. A smoke test is performed with [Goss](https://github.com/aelsabbahy/goss).
+Each VM is provisoned from a common base Debian 11 image created with Packer and
+Ansible, as seen in `packer/base`. The templating process installs common packages,
+performs security hardening and other common tasks. Refer to
+[docs/packer](docs/packer.md) for more information.
 
-For client hosts, Ansible performs the following, after post-provisioning of servers:
+### Provisioning with Terraform
 
-0. One or more new client certificate pair will be generated from Vault PKI for client
-	 access to the remote Vault instance. Their associated policies can be tweaked for the
-	 use case.
-1. Consul-template is configured and started with limited access to Vault. This should
-	 use the previously generated client certificates for authentication.
-2. Consul is configured and started with gossip and TLS encryption in client mode.
-3. Nomad is configured and started with gossip and TLS encryption in client mode.
-4. NFS shares are mounted from the remote NAS server.
-5. A smoke test is performed with [Goss](https://github.com/aelsabbahy/goss).
+Terraform provisons VMs from the created images on Proxmox with the
+[telmate/proxmox](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs)
+provider. All resources utilize a custom `base` module in `terraform/modules/vm` which
+contains some sane defaults and sets up SSH access. `null_resource` is then used to pass
+on post-provisioning to Ansible. Configuration variables and other information are found
+at [docs/terraform](docs/terraform.md).
 
-Finally, we can provision all Nomad jobs in `apps/`.
+### Post-provisioning with Ansible
 
-#### Vault First Time Setup
-1. We initialize Vault for the first time, saving the root token and unseal keys
-	 into a password manager. The root token is used to login as root.
-2. A root and intermediate CA is created with the PKI secrets engine for
-	 certificate generation. We create roles for deploying Nomad and Consul TLS
-	 certificates, and for client cert authentication.
-3. An non-root admin policy and identity is created. It utilizes cert
-	 authentication and contains only the required capabilities to perform
+Post-provisioning is performed on each host with Ansible playbooks. These playbooks use
+modular and independent [roles](docs/roles.md) to set up software configurations in
+each node, depending on their type.
+
+On server nodes,
+
+1. Vault is started and initialized with TLS encryption. After unsealing, first-time
+   setup is performed with the root token.
+2. Consul-template is configured with limited access to Vault. It will be the main tool
+   to automate Vault credential rotation.
+3. Nomad and Consul are configured with mTLS encryption in server mode.
+4. A smoke test is performed with [Goss](https://github.com/aelsabbahy/goss).
+
+On client nodes, after the server playbooks are run,
+
+1. Consul-template is configured with limited access to the remote Vault server.
+2. Nomad and Consul are configured with mTLS encryption in client mode.
+3. A smoke test is performed with [Goss](https://github.com/aelsabbahy/goss).
+4. All Nomad jobs in `apps/` are provisioned.
+
+Refer to [docs/setup](docs/setup.md) for detailed information.
+
+## Networking
+
+TODO
+
 	 maintenance.
 4. Other policies are created including those used by Consul-template for
 	 certificate rotation, retrieving secrets etc.
 
 ## VPS
+
 A Hetzner VPS is provisioned to run various web applications. It is bootstrapped
 with `cloud-config` and exposed via a Nginx reverse proxy.
 
 ## Backups
+
 Autorestic performs daily backups to an external USB hard drive and Backblaze
 B2.
-
-## Matrix
-| Service  | Status     | Comments        |
-|----------| ---------- | --------------- |
-| Nomad    | Production |     |
-| Consul   | Production |     |
-| Vault    | Production |     |
 
 ## Notes
 

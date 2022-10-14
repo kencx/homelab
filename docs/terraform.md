@@ -1,23 +1,31 @@
 # Terraform
 
-## Prerequisites
-- `telmate/proxmox` provider
-- Terraform v1.3.0
+Terraform uses the
+[telmate/proxmox](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs)
+provider to communicate with the Proxmox API. The `proxmox` provider must be
+configured appropriately.
 
-## Modules
-There are two Terraform modules available at `terraform/modules`: `vm` and `lxc` for a
-Proxmox VM and LXC respectively.
+```tf
+provider "proxmox" {
+  pm_api_url  = var.proxmox_ip
+  pm_user     = var.proxmox_user
+  pm_password = var.proxmox_password
+}
+```
 
-## Cluster
-The main Hubble cluster utilizes the `vm` module to create one or more server nodes and
-client nodes. On creation, both resources have a corresponding `null_resource` with a
-`remote_exec` provisioner.
+## Overview
 
-This provisioners are triggered by changes in their respective Ansible playbooks,
-`ansible/server.yml` and `ansible/client.yml`, and runs them.
+There are two custom modules available `terraform/modules/{vm,lxc}` for
+provisioning a VM and LXC respectively.
+
+Cluster nodes are provisioned with the `vm` module. Each resource has a
+`null_resource` with a `local_exec` provisioner that calls its Ansible playbook.
+These provisioners are triggered by changes in their configured Ansible playbooks.
 
 ### Commands
-To start the deployment, ensure all variables are populated in `terraform.tfvars`.
+
+To start the deployment, ensure all variables are appropriately populated in
+`terraform.tfvars`.
 
 ```bash
 $ cd terraform/cluster
@@ -47,3 +55,8 @@ $ terraform apply
 | ssh_username         | User to SSH into during provisioning | string |            |
 | ssh_private_key_file | Filepath of private SSH key          | string |            |
 | ssh_public_key_file  | Filepath of public SSH key           | string |            |
+
+### Notes
+- Currently, only `pm_user` and `pm_password` are supported
+- The given `template_name` must be exist. This should be the same name in
+  Packer

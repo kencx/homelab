@@ -89,6 +89,8 @@ For encryption, the role creates consul-template templates for:
 | consul_template_config | consul-template configuration file | string | `/opt/consul-template/consul_template.hcl` |
 | consul_bootstrap_expect | (server only) Bootstrap expect | number | `1` |
 | consul_server_ip | (client only) Server's IP address | string | - |
+| consul_vault_addr | Vault server API address to use | string | `https://localhost:8200` |
+| consul_common_name | Consul node certificate common_name | string | `server.dc1.consul` |
 | consul_ip_sans | Consul's TLS certificate IP SANs | string | `127.0.0.1` |
 
 ## Nomad
@@ -117,4 +119,6 @@ For encryption, the role creates consul-template templates for:
 | consul_template_config | consul-template configuration file | string | `/opt/consul-template/consul_template.hcl` |
 | nomad_bootstrap_expect | (server only) Bootstrap expect | number | `1` |
 | nomad_server_ip | (client only) Server's IP address | string | - |
+| nomad_vault_addr | Vault server API address to use | string | `https://localhost:8200` |
+| nomad_common_name | Nomad node certificate common_name | string | `server.global.nomad` |
 | nomad_ip_sans | Nomad's TLS certificate IP SANs | string | `127.0.0.1` |
