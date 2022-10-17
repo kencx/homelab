@@ -3,15 +3,6 @@ vault {
   address = "https://{{ vault_address }}:8200"
   unwrap_token = false
   renew_token = false
-
-{% if 'server' in group_names %}
-  ssl {
-    enabled = true
-    verify = true
-    cert = "{{ vault_tls_dir }}/vault.crt"
-    key = "{{ vault_tls_dir }}/key.pem"
-  }
-{% endif %}
 }
 
 {% if 'server' in group_names %}
