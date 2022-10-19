@@ -24,7 +24,6 @@
 - name: Enable kv secrets engine
   command: "vault secrets enable -path=kv kv-v2"
 
-# This should have 2FA, limited validity period, strong audit
 - name: Read admin policy
   copy:
     src: "admin_policy.hcl"

@@ -70,7 +70,7 @@ path "pki_int/roles" {
 
 # Issue certs
 path "pki_int/issue/*" {
-  capabilities = ["create"]
+  capabilities = ["create", "update"]
 }
 
 # Read certs

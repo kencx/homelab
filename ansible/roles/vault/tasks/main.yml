@@ -67,5 +67,5 @@
   import_tasks: init.yml
 
 # Setup CA, file audit, cert auth, admin role
-- name: Root token setup
+- name: Setup with root token
   import_tasks: root.yml

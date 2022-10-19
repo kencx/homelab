@@ -36,7 +36,7 @@ echo "Intermediate certificate generated"
 # TODO tweak allowed_domains
 # create role for nomad,consul tls certs
 vault write pki_int/roles/cluster \
-	allowed_domains="localhost,dc1.consul,dc1.nomad,dc1.vault,service.consul,global.nomad" \
+	allowed_domains="localhost,dc1.consul,dc1.nomad,service.consul,global.nomad" \
 	allow_subdomains=true \
 	generate_lease=true \
 	ttl="24h" \
