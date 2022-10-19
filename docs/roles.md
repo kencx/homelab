@@ -108,6 +108,7 @@ For encryption, the role creates consul-template templates for:
 - Nomad's gossip key. A new key is added with `nomad operator keygen` if it does not already
 	exist
 - Nomad TLS certs
+- Vault token for Vault integration
 
 ### Variables
 
@@ -117,6 +118,8 @@ For encryption, the role creates consul-template templates for:
 | nomad_data_dir | Data directory | string | `/opt/nomad` |
 | nomad_tls_dir | TLS files directory | string | `{{ nomad_data_dir }}/tls` |
 | consul_template_config | consul-template configuration file | string | `/opt/consul-template/consul_template.hcl` |
+| setup_vault_integration | Sets up Vault integration in server node | bool | `true` |
+| vault_policy_dir | Vault server policy directory | string | `/etc/vault.d/policies` |
 | nomad_bootstrap_expect | (server only) Bootstrap expect | number | `1` |
 | nomad_server_ip | (client only) Server's IP address | string | - |
 | nomad_vault_addr | Vault server API address to use | string | `https://localhost:8200` |

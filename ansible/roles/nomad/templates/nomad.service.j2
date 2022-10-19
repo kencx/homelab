@@ -7,6 +7,9 @@ After=network-online.target
 {% if 'server' in group_names %}
 User=nomad
 Group=nomad
+{% if setup_vault_integration %}
+EnvironmentFile={{ nomad_data_dir }}/.vault_token
+{% endif %}
 {% endif %}
 
 ExecReload=/bin/kill -HUP $MAINPID

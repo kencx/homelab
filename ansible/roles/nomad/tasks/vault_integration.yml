@@ -1,0 +1,104 @@
+---
+- name: Read policy
+  copy:
+    src: "vault_token_policy.hcl"
+    dest: "{{ vault_policy_dir }}/nomad_vault_token.hcl"
+    mode: 0640
+    owner: vault
+    group: vault
+
+- name: Create policy
+  command: "vault policy write nomad-cluster {{ vault_policy_dir }}/nomad_vault_token.hcl"
+  register: create_nomad_vault_policy
+  failed_when: create_nomad_vault_policy.rc != 0
+
+- name: Create token role
+  command: vault write auth/token/roles/nomad-cluster \
+    "allowed_policies="nomad-cluster"" \
+    "orphan=true" \
+    "token_period=72h" \
+    "renewable=true"
+
+# Both Nomad and consul-template perform renewal of the Vault token, but for entirely
+# different reasons.
+#
+# This file is simply for starting the Nomad service with a valid VAULT_TOKEN env
+# variable. On its expiry, Nomad will renew the token in memory without writing the
+# new token to the file.
+#
+# However, if Nomad is restarted after the token in the file has expired, Nomad is
+# unable to produce a new token for startup automatiicaly. As such, consul-template
+# writes a new plain text token in the file when it expires, ensuring a valid token is
+# always available in the file.
+- name: Check if token file exists
+  stat:
+    path: "{{ nomad_data_dir }}/.vault_token"
+  register: nomad_vault_token
+  changed_when: false
+
+- name: Create Vault token file
+  block:
+    - name: Generate token for Vault integration with Nomad
+      command: vault token create -policy nomad-cluster -period 72h -orphan -format=json
+      environment:
+        VAULT_ADDR: "{{ nomad_vault_addr }}"
+      register: nomad_vault_token_raw
+
+    - set_fact:
+        nomad_vault_token_json: "{{ nomad_vault_token_raw.stdout | from_json }}"
+      when: nomad_vault_token_raw is defined and nomad_vault_token_raw.stdout is defined
+
+    - name: Write token file
+      copy:
+        content: "VAULT_TOKEN={{ nomad_vault_token_json.auth.client_token }}"
+        dest: "{{ nomad_data_dir }}/.vault_token"
+        mode: 0600
+        owner: nomad
+        group: nomad
+      when: nomad_vault_token_json is defined and nomad_vault_token_json.auth.client_token is defined
+  when: nomad_vault_token is defined and not nomad_vault_token.stat.exists
+
+# Must update consul_template policy to allow creation of nomad-cluster token
+# from token role
+- name: Check if consul_template policy file exists
+  stat:
+    path: "{{ vault_policy_dir }}/consul_template_policy.hcl"
+  register: consul_template_policy
+  changed_when: false
+
+- name: Update consul_template policy with nomad-cluster token role
+  block:
+    - name: Update consul_template policy file
+      blockinfile:
+        path: "{{ vault_policy_dir }}/consul_template_policy.hcl"
+        block: |
+          path "auth/token/create/nomad-cluster" {
+            capabilities = ["create", "update"]
+          }
+
+    - name: Write updated consul_template policy
+      command: "vault policy write consul_template {{ vault_policy_dir }}/consul_template_policy.hcl"
+      register: update_ct_policy
+      failed_when: update_ct_policy.rc != 0
+  when: consul_template_policy is defined and consul_template_policy.stat.exists
+
+- name: Add nomad-cluster token template stanza to consul-template
+  blockinfile:
+    path: "{{ consul_template_config }}"
+    marker: "# {mark} Nomad Vault Token"
+    validate: consul-template -config=%s -parse-only
+    block: |
+      template {
+        contents = <<EOF
+      {{ '{{' }} with secret "auth/token/create/nomad-cluster" "period=72h" "orphan=true" {{ '}}' }}
+      VAULT_TOKEN={{ '{{' }} .Auth.ClientToken {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
+      EOF
+        destination = "{{ nomad_data_dir }}/.vault_token"
+        perms = 0600
+        user = "nomad"
+        group = "nomad"
+        command = "date && if systemctl is-active nomad; then service nomad restart; fi"
+      }
+  notify: reload consul-template
+  when: consul_template_policy is defined and consul_template_policy.stat.exists

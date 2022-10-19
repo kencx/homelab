@@ -14,3 +14,10 @@ tls {
   # false to allow consul healthcheck
   verify_https_client = false
 }
+
+# vault token set as env variable
+vault {
+  enabled = true
+  address = "{{ nomad_vault_addr }}"
+  create_from_role = "nomad-cluster"
+}
