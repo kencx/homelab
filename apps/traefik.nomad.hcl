@@ -64,8 +64,8 @@ job "traefik" {
 
         volumes = [
           "local/traefik.yml:/traefik.yml",
+          "secrets/tls:/tls",
           "[[ .app.traefik.volumes.acme ]]:/acme",
-          "[[ .app.traefik.volumes.tls ]]:/tls",
         ]
       }
 
@@ -141,7 +141,39 @@ http:
         servers:
           - url: "[[ .app.traefik.pihole_ip ]]"
 EOF
-        destination = "local/rules/rules.yml"
+        destination = "${NOMAD_TASK_DIR}/rules/rules.yml"
+      }
+
+      template {
+        data = <<EOF
+{{ with secret "pki_int/issue/cluster" "common_name=traefik-client.dc1.consul" }}
+{{ .Data.certificate }}
+{{ end }}
+EOF
+        destination = "${NOMAD_SECRETS_DIR}/tls/traefik-client.dc1.consul-cert.crt"
+        perms = "0600"
+        change_mode = "restart"
+      }
+
+      template {
+        data = <<EOF
+{{ with secret "pki_int/issue/cluster" "common_name=traefik-client.dc1.consul" }}
+{{ .Data.private_key }}
+{{ end }}
+EOF
+        destination = "${NOMAD_SECRETS_DIR}/tls/traefik-client.dc1.consul-key.pem"
+        perms = "0400"
+        change_mode = "restart"
+      }
+      template {
+        data = <<EOF
+{{ with secret "pki_int/issue/cluster" "common_name=traefik-client.dc1.consul" }}
+{{ .Data.issuing_ca }}
+{{ end }}
+EOF
+        destination = "${NOMAD_SECRETS_DIR}/tls/traefik-client.dc1.consul-ca.crt"
+        perms = "0640"
+        change_mode = "restart"
       }
 
       resources {
