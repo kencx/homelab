@@ -46,6 +46,10 @@ job "calibre" {
           "[[ .app.calibre_web.volumes.config ]]:/config",
           "[[ .app.calibre_web.volumes.books ]]:/books",
         ]
+
+        labels = {
+          "diun.enable" = "true"
+        }
       }
 
       env {

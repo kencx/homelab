@@ -67,6 +67,10 @@ job "traefik" {
           "secrets/tls:/tls",
           "[[ .app.traefik.volumes.acme ]]:/acme",
         ]
+
+        labels = {
+          "diun.enable" = "false"
+        }
       }
 
       env {

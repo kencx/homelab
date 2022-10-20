@@ -49,6 +49,10 @@ job "linkding" {
         volumes = [
           "[[ .app.linkding.volumes.data ]]:/etc/linkding/data",
         ]
+
+        labels = {
+          "diun.enable" = "true"
+        }
       }
 
       env {

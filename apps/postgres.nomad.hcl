@@ -37,6 +37,10 @@ job "postgres" {
           "[[ .app.postgres.volumes.data ]]:/var/lib/postgresql/data",
           "local/init.sql:/docker-entrypoint-initdb.d/init.sql",
         ]
+
+        labels = {
+          "diun.enable" = "true"
+        }
       }
 
       env {
