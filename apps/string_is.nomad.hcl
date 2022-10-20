@@ -7,20 +7,20 @@ job "string" {
     network {
       mode = "bridge"
       port "http" {
-      	to = "3000"
+        to = "3000"
       }
     }
 
     service {
       provider = "consul"
-      name = "${NOMAD_JOB_NAME}"
-      port = "http"
+      name     = NOMAD_JOB_NAME
+      port     = "http"
 
       tags = [
         "traefik.enable=true",
         "traefik.http.routers.string-proxy.entrypoints=https",
         "traefik.http.routers.string-proxy.tls=true",
-        "traefik.http.routers.string-proxy.rule=Host(`string.${}`)",
+        "traefik.http.routers.string-proxy.rule=Host(`[[ .app.string.domain ]].[[ .common.domain ]]`)",
       ]
 
       check {
@@ -47,6 +47,6 @@ job "string" {
         cpu    = 35
         memory = 256
       }
-	}
+    }
   }
 }

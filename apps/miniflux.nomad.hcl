@@ -7,20 +7,20 @@ job "miniflux" {
     network {
       mode = "bridge"
       port "http" {
-      	to = "8120"
+        to = "8120"
       }
     }
 
     service {
       provider = "consul"
-      name = "${NOMAD_JOB_NAME}"
-      port = "http"
+      name     = NOMAD_JOB_NAME
+      port     = "http"
 
       tags = [
         "traefik.enable=true",
         "traefik.http.routers.miniflux-proxy.entrypoints=https",
         "traefik.http.routers.miniflux-proxy.tls=true",
-        "traefik.http.routers.miniflux-proxy.rule=Host(`miniflux.${}`)",
+        "traefik.http.routers.miniflux-proxy.rule=Host(`[[ .app.miniflux.domain ]].[[ .common.domain ]]`)",
       ]
 
       check {
@@ -44,29 +44,29 @@ job "miniflux" {
       }
 
       env {
-        PORT = 8120
-        DEBUG = 1
-        RUN_MIGRATIONS = 1
+        PORT              = 8120
+        DEBUG             = 1
+        RUN_MIGRATIONS    = 1
         POLLING_FREQUENCY = 1440
-        CREATE_ADMIN = 1
-        ADMIN_USERNAME = "miniflux"
-        ADMIN_PASSWORD = "miniflux"
+        CREATE_ADMIN      = 1
+        ADMIN_USERNAME    = "miniflux"
+        ADMIN_PASSWORD    = "miniflux"
       }
 
-	  template {
-	    data = <<EOF
+      template {
+        data        = <<EOF
 {{ range service "postgres" }}
-DATABASE_URL = "postgres://miniflux:miniflux@{{ .Address }}:{{ .Port }}/miniflux?sslmode=disable"
+DATABASE_URL = "postgres://postgres:postgres@{{ .Address }}:{{ .Port }}/miniflux?sslmode=disable"
 {{ end }}
 EOF
-		destination = "secrets/.env"
-		env = true
-	  }
+        destination = "secrets/.env"
+        env         = true
+      }
 
       resources {
         cpu    = 35
         memory = 512
       }
-	}
+    }
   }
 }

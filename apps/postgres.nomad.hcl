@@ -34,7 +34,7 @@ job "postgres" {
         ports = ["db"]
 
         volumes = [
-          "${pathexpand("~/data/postgres")}:/var/lib/postgresql/data",
+          "[[ .app.postgres.volumes.data ]]:/var/lib/postgresql/data",
           "local/init.sql:/docker-entrypoint-initdb.d/init.sql",
         ]
       }
