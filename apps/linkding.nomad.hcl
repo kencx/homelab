@@ -63,7 +63,7 @@ job "linkding" {
       }
 
       resources {
-        cpu    = 35
+        cpu    = 50
         memory = 256
       }
     }

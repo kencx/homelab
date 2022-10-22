@@ -43,8 +43,8 @@ job "whoami" {
       }
 
       resources {
-        cpu    = 35
-        memory = 128
+        cpu    = 15
+        memory = 32
       }
     }
   }
