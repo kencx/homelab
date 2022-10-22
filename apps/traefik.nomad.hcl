@@ -64,6 +64,7 @@ job "traefik" {
 
         volumes = [
           "local/traefik.yml:/traefik.yml",
+          "local/rules:/rules",
           "secrets/tls:/tls",
           "[[ .app.traefik.volumes.acme ]]:/acme",
         ]
@@ -116,6 +117,9 @@ providers:
         key: "tls/traefik-client.dc1.consul-key.pem"
     exposedByDefault: false
 
+  file:
+    directory: "/rules"
+
 certificatesResolvers:
   dns-dgo:
     acme:
@@ -126,24 +130,57 @@ certificatesResolvers:
         provider: digitalocean
         resolvers: "1.1.1.1:53,1.0.0.1:53"
 EOF
-        destination = "local/traefik.yml"
+        destination = "${NOMAD_TASK_DIR}/traefik.yml"
       }
 
       template {
         data = <<EOF
 http:
   routers:
-    pihole:
-      entrypoints:
+    proxmox-https:
+      entryPoints:
         - https
-      rule: "Host(`pihole.[[ .common.domain ]]`)"
+      rule: "Host(`[[ .app.proxmox.domain ]].[[ .common.domain ]]`)"
       tls: {}
+      middlewares:
+        - default-headers
+      service: proxmox
+
+    pihole:
+      entryPoints:
+        - https
+      rule: "Host(`[[ .app.pihole.domain ]].[[ .common.domain ]]`)"
+      tls: {}
+      middlewares:
+        - default-headers
+        - addprefix-pihole
       service: pihole
+
   services:
     pihole:
       loadBalancer:
         servers:
-          - url: "[[ .app.traefik.pihole_ip ]]"
+          - url: "https://[[ .app.pihole.ip ]]"
+        passHostHeader: true
+
+  serversTransports:
+    insecureTransport:
+      insecureSkipVerify: true
+
+  middlewares:
+    addprefix-pihole:
+      addPrefix:
+        prefix: "/admin"
+
+    default-headers:
+      headers:
+        frameDeny: true
+        sslRedirect: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
 EOF
         destination = "${NOMAD_TASK_DIR}/rules/rules.yml"
       }
