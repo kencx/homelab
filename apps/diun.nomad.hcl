@@ -38,6 +38,13 @@ watch:
 providers:
   docker:
     watchByDefault: false
+
+notif:
+  gotify:
+    endpoint: "[[ .app.gotify.domain ]].[[ .common.domain ]]"
+    token: ""
+    priority: 1
+    timeout: "10s"
 EOF
         destination = "${NOMAD_TASK_DIR}/diun.yml"
       }
