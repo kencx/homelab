@@ -8,6 +8,7 @@ This documents the setup details for a cluster from scratch.
 - [consul-template](#consul-template)
   - [Setup](#consul-template-setup)
   - [Token Renewal](#token-renewal)
+- [Consul](#consul)
 - [Nomad](#nomad)
   - [Setup](#nomad-setup)
   - [Vault Integration](#vault-integration)
@@ -56,10 +57,12 @@ Vault credentials rotation. This includes:
 - Certificates rotation for Consul, Nomad mTLS
 - Client certificates rotation for Nomad, Vault communication with Consul
 - Client certificates rotation for Traefik communication with Consul provider
-- Vault token for Vault-Nomad integration
+- Vault token for [Vault-Nomad integration](#vault-integration)
 - Vault token's accessor for consul-template (see [Token Renewal](#token-renewal))
 
-### Setup
+All nodes running Nomad, Consul or Vault require a consul-template instance.
+
+### Setup <a name="consul-template-setup"></a>
 
 1. A client certificate and private key is issued from Vault's CA. It is to be used for
    certificate authentication to Vault.
@@ -85,9 +88,29 @@ When consul-template starts, it performs a self-lookup on the token, generated f
 login script, that stores the accessor ID. The helper script uses this accessor ID to
 renew the token when triggered.
 
-## Nomad
+## Consul
+
+#### Security
+Consul is started with mTLS. As such, all clients are required to possess a
+signed certificate from the same CA (Vault's CA):
+
+- Consul client nodes
+- CLI client on all hosts
+- Consul UI
+- Vault server
+- Nomad server and client nodes
+
+#### Consul Registration
+
+TODO
 
 #### Setup
+
+TODO
+
+## Nomad
+
+#### Setup <a name="nomad-setup"></a>
 
 1. Client certificates are issued via Vault to all Nomad nodes to enable mTLS
    encryption. consul-template handles all renewal of expired certificates.

@@ -37,6 +37,7 @@
     group: root
   notify: reload consul_template
 
+# TODO need to create auth certs in advance
 - name: Copy consul-template config
   template:
     src: "consul-template.hcl.j2"

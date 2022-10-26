@@ -5,6 +5,7 @@
   register: vault_consul_cert
   changed_when: false
 
+  # must be logged in to bw and Vault
 - name: Create Vault client certificate for Consul
   block:
     - name: Issue new certificate

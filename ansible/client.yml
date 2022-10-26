@@ -4,7 +4,7 @@
   vars:
     nfs_ip: "10.10.10.102"
     nfs_share_mounts:
-      - src: "{{ nfs_ip }}:/home/debian/apps/test-apps"
+      - src: "{{ nfs_ip }}:/home/debian/apps/prod-apps"
         path: "/mnt/storage"
         state: mounted
       - src: "{{ nfs_ip }}:/home/debian/apps/tls"

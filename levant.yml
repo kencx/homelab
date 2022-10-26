@@ -1,14 +1,68 @@
 ---
 common:
-  domain: dev.example.com
+  domain: example.com
+  tz: "Asia/Singapore"
 
 app:
+  calibre_web:
+    domain: books
+    image: "amd64-0.6.18"
+    volumes:
+      config: "/mnt/storage/calibre_web/config"
+      books: "/mnt/storage/books"
+
+  firefly:
+    domain: firefly
+    image: "version-5.7.6"
+    volumes:
+      data: "/mnt/storage/firefly/data"
+      db: "/mnt/storage/firefly/db"
+
+  gotify:
+    domain: gotify
+    image: "2.1.7"
+    volumes:
+      data: "/mnt/storage/gotify/data"
+
   linkding:
     domain: linkding
+    image: "1.15.1"
     volumes:
       data: "/mnt/storage/linkding"
+
+  mariadb:
+    version: "10.9.3"
+    volumes:
+      data: ""
+
+  miniflux:
+    domain: miniflux
+    version: "2.0.36"
+
+  paperless:
+    domain: paper
+    version: "1.7.1"
+    volumes:
+      data: "/mnt/storage/paperless/data"
+      consume: "/mnt/paper"
+      media: ""
+
+  pihole:
+    domain: pihole
+    ip: ""
+
+  postgres:
+    version: "14-alpine3.16"
+    volumes:
+      data: "/mnt/storage/postgres/data"
+
+  string:
+    domain: string
+    version: ""
+
   traefik:
     domain: traefik
+    version: "2.6.1"
     provider:
       address: "localhost:8500"
     acme:
@@ -18,7 +72,6 @@ app:
       acme: "/mnt/storage/traefik/acme"
       tls: "/mnt/storage/traefik/tls"
     do_token: ""
-    pihole_ip: ""
 
   whoami:
     domain: whoami

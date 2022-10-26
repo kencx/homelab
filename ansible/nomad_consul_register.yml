@@ -5,7 +5,7 @@
   register: nomad_consul_cert
   changed_when: false
 
-# TODO vault login
+  # must be logged in to bw and Vault
 - name: Create Nomad client certificate for Consul
   block:
     - name: Issue new certificate
