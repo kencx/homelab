@@ -34,7 +34,7 @@
         ssl_ca_chain_name: "vault"
         ssl_remote_cert_name: "vault"
         ssl_remote_cert_common_name: "vault"
-        ssl_remote_cert_subject_alt_name: "IP:{{ cluster_server_ip }}"
+        ssl_remote_cert_subject_alt_name: "IP:{{ cluster_server_ip }},DNS:vault.service.consul"
         ssl_remote_cert_ttl: "+365d"
 
     - name: Mount NFS shares
@@ -50,12 +50,14 @@
       vars:
         consul_vault_addr: "https://{{ cluster_server_ip }}:8200"
         consul_common_name: "server.dc1.consul"
+        consul_alt_names: "consul.service.consul"
         consul_ip_sans: "127.0.0.1,{{ cluster_server_ip }}"
 
     - role: nomad
       vars:
         nomad_vault_addr: "https://{{ cluster_server_ip }}:8200"
         nomad_common_name: "server.global.nomad"
+        nomad_alt_names: "nomad.service.consul"
         nomad_ip_sans: "127.0.0.1,{{ cluster_server_ip }}"
 
   tasks:

@@ -11,6 +11,9 @@ listener "tcp" {
   tls_require_and_verify_client_cert = false
 }
 
-api_addr     = "https://127.0.0.1:8200"
-cluster_addr = "https://127.0.0.1:8201"
+api_addr     = {% raw %}"https://{{ GetInterfaceIP \"eth0\" }}:8200"
+{% endraw %}
+cluster_addr = {% raw %}"https://{{ GetInterfaceIP \"eth0\" }}:8201"
+{% endraw %}
+
 ui           = true

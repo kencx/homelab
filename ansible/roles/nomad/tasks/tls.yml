@@ -13,7 +13,7 @@
           vault write -format=json pki_int/issue/cluster \
           "common_name={{ nomad_common_name }}" \
           "ttl=24h" \
-          "alt_names=localhost" \
+          "alt_names=localhost,{{ nomad_alt_names }}" \
           "ip_sans={{ nomad_ip_sans }}"
       environment:
         VAULT_ADDR: "{{ nomad_vault_addr }}"
@@ -59,7 +59,7 @@
     block: |
       template {
         contents = <<EOF
-      {{ '{{' }} with pkiCert "pki_int/issue/cluster" "common_name={{ nomad_common_name }}" "ttl=24h" "alt_names=localhost" "ip_sans={{ nomad_ip_sans }}" {{ '}}' }}
+      {{ '{{' }} with pkiCert "pki_int/issue/cluster" "common_name={{ nomad_common_name }}" "ttl=24h" "alt_names=localhost,{{ nomad_alt_names }}" "ip_sans={{ nomad_ip_sans }}" {{ '}}' }}
       {{ '{{' }} .Cert {{ '}}' }}
       {{ '{{' }} if .CA {{ '}}' }}
       {{ '{{' }} .CA | writeToFile "{{ nomad_tls_dir }}/ca.crt" "nomad" "nomad" "0600" {{ '}}' }}

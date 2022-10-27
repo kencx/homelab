@@ -91,7 +91,7 @@ api:
 ping: {}
 
 log:
-  level: "DEBUG"
+  level: "INFO"
 
 # accessLog:
 #   filePath: "/traefik.log"
@@ -187,7 +187,7 @@ EOF
 
       template {
         data = <<EOF
-{{ with secret "pki_int/issue/cluster" "common_name=traefik-client.dc1.consul" }}
+{{ with secret "pki_int/issue/cluster" "common_name=traefik-client.dc1.consul" "alt_names=consul.service.consul" }}
 {{ .Data.certificate }}
 {{ end }}
 EOF
@@ -198,7 +198,7 @@ EOF
 
       template {
         data = <<EOF
-{{ with secret "pki_int/issue/cluster" "common_name=traefik-client.dc1.consul" }}
+{{ with secret "pki_int/issue/cluster" "common_name=traefik-client.dc1.consul" "alt_names=consul.service.consul" }}
 {{ .Data.private_key }}
 {{ end }}
 EOF
@@ -208,7 +208,7 @@ EOF
       }
       template {
         data = <<EOF
-{{ with secret "pki_int/issue/cluster" "common_name=traefik-client.dc1.consul" }}
+{{ with secret "pki_int/issue/cluster" "common_name=traefik-client.dc1.consul" "alt_names=consul.service.consul" }}
 {{ .Data.issuing_ca }}
 {{ end }}
 EOF

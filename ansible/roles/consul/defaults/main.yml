@@ -13,4 +13,5 @@ consul_server_ip: ""
 # certificate generation
 consul_vault_addr: "https://localhost:8200"
 consul_common_name: "server.dc1.consul"
+consul_alt_names: "consul.service.consul"
 consul_ip_sans: "127.0.0.1"

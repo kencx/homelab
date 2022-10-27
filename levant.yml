@@ -64,7 +64,7 @@ app:
     domain: traefik
     version: "2.6.1"
     provider:
-      address: "localhost:8500"
+      address: "consul.service.consul:8501"
     acme:
       email: ""
       caServer: ""

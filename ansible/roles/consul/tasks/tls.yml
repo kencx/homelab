@@ -14,7 +14,7 @@
           vault write -format=json pki_int/issue/cluster \
           "common_name={{ consul_common_name }}" \
           "ttl=24h" \
-          "alt_names=localhost" \
+          "alt_names=localhost,{{ consul_alt_names }}" \
           "ip_sans={{ consul_ip_sans }}"
       environment:
         VAULT_ADDR: "{{ consul_vault_addr }}"
@@ -60,7 +60,7 @@
     block: |
       template {
         contents = <<EOF
-      {{ '{{' }} with pkiCert "pki_int/issue/cluster" "common_name={{ consul_common_name }}" "ttl=24h" "alt_names=localhost" "ip_sans={{ consul_ip_sans }}" {{ '}}' }}
+      {{ '{{' }} with pkiCert "pki_int/issue/cluster" "common_name={{ consul_common_name }}" "ttl=24h" "alt_names=localhost,{{ consul_alt_names }}" "ip_sans={{ consul_ip_sans }}" {{ '}}' }}
       {{ '{{' }} .Cert {{ '}}' }}
       {{ '{{' }} if .CA {{ '}}' }}
       {{ '{{' }} .CA | writeToFile "{{ consul_tls_dir }}/ca.crt" "consul" "consul" "0600" {{ '}}' }}
