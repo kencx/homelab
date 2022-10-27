@@ -156,12 +156,44 @@ http:
         - addprefix-pihole
       service: pihole
 
+    nomad:
+      entryPoints:
+        - https
+      rule: "Host(`nomad.[[ .common.domain ]]`)"
+      tls: {}
+      middlewares:
+        - default-headers
+      service: nomad
+
+    consul:
+      entryPoints:
+        - https
+      rule: "Host(`consul.[[ .common.domain ]]`)"
+      tls: {}
+      middlewares:
+        - default-headers
+      service: consul
+
   services:
     pihole:
       loadBalancer:
         servers:
           - url: "https://[[ .app.pihole.ip ]]"
-        passHostHeader: true
+    proxmox:
+      loadBalancer:
+        servers:
+          - url: "https://[[ .app.proxmox.ip ]]"
+        serversTransports: insecureTransport
+    nomad:
+      loadBalancer:
+        servers:
+          - url: "https://nomad.service.consul:4646"
+        serversTransports: insecureTransport
+    consul:
+      loadBalancer:
+        servers:
+          - url: "https://consul.service.consul:8501"
+        serversTransports: insecureTransport
 
   serversTransports:
     insecureTransport:
@@ -175,7 +207,6 @@ http:
     default-headers:
       headers:
         frameDeny: true
-        sslRedirect: true
         browserXssFilter: true
         contentTypeNosniff: true
         forceSTSHeader: true

@@ -56,6 +56,10 @@ app:
     volumes:
       data: "/mnt/storage/postgres/data"
 
+  proxmox:
+    domain: proxmox
+    ip: ""
+
   string:
     domain: string
     version: ""
