@@ -25,7 +25,7 @@ job "firefly" {
 
       check {
         type     = "http"
-        path     = "/"
+        path     = "/health"
         port     = "http"
         interval = "30s"
         timeout  = "5s"

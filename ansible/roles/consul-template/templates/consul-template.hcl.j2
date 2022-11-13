@@ -11,7 +11,7 @@ template {
 {{ '{{' }} with pkiCert "pki_int/issue/client" "common_name=ctemplate" "ttl=30d" {{ '}}' }}
 {{ '{{' }} .Cert {{ '}}' }}
 {{ '{{' }} if .Key {{ '}}' }}
-{{ '{{' }} .Key | writeToFile "{{ consul_template_dir }}/tls_consul_template_key.pem" "root" "root" "0400" {{ '}}' }}
+{{ '{{' }} .Key | writeToFile "{{ consul_template_dir }}/tls/consul_template_key.pem" "root" "root" "0400" {{ '}}' }}
 {{ '{{' }} end {{ '}}' }}
 {{ '{{' }} end {{ '}}' }}
 EOF
