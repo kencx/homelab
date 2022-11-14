@@ -4,6 +4,13 @@ common:
   tz: "Asia/Singapore"
 
 app:
+  actual:
+    domain: actual
+    image: "22.10.25-alpine"
+    volumes:
+      server: "/mnt/storage/actual/server"
+      user: "/mnt/storage/actual/user"
+
   calibre_web:
     domain: books
     image: "amd64-0.6.18"
