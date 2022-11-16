@@ -86,3 +86,9 @@ app:
 
   whoami:
     domain: whoami
+
+  yarr:
+    domain: yarr
+    image: ""
+    volumes:
+      data: "/mnt/storage/yarr/data"
