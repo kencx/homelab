@@ -1,27 +1,52 @@
 # Setup
 
-This documents the setup details for a cluster from scratch.
+This documents the details for setting up a cluster from scratch.
 
 - [Vault](#vault)
-  - [Prerequisites](#prerequisites)
+  - [Prerequisites](#vault-prerequisites)
   - [First Time Setup](#first-time-setup)
 - [consul-template](#consul-template)
+  - [Prerequisites](#consul-template-prerequisites)
   - [Setup](#consul-template-setup)
   - [Token Renewal](#token-renewal)
 - [Consul](#consul)
+  - [Prerequisites](#consul-prerequisites)
+  - [Setup](#consul-setup)
+  - [Consul Registration](#consul-registration)
 - [Nomad](#nomad)
+  - [Prerequisites](#nomad-prerequisites)
   - [Setup](#nomad-setup)
   - [Vault Integration](#vault-integration)
+- [TODO](#todo)
 
 ## Vault
 
 A single Vault server instance is configured on a server node. For maximum
-resiliency, multiple Vault servers can be started as standby nodes. We also use
+resiliency, multiple Vault servers can be started as standby nodes. We use
 Vault's [integrated
 storage](https://www.vaultproject.io/docs/concepts/integrated-storage) as the
 storage backend.
 
-### Prerequisites
+Following [Vault's production hardening
+guide](https://learn.hashicorp.com/tutorials/vault/production-hardening?in=vault/day-one-raft),
+we try to follow the baseline recommendations for a production ready Vault instance:
+
+- [x] Run as non-root user
+- [x] End-to-end TLS
+- [ ] Disable swap
+- [ ] Disable core dumps
+- [ ] Single tenancy
+- [ ] Restrict firewall traffic
+- [x] Avoid root tokens
+- [x] Enable audit logging
+- [ ] Disable shell command history
+- [x] Restrict storage access
+- [x] No clear text credentials
+- [x] Use correct file permissions
+- [x] Use stdin for Vault secrets
+- [x] Use short TTLs
+
+### Prerequisites <a name="vault-prerequisites"></a>
 
 - A generated certificate, private key and CA chain from an (offline) private
   root CA and intermediate CA. This is required for TLS encryption for Vault's
@@ -32,21 +57,23 @@ storage backend.
   secrets engine as a CA. This still requires a temporary key pair for starting
   the Vault instance.
 
-- A password manager where the user is logged in. Here,
-  [Bitwarden](https://bitwarden.com/) is used with helper scripts
-  `vault/files/bw_store.sh` and `vault/files/bw_get.sh`.
+- A secure password manager. Here, [Bitwarden](https://bitwarden.com/) is used with
+  helper scripts `vault/files/bw_store.sh` and `vault/files/bw_get.sh`.
 
 ### First Time Setup
 
-1. Start Vault as `vault` user on port 8200.
+1. Vault is started as the `vault` user.
 2. Vault is initialized. The root token and unseal key(s) are saved in
    Bitwarden.
-3. We login as root to create a root and intermediate CVA with the PKI secrets
-   engine. Multiple roles are created for issuing certificates for Nomad, Consul
-   TLS and client cert authentication.
-4. The file audit device is enabled for logging Vault operations.
-5. A non-root admin policy and identity is created for Vault maintenance. It
-   utilizes cert authentication and contains less capabilities than root.
+3. Login to Vault with the root token and create a root and intermediate CA with
+   the PKI secrets engine.
+4. Create PKI roles for certificate issuance for mTLS and certificate
+   authentication.
+5. Enable the file audit device for logging Vault operations.
+6. Create a non-root admin policy and identity for secure Vault administration
+   and maintenance. It utilizes cert authentication for login.
+7. (Optional) If Consul is started, we may enable [Consul integration](#consul-registration) with Vault.
+   This requires a certificate key pair to interact with Consul's encrypted API.
 
 ## Consul-Template
 
@@ -62,80 +89,136 @@ Vault credentials rotation. This includes:
 
 All nodes running Nomad, Consul or Vault require a consul-template instance.
 
+### Prerequisites <a name="consul-template-prerequisites"></a>
+
+- A working Vault server instance
+
 ### Setup <a name="consul-template-setup"></a>
 
-1. A client certificate and private key is issued from Vault's CA. It is to be used for
-   certificate authentication to Vault.
+1. Issue a client certificate and private key from Vault's CA for certificate
+   authentication to Vault.
 2. Create a new `consul-template` policy and authentication role with the generated
    certificate.
-3. Start consul-template as `root` (temporary measure) with login script.
-4. Setup cronjob for renew token script.
+3. Consul-template is started as `root` (to be fixed) with login script.
+4. Set up cronjob for renew token script.
 
-consul-template requires access to Vault via a Vault token. This is obtained when
-authenticating to Vault with any method. Here, we use [certificate
-authentication](https://developer.hashicorp.com/vault/docs/auth/cert). A login helper
-script is a necessary
-[workaround](https://github.com/hashicorp/consul-template/issues/318) for
-consul-template to use cert auth to securely access Vault without the need to store the
-token in plain text.
+consul-template requires access to Vault via a Vault token. This is obtained
+when authenticating to Vault with any method. Here, we use [certificate
+authentication](https://developer.hashicorp.com/vault/docs/auth/cert) with a
+login helper script to securely authenticate with Vault without needing to store
+the Vault token in plain text. The helper script is a necessary
+[workaround](https://github.com/hashicorp/consul-template/issues/318) as
+consul-template is unable to use cert auth to natively authenticate with Vault.
 
 #### Token Renewal
 
 consul-template supports automated renewal of its given Vault token. However, cert auth
 tokens require passing the client certificate and key during renewal and hence, are not
-supported. As such, we use a renew token helper script with a periodic cronjob instead.
+supported.
+
+As such, we use a renew token helper script with a periodic cronjob instead.
 When consul-template starts, it performs a self-lookup on the token, generated from the
 login script, that stores the accessor ID. The helper script uses this accessor ID to
 renew the token when triggered.
 
 ## Consul
 
-#### Security
-Consul is started with mTLS. As such, all clients are required to possess a
-signed certificate from the same CA (Vault's CA):
+A minimum of two Consul instances are deployed on separate hosts - a server and
+a client. The Consul cluster provides service discovery for the cluster with DNS
+and HTTP, and integrates with Nomad to provide health checks for applications.
 
-- Consul client nodes
-- CLI client on all hosts
-- Consul UI
-- Vault server
-- Nomad server and client nodes
+### Prerequisites <a name="consul-prerequisites"></a>
 
-#### Consul Registration
+- A working Vault server instance with PKI enabled and configured
+- A local consul-template instance
+- A local DNS server that
+  [forwards](https://developer.hashicorp.com/consul/tutorials/networking/dns-forwarding#dnsmasq-setup)
+  `service.consul` queries to Consul for DNS lookup.
 
-TODO
+### Setup
 
-#### Setup
+1. Set up gossip encryption. A gossip key is generated and saved to Vault, if
+   not already present. Gossip key rotation is handled by consul-template.
+2. Set up mTLS encryption. A certificate key pair is issued from Vault PKI if
+   it does not already exist. Renewal of expired certificates is handled by
+   consul-template.
+3. Consul is started.
 
-TODO
+### Consul Registration
+
+Both Vault and Nomad can be integrated with Consul in their respective
+configurations. This enables them to leverage on Consul's features including
+health checks, service discovery and dynamic configuration. Additionally, we can
+use Consul's DNS lookup to easily reference their host IP.
 
 ## Nomad
 
-#### Setup <a name="nomad-setup"></a>
+A minimum of two Nomad instances are deployed on separate hosts - a server and a
+client - to form a cluster. Ideally, deploying a minimum of three Nomad servers
+is recommended to ensure resiliency in the event of a single server failure.
 
-1. Client certificates are issued via Vault to all Nomad nodes to enable mTLS
-   encryption. consul-template handles all renewal of expired certificates.
-2. The gossip key is obtained from Vault to enable gossip encryption. If there is no
-   existing key, a new key is generated.
-3. [Vault integration](#vault-integration) is enabled.
-4. The Nomad node is started with server or client dependent configuration.
-5. (Optional) Client certificates are issued via Vault for CLI interaction with the
-   Nomad API. It is also useful to setup the relevant environment variables:
-   `NOMAD_ADDR, NOMAD_CACERT`.
+Communication within the Nomad mini-cluster is encrypted:
+- Serf or "gossip" traffic for communication between Nomad servers, secured by
+  an encryption key.
+- HTTP and RPC for communication between Nomad agents, secured by mTLS.
 
-#### Vault Integration
+### Prerequisites <a name="nomad-prerequisites"></a>
+
+- A working Vault server instance
+- A local consul-template instance
+
+### Setup <a name="nomad-setup"></a>
+
+1. On Nomad client hosts, install [CNI
+   plugins](https://github.com/containernetworking/plugins/releases/tag/v1.0.0).
+   This is necessary to use [bridge networking
+   mode](https://developer.hashicorp.com/nomad/docs/job-specification/network#network-modes)
+   in Nomad jobspecs.
+2. Set up gossip encryption. Similar to Consul, a gossip key is generated and
+   saved to Vault, if not already present. This gossip key is added to Nomad's
+   configuration and
+   [rotated](https://developer.hashicorp.com/consul/tutorials/vault-secure/vault-kv-consul-secure-gossip)
+   with consul-template.
+3. Set up mTLS encryption. A certificate key pair is issued from the configured
+   Vault PKI role if there is no existing pair. Renewal of expired certificates
+   is handled by consul-template.
+4. [Vault integration](#vault-integration) is enabled.
+5. Nomad is started.
+6. (Optional) Issue client certificates via Vault for the Nomad CLI. It is also
+   useful to setup the relevant environment variables: `NOMAD_ADDR,
+   NOMAD_CACERT`.
+7. (Optional) If Consul is started, we may enable [Consul
+   integration](#consul-registration) in Nomad. This requires a certificate key
+   pair to interact with Consul's encrypted API.
+
+### Vault Integration
 
 To access Vault secrets in Nomad jobs, [Vault
 integration](https://developer.hashicorp.com/nomad/docs/integrations/vault-integration)
-must be enabled. This requires Nomad to have its own periodic, orphan Vault token, with
-relevant policies attached. The token is generated with a custom token role. It is then
-passed to Nomad as the `VAULT_TOKEN` environment variable.
+must be enabled. This requires Nomad to have its own periodic, orphan Vault
+token, with the relevant policies attached. The token is generated with a custom
+token role and passed to Nomad as the `VAULT_TOKEN` environment variable.
 
-Both Nomad and consul-template perform renewal of the Vault token, but for different
-reasons. The token is placed in a plain text file, to be read by systemd as an
-`EnvironmentFile` for the Nomad service. On the token's expiry, Nomad will renew it in
-memory without writing the new token to the file.
+It is important to note that both Nomad and consul-template perform renewal of
+the Vault token for different reasons which are explained below.
 
-However, if Nomad is restarted after the token in the file has expired, Nomad is unable
-to produce a new token for startup automatiicaly. As such, consul-template writes a new
-plain text token in the file when it expires, ensuring a valid token is always available
-on every restart of the Nomad server.
+At the moment, we pass the `VAULT_TOKEN` environment variable to Nomad's systemd
+service file with the `EnvironmentFile` key and the token in plain text. This
+ensures the environment variable is always read when Nomad is started. Nomad
+will then handle the renewal of the Vault token in memory without writing the
+new token to the file, as long as it has the appropriate policies.
+
+However, if Nomad is restarted after the token in the file has expired, it will
+be unable to start. This means the plain text token must be renewed as well.
+This renewal is handled by consul-template, which ensures a valid token is
+always available on every restart of the Nomad server.
+
+## TODO
+
+### Common
+- [ ] Replace user with non-default password protected user
+- [ ] Security audit
+- [ ] Monitor for intrusions
+
+### Consul-template
+- [ ] Run as non-root service

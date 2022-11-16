@@ -11,11 +11,11 @@ minimally of one server node and one client node with NFS mounted storage from a
 NAS instance.
 
 ### Features
-- [ ] Nomad container scheduling and orchestration
-- [ ] Consul service discovery
-- [ ] Secure node communication via mTLS
-- [ ] Personal Certificate Authority hosted on Vault
-- [ ] Automated certificate management with consul-template, Traefik
+- [x] Nomad container scheduling and orchestration
+- [x] Consul service discovery
+- [x] Secure node communication via mTLS
+- [x] Personal Certificate Authority hosted on Vault
+- [x] Automated certificate management with consul-template, Traefik
 
 ## Provisioning
 
@@ -33,17 +33,19 @@ The three key provisioning steps are:
 
 Each VM is provisoned from a common base Debian 11 image created with Packer and
 Ansible, as seen in `packer/base`. The templating process installs common packages,
-performs security hardening and other common tasks. Refer to
-[docs/packer](docs/packer.md) for more information.
+performs security hardening and other common tasks.
+
+Refer to [docs/packer](docs/packer.md) for more information.
 
 ### Provisioning with Terraform
 
 Terraform provisons VMs from the created images on Proxmox with the
 [telmate/proxmox](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs)
-provider. All resources utilize a custom `base` module in `terraform/modules/vm` which
-contains some sane defaults and sets up SSH access. `null_resource` is then used to pass
-on post-provisioning to Ansible. Configuration variables and other information are found
-at [docs/terraform](docs/terraform.md).
+provider. All resources utilize a custom `base` module in which contains sane
+defaults and sets up SSH access. Post-provisioning is then performed with Ansible with
+the help of `null_resource`.
+
+Configuration variables for `base` are found at [docs/terraform](docs/terraform.md).
 
 ### Post-provisioning with Ansible
 
@@ -72,10 +74,6 @@ Refer to [docs/setup](docs/setup.md) for detailed information.
 ## Networking
 
 TODO
-
-	 maintenance.
-4. Other policies are created including those used by Consul-template for
-	 certificate rotation, retrieving secrets etc.
 
 ## VPS
 

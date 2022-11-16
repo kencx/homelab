@@ -8,6 +8,7 @@
         path: "{{ consul_template_dir }}/tls"
         state: mounted
 
+    # IP address must be used instead of DNS as Consul has not been setup yet
     cluster_server_ip: "{{ ansible_default_ipv4.address }}"
 
     vault_config_dir: "/etc/vault.d"
