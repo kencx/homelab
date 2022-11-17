@@ -15,6 +15,12 @@ packer.validate:
 packer.base:
 	cd packer/base && packer build -var-file="auto.pkrvars.hcl" .
 
+# ansible
+.PHONY: ansible.play
+ansible.play:
+	cd ansible && ansible-playbook -i inventory/hosts.yml $(c).yml --user=debian
+
+# restic
 restic.check:
 	sudo autorestic exec check -av
 
