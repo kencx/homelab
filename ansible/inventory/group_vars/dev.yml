@@ -1,0 +1,29 @@
+---
+# common
+nfs_ip: "10.10.10.102"
+nfs_share_mounts:
+  - src: "{{ nfs_ip }}:/home/debian/apps/test-apps"
+    path: "/mnt/storage"
+    state: mounted
+
+# Default to IP address of dev server node.
+# IP address must be used instead of DNS as Consul has not been setup yet
+# NOTE: this variable must be gathered and cached in server.yml. Otherwise, it will be
+# undefined in client.yml
+cluster_server_ip: "{{ hostvars[groups['server'] | difference(groups['prod']) | first]['ansible_default_ipv4']['address'] }}"
+
+# vault
+vault_address: "{{ cluster_server_ip }}"
+
+# consul-template
+consul_template_dir: "/opt/consul-template"
+
+# consul
+consul_vault_addr: "https://{{ cluster_server_ip }}:8200"
+consul_alt_names: "consul.service.consul"
+
+# nomad
+nomad_config_dir: "/etc/nomad.d"
+nomad_tls_dir: "/opt/nomad/data/tls"
+nomad_vault_addr: "https://{{ cluster_server_ip }}:8200"
+nomad_alt_names: "nomad.service.consul"

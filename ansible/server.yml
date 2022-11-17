@@ -1,24 +1,6 @@
 ---
 - hosts: server
   become: true
-  vars:
-    nfs_ip: "10.10.10.102"
-    nfs_share_mounts:
-      - src: "{{ nfs_ip }}:/home/debian/apps/tls"
-        path: "{{ consul_template_dir }}/tls"
-        state: mounted
-
-    # IP address must be used instead of DNS as Consul has not been setup yet
-    cluster_server_ip: "{{ ansible_default_ipv4.address }}"
-
-    vault_config_dir: "/etc/vault.d"
-    vault_tls_dir: "/opt/vault/tls"
-    vault_ca_cert_dir: "/usr/share/ca-certificates/vault"
-    consul_template_dir: "/opt/consul-template"
-
-    nomad_config_dir: "/etc/nomad.d"
-    nomad_tls_dir: "/opt/nomad/data/tls"
-
   roles:
     # requires localhost root
     # NOTE: /tmp/certs must already exist with 1000:1000
@@ -40,26 +22,10 @@
 
     - name: Mount NFS shares
       role: kencx.ansible.nfs
-
     - role: vault
-
     - role: consul-template
-      vars:
-        vault_address: "{{ cluster_server_ip }}"
-
     - role: consul
-      vars:
-        consul_vault_addr: "https://{{ cluster_server_ip }}:8200"
-        consul_common_name: "server.dc1.consul"
-        consul_alt_names: "consul.service.consul"
-        consul_ip_sans: "127.0.0.1,{{ cluster_server_ip }}"
-
     - role: nomad
-      vars:
-        nomad_vault_addr: "https://{{ cluster_server_ip }}:8200"
-        nomad_common_name: "server.global.nomad"
-        nomad_alt_names: "nomad.service.consul"
-        nomad_ip_sans: "127.0.0.1,{{ cluster_server_ip }}"
 
   tasks:
     - name: Register Vault as Consul service

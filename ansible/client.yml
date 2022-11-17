@@ -2,22 +2,7 @@
 - hosts: client
   become: true
   vars:
-    nfs_ip: "10.10.10.102"
-    nfs_share_mounts:
-      - src: "{{ nfs_ip }}:/home/debian/apps/prod-apps"
-        path: "/mnt/storage"
-        state: mounted
-      - src: "{{ nfs_ip }}:/home/debian/apps/tls"
-        path: "{{ consul_template_dir }}/tls"
-        state: mounted
-
     cluster_server_ip: "10.10.10.110"
-    cluster_client_ip: "{{ ansible_default_ipv4.address }}"
-
-    consul_template_dir: "/opt/consul-template"
-
-    nomad_config_dir: "/etc/nomad.d"
-    nomad_tls_dir: "/opt/nomad/data/tls"
 
   pre_tasks:
     # TODO too dependent on server.yml playbook
@@ -75,26 +60,9 @@
   roles:
     - name: Mount NFS shares
       role: kencx.ansible.nfs
-
     - role: consul-template
-      vars:
-        vault_address: "{{ cluster_server_ip }}"
-
     - role: consul
-      vars:
-        consul_server_ip: "{{ cluster_server_ip }}"
-        consul_vault_addr: "https://{{ cluster_server_ip }}:8200"
-        consul_common_name: "client.dc1.consul"
-        consul_alt_names: "consul.service.consul"
-        consul_ip_sans: "127.0.0.1,{{ cluster_server_ip }}"
-
     - role: nomad
-      vars:
-        nomad_server_ip: "{{ cluster_server_ip }}"
-        nomad_vault_addr: "https://{{ cluster_server_ip }}:8200"
-        nomad_common_name: "client.global.nomad"
-        nomad_alt_names: "nomad.service.consul"
-        nomad_ip_sans: "127.0.0.1,{{ cluster_client_ip }}"
 
   tasks:
     - name: Register Nomad client as Consul service
