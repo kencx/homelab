@@ -1,0 +1,10 @@
+#!/bin/bash
+
+URL="{{ consul_gotify_url }}/message?token={{ consul_gotify_token }}"
+SERVICE="$(cat - | jq -r '.[] | select(.ServiceName != "" and .Status != "passing") | .ServiceName')"
+
+if [[ $SERVICE != "" ]]; then
+    MESSAGE="Service $SERVICE is unhealthy"
+    PRIORITY=3
+    curl -X POST --data '{"message": "'"$MESSAGE"'", "priority": '"$PRIORITY"'}' -H 'Content-Type: application/json' "$URL"
+fi

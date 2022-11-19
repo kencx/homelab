@@ -92,6 +92,9 @@ For encryption, the role creates consul-template templates for:
 | consul_vault_addr | Vault server API address to use | string | `https://localhost:8200` |
 | consul_common_name | Consul node certificate common_name | string | `server.dc1.consul` |
 | consul_ip_sans | Consul's TLS certificate IP SANs | string | `127.0.0.1` |
+| setup_consul_watches | Set up Consul watches for healthchecks | bool | `true` |
+| consul_gotify_url | Gotify URL for sending webhook | string | `""` |
+| consul_gotify_token | Gotify token for sending webhook | string | `""` |
 
 ## Nomad
 This role deploys a new Nomad instance. It can deploy Nomad as a server or client,

@@ -36,6 +36,18 @@
     group: root
   notify: restart consul
 
+- name: Copy watches script
+  become: true
+  template:
+    src: "healthcheck.sh.j2"
+    dest: "{{ consul_data_dir }}/healthcheck.sh"
+    mode: 0755
+    owner: consul
+    group: consul
+  when:
+    - "'server' in group_names"
+    - setup_consul_watches
+
 - name: Copy Consul config files
   block:
     - name: Common config

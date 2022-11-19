@@ -4,3 +4,13 @@ bootstrap_expect = {{ consul_bootstrap_expect }}
 auto_encrypt {
   allow_tls = true
 }
+
+{% if setup_consul_watches %}
+watches = [
+  {
+    type = "checks"
+    handler_type = "script"
+    args = ["{{ consul_data_dir }}/healthcheck.sh"]
+  }
+]
+{% endif %}
