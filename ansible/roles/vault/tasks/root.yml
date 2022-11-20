@@ -14,9 +14,16 @@
     group: vault
     state: touch
 
-# TODO setup logrotate
 - name: Enable file audit
   command: "vault audit enable file file_path={{ vault_log_file }}"
+
+- name: Set up logrotate for file audit
+  template:
+    src: "logrotate-vault.j2"
+    dest: "/etc/logrotate.d/vault"
+    mode: 0644
+    owner: root
+    group: root
 
 - name: Enable cert auth
   command: "vault auth enable cert"
