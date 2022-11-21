@@ -249,7 +249,7 @@ EOF
       }
 
       resources {
-        cpu    = 35
+        cpu    = 60
         memory = 128
       }
     }

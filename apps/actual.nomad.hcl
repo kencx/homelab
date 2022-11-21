@@ -59,7 +59,7 @@ job "actual" {
       }
 
       resources {
-        cpu    = 50
+        cpu    = 25
         memory = 100
       }
     }
