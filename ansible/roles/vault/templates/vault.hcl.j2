@@ -9,6 +9,10 @@ listener "tcp" {
   tls_key_file  = "{{ vault_tls_dir }}/key.pem"
 
   tls_require_and_verify_client_cert = false
+
+  telemetry {
+    unauthenticated_metrics_access = true
+  }
 }
 
 api_addr     = {% raw %}"https://{{ GetInterfaceIP \"eth0\" }}:8200"
@@ -17,3 +21,8 @@ cluster_addr = {% raw %}"https://{{ GetInterfaceIP \"eth0\" }}:8201"
 {% endraw %}
 
 ui           = true
+
+telemetry {
+  disable_hostname = true
+  prometheus_retention_time = "12h"
+}

@@ -37,7 +37,8 @@ job "grafana" {
         ports = ["http"]
         volumes = [
           "[[ .app.grafana.volumes.data ]]:/var/lib/grafana",
-          "local/datasources:/etc/grafana/provisioning/datasources",
+          "[[ .app.grafana.volumes.dashboards ]]:/dashboards",
+          "local/provisioning:/etc/grafana/provisioning",
         ]
       }
 
@@ -56,7 +57,24 @@ datasources:
     version: 1
     editable: true
 EOF
-        destination = "${NOMAD_TASK_DIR}/datasources/datasource.yml"
+        destination = "${NOMAD_TASK_DIR}/provisioning/datasources/datasource.yml"
+      }
+
+      template {
+        data        = <<EOF
+apiVersion: 1
+providers:
+  - name: Dashboard
+    folder: 'Services'
+    type: file
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    disableDeletion: true
+    options:
+      path: /dashboards
+      foldersFromFileStructure: true
+EOF
+        destination = "${NOMAD_TASK_DIR}/provisioning/dashboards/dashboard.yml"
       }
 
       resources {

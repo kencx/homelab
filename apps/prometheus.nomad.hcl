@@ -61,7 +61,7 @@ scrape_configs:
         target_label: __scheme__
         replacement: https
 
-    scrape_interval: 5s
+    scrape_interval: 10s
     metrics_path: /v1/metrics
     params:
       format: ['prometheus']
@@ -70,9 +70,6 @@ scrape_configs:
     static_configs:
       - targets:
           - 192.168.86.200
-    metrics_path: /pve
-    params:
-      module: [default]
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -82,6 +79,24 @@ scrape_configs:
 {{ range service "pve_exporter" }}
         replacement: {{ .Address }}:{{ .Port }}
 {{ end }}
+    scrape_interval: 60s
+    metrics_path: /pve
+    params:
+      module: [default]
+
+  - job_name: 'vault'
+    static_configs:
+      - targets:
+{{ range service "vault" }}
+          - {{ .Address }}:{{ .Port }}
+{{ end }}
+    scheme: https
+    tls_config:
+      ca_file: "tls/vault-ca.crt"
+    scrape_interval: 60s
+    metrics_path: /v1/sys/metrics
+    params:
+      format: ['prometheus']
 EOF
         destination = "${NOMAD_TASK_DIR}/prometheus.yml"
         change_mode = "noop"
@@ -115,6 +130,14 @@ EOF
 {{ end }}
 EOF
         destination = "${NOMAD_SECRETS_DIR}/tls/prom-client.dc1.consul-ca.crt"
+        perms       = "0640"
+        change_mode = "restart"
+      }
+
+      # need to replace with Vault's intermediate CA
+      template {
+        data        = file("../certs/vault-ca.crt")
+        destination = "${NOMAD_SECRETS_DIR}/tls/vault-ca.crt"
         perms       = "0640"
         change_mode = "restart"
       }
