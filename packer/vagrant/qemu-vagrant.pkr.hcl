@@ -1,7 +1,7 @@
 source "qemu" "base" {
   vm_name          = var.vm_name
   headless         = true
-  shutdown_command = "echo '${var.ssh_username}' | sudo -S /sbin/shutdown -hP now"
+  shutdown_command = "echo 'vagrant' | sudo -S /sbin/shutdown -hP now"
 
   iso_url      = var.iso_url
   iso_checksum = var.iso_checksum
@@ -15,10 +15,11 @@ source "qemu" "base" {
     ["-display", "none"]
   ]
 
-  ssh_username     = var.ssh_username
-  ssh_password     = var.ssh_password
-  ssh_port         = 22
-  ssh_wait_timeout = "3600s"
+  ssh_username         = var.ssh_username
+  ssh_password         = var.ssh_password
+  ssh_private_key_file = "~/.ssh/vagrant"
+  ssh_port             = 22
+  ssh_wait_timeout     = "3600s"
 
   http_directory = "${path.root}/http"
   boot_wait      = "5s"
@@ -28,11 +29,37 @@ source "qemu" "base" {
 build {
   sources = ["source.qemu.base"]
 
+  # Make debian user ready for Ansible
   provisioner "shell" {
-    execute_command = "echo '${var.ssh_username}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
+    execute_command = "echo 'vagrant' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
+    scripts = [
+      "./bin/ssh.sh",
+      "./bin/sudo.sh",
+    ]
+    expect_disconnect = true
+  }
+
+  provisioner "ansible" {
+    playbook_file = "../../ansible/common.yml"
+    extra_arguments = [
+      "-e",
+      "user=${var.ssh_username}",
+      "-e",
+      "ansible_become_password=${var.ssh_password}",
+    ]
+    galaxy_file = "../../requirements.yml"
+    user        = var.ssh_username
+    ansible_env_vars = [
+      "ANSIBLE_STDOUT_CALLBACK=yaml",
+      "ANSIBLE_HOST_KEY_CHECKING=False",
+    ]
+  }
+
+  # vagrant-specific setup
+  provisioner "shell" {
+    execute_command = "echo 'vagrant' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
     scripts = [
       "./bin/vagrant.sh",
-      "./bin/networking.sh",
       "./bin/minimize.sh"
     ]
     expect_disconnect = true

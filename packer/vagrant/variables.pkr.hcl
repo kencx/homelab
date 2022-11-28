@@ -19,7 +19,7 @@ variable "vm_name" {
 variable "ssh_username" {
   type        = string
   description = "SSH username"
-  default     = "vagrant"
+  default     = "debian"
 }
 
 variable "ssh_password" {

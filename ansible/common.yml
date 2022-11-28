@@ -5,6 +5,16 @@
   vars:
     user: debian
 
+  pre_tasks:
+    - name: Ensure Debian user created
+      user:
+        name: debian
+        shell: /bin/bash
+        groups: sudo
+        append: true
+        create_home: true
+        state: present
+
   roles:
     - name: Install Common
       role: common
