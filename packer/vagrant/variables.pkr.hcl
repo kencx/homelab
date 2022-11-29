@@ -16,6 +16,12 @@ variable "vm_name" {
   default     = "base"
 }
 
+variable "root_password" {
+  type        = string
+  description = "Root password"
+  default     = "vagrant"
+}
+
 variable "ssh_username" {
   type        = string
   description = "SSH username"
@@ -26,4 +32,16 @@ variable "ssh_password" {
   type        = string
   description = "SSH password"
   default     = "vagrant"
+}
+
+variable "ssh_public_key_path" {
+  type        = string
+  description = "SSH Public Key Path"
+  default     = "~/.ssh/vagrant.pub"
+}
+
+variable "ssh_private_key_path" {
+  type        = string
+  description = "SSH Private Key Path"
+  default     = "~/.ssh/vagrant"
 }

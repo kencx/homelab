@@ -38,9 +38,28 @@ $ vagrant ssh
 We build the Vagrant box with the qemu builder and Vagrant post-processor. Several
 scripts are **required** for the Vagrant box to function properly with Vagrant:
 
-- Create `vagrant` user with password `vagrant`
-- Add Vagrant's insecure public key to `vagrant` user's `authorized_keys` file
-- Set up password-less sudo for `vagrant` user
 - Ensure `UseDNS no` is added to `sshd_config`
 - Use `eth0` interface (for libvirt)
 - For qemu builds, minimize the image with `minimize.sh`
+
+## Notes
+
+Specify your custom SSH key pair with `ssh_private_key_file` and `ssh_public_key_file`.
+The SSH public key will be added to the user's `.ssh/authorized_keys` file.
+
+The default root password is `vagrant`. Although root login is disabled, it is
+recommended to change this for non-development systems:
+
+```hcl
+# auto.pkrvars.hcl
+root_password = changeme
+```
+
+or you can choose to change the root password on startup with
+
+```bash
+$ sudo passwd root
+```
+
+It is also recommmended to disable password-less sudo, which has been enabled for
+easy provisioning.

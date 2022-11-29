@@ -42,18 +42,18 @@ d-i partman/confirm_write_new_label boolean true
 
 # User Setup
 d-i passwd/root-login boolean false
-d-i passwd/root-password password vagrant
-d-i passwd/root-password-again password vagrant
-d-i passwd/user-fullname string debian
-d-i passwd/username string debian
+d-i passwd/root-password password ${root_password}
+d-i passwd/root-password-again password ${root_password}
+d-i passwd/user-fullname string ${username}
+d-i passwd/username string ${username}
 d-i passwd/user-uid string 1000
-d-i passwd/user-password password vagrant
-d-i passwd/user-password-again password vagrant
+d-i passwd/user-password password ${password}
+d-i passwd/user-password-again password ${password}
 d-i passwd/user-default-groups sudo
 d-i user-setup/allow-password-weak boolean true
 d-i user-setup/encrypt-home boolean false
 
-# # Package Setup
+# Package Setup
 # d-i apt-setup/contrib boolean true
 # d-i apt-setup/non-free boolean true
 tasksel tasksel/first multiselect standard, ssh-server

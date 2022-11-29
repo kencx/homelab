@@ -12,6 +12,10 @@ inventory/*
 
 # packer
 auto.pkrvars.hcl
+**/builds/*
+
+# vagrant
+**/.vagrant/*
 
 # nomad
 input.vars

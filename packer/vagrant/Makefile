@@ -1,6 +1,6 @@
 .PHONY: build add up up.d
 build:
-	packer build .
+	packer build -var-file="auto.pkrvars.hcl" .
 
 add:
 	vagrant box add builds/base.libvirt.box --provider libvirt --name kenc/debian-11.5
