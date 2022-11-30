@@ -1,8 +1,8 @@
 resource "vault_pki_secret_backend_role" "server_role" {
   backend        = vault_mount.pki_int.path
   name           = "server"
-  ttl            = "24h"
-  max_ttl        = "72h"
+  ttl            = "86400"
+  max_ttl        = "259200"
   generate_lease = true
 
   allowed_domains    = concat(["localhost"], var.allowed_server_domains)
@@ -18,8 +18,8 @@ resource "vault_pki_secret_backend_role" "server_role" {
 resource "vault_pki_secret_backend_role" "client_role" {
   backend        = vault_mount.pki_int.path
   name           = "client"
-  ttl            = "24h"
-  max_ttl        = "72h"
+  ttl            = "86400"
+  max_ttl        = "259200"
   generate_lease = true
 
   allowed_domains    = concat(["localhost"], var.allowed_client_domains)
@@ -38,8 +38,8 @@ resource "vault_pki_secret_backend_role" "client_role" {
 resource "vault_pki_secret_backend_role" "auth_role" {
   backend        = vault_mount.pki_int.path
   name           = "auth"
-  ttl            = "24h"
-  max_ttl        = "72h"
+  ttl            = "86400"
+  max_ttl        = "259200"
   generate_lease = true
 
   allowed_domains    = concat(["localhost"], var.allowed_auth_domains)
@@ -54,8 +54,8 @@ resource "vault_pki_secret_backend_role" "auth_role" {
 resource "vault_pki_secret_backend_role" "vault_server" {
   backend        = vault_mount.pki_int.path
   name           = "vault"
-  ttl            = "8760h"  # 1 year
-  max_ttl        = "43830h" # 5 years
+  ttl            = "31536000"  # 1 year
+  max_ttl        = "157788000" # 5 years
   generate_lease = true
 
   allowed_domains    = concat(["localhost"], var.allowed_vault_domains)

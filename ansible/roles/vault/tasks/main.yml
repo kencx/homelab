@@ -9,6 +9,7 @@
   with_items:
     - "{{ vault_data_dir }}"
     - "{{ vault_data_dir }}/raft"
+    - "{{ vault_log_dir }}"
     - "{{ vault_tls_dir }}"
     - "{{ vault_policy_dir }}"
 
@@ -66,6 +67,56 @@
 - name: Vault Initialization
   import_tasks: init.yml
 
-# Setup CA, file audit, cert auth, admin role
-- name: Setup with root token
-  import_tasks: root.yml
+- name: Create Vault log file
+  file:
+    path: "{{ vault_log_file }}"
+    mode: 0640
+    owner: vault
+    group: vault
+    # ensures idempotence
+    access_time: preserve
+    modification_time: preserve
+    state: touch
+
+- name: Set up logrotate for file audit
+  template:
+    src: "logrotate-vault.j2"
+    dest: "/etc/logrotate.d/vault"
+    mode: 0644
+    owner: root
+    group: root
+
+- set_fact:
+    vault_terraform_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/terraform/vault"
+
+# Terraform provider requires Vault's CA cert on Ansible host
+- name: Copy Vault CA cert to localhost
+  fetch:
+    src: "{{ vault_ca_cert_dir }}/ca.crt"
+    dest: "{{ vault_terraform_dir }}/certs/vault-ca.crt"
+    flat: true
+
+# Terraform must be installed on Ansible host
+# Provisions consul_template and nomad auth entities
+# See ${GIT_REPO}/terraform/vault for resources
+- name: Provision Vault secrets with Terraform provider
+  become: false
+  community.general.terraform:
+    project_path: "{{ vault_terraform_dir }}"
+    state: present
+    force_init: true
+    variables:
+      admin_password: "{{ vault_admin_password }}"
+      vault_token: "{{ vault_root_token }}"
+      vault_address: "https://{{ ansible_default_ipv4.address }}:8200"
+      vault_audit_path: "{{ vault_log_file }}"
+      vault_ca_cert_file: "{{ vault_terraform_dir }}/certs/vault-ca.crt"
+  register: vault_terraform
+  delegate_to: localhost
+
+- debug:
+    msg: "{{ vault_terraform.stdout }}"
+  when: vault_terraform is defined
+
+# - name: Revoke root token (Optional)
+#   when: vault_revoke_root_token|bool

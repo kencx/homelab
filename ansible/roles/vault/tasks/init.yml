@@ -17,10 +17,26 @@
     vault_init_json: "{{ vault_init_raw.stdout | from_json }}"
   when: vault_init_raw is defined and vault_init_raw.stdout is defined
 
+- name: Store unseal keys on filesystem
+  copy:
+    content: "{{ vault_init_json.unseal_keys_hex[0] }}"
+    dest: "{{ vault_unseal_key_file }}"
+    owner: root
+    group: root
+    mode: 0400
+  when:
+    - vault_store_bw == false
+    - vault_init_json is defined
+    - vault_init_json.unseal_keys_hex is defined
+  no_log: true
+
 # TODO BW must be logged in
 - name: Store unseal keys in Bitwarden
   script: "bw_store.sh 'Vault Unseal Key' {{ vault_init_json.unseal_keys_hex[0] }} {{ bw_password }}"
-  when: vault_init_json is defined and vault_init_json.unseal_keys_hex is defined
+  when:
+    - vault_store_bw == true
+    - vault_init_json is defined
+    - vault_init_json.unseal_keys_hex is defined
   no_log: true
   register: bw_vault_unseal_key
   failed_when: bw_vault_unseal_key.stdout == "bw get failed"
@@ -28,9 +44,25 @@
 # - debug:
 #     var: bw_vault_unseal_key.stdout
 
+- name: Store root token on filesystem
+  copy:
+    content: "{{ vault_init_json.root_token }}"
+    dest: "{{ vault_root_token_file }}"
+    owner: root
+    group: root
+    mode: 0400
+  when:
+    - vault_store_bw == false
+    - vault_init_json is defined
+    - vault_init_json.root_token is defined
+  no_log: true
+
 - name: Save root token in Bitwarden
   script: "bw_store.sh 'Vault Root Token' {{ vault_init_json.root_token }} {{ bw_password }}"
-  when: vault_init_json is defined and vault_init_json.root_token is defined
+  when:
+    - vault_store_bw == true
+    - vault_init_json is defined
+    - vault_init_json.root_token is defined
   no_log: true
   register: bw_vault_root_token
   failed_when: bw_vault_root_token.stdout == "bw get failed"
@@ -59,9 +91,39 @@
 #     var: vault_unseal_json
 #   when: vault_unseal_raw is defined and vault_unseal_raw.stdout is defined
 
+- name: Read root token from file
+  slurp:
+    src: "{{ vault_root_token_file }}"
+  register: slurped_vault_root_token
+  when:
+    - vault_store_bw == false
+    - vault_init_json is not defined
+    - vault_init_json.root_token is not defined
+
+- set_fact:
+    vault_root_token: "{{ slurped_vault_root_token['content'] | b64decode }}"
+  when:
+    - slurped_vault_root_token is defined
+    - vault_init_json is not defined
+    - vault_init_json.root_token is not defined
+
+# - name: Read root token from Bitwarden
+#   set_fact:
+#     vault_root_token: ""
+#   when:
+#     - vault_store_bw == true
+#     - vault_init_json is not defined
+#     - vault_init_json.root_token is not defined
+
+- set_fact:
+    vault_root_token: "{{ vault_init_json.root_token }}"
+  when:
+    - vault_init_json is defined
+    - vault_init_json.root_token is defined
+
 - name: Login to Vault with root token
   shell:
-    cmd: vault login --format json {{ vault_init_json.root_token }}
+    cmd: vault login --format json {{ vault_root_token }}
   register: vault_login_raw
   changed_when: false
   failed_when: vault_login_raw.rc != 0

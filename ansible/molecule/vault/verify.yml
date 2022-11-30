@@ -1,0 +1,38 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Include default vars
+      include_vars:
+        dir: "{{ role_directory }}/defaults/"
+        extensions:
+          - 'yml'
+          - 'yaml'
+      vars:
+        role_directory: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/roles/{{ lookup('env', 'MOLECULE_SCENARIO_NAME') }}"
+
+    - name: Vault service started
+      systemd:
+        name: vault
+        state: started
+        enabled: true
+
+    - name: Check Vault status
+      command: vault status -format=json
+      register: vault_status_raw
+      changed_when: false
+      failed_when: vault_status_raw.rc == 1
+
+    - set_fact:
+        vault_status_json: "{{ vault_status_raw.stdout | from_json }}"
+
+    - fail:
+        msg: Vault sealed
+      when: not vault_status_json.initialized
+
+    # - name: Vault status
+    #   debug:
+    #     var: vault_status_json
+    #   when: vault_status_json is defined

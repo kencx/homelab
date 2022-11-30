@@ -4,26 +4,37 @@
 This role deploys a new Vault instance and performs the required initialization.
 
 ### Prerequisites
+- Terraform installed on Ansible host
 - A private key and signed certificate for TLS encryption. If from a self-signed CA, the
 	system must also contain and recognize the CA certificate or certificate chain.
 - Vault installed
-- Bitwarden password manager
+- (Optional) Bitwarden password manager
 
 ### Initialization
-After Vault initialization, the role records the root token and unseal key(s) into
-Bitwarden for reference when required. It logs in as root to setup Vault as a
-self-signed CA with the PKI secrets engine. The role also creates an admin policy and
-cert auth role for secure non-root access of Vault by an administrator.
+
+After Vault initialization, the role records the root token and unseal key(s)
+into Bitwarden or the filesystem for reference when required. It logs in as root
+to setup Vault as a self-signed CA with the PKI secrets engine with the
+Terraform provider. The role also creates an admin policy and cert auth role for
+secure non-root access of Vault by an administrator. A full list of Terraform
+resources can be found at `homelab/terraform/vault`.
 
 ### Variables
 | Variable | Description | Type | Default |
 | -------- | ----------- | ---- | ------- |
 | vault_config_dir | Configuration directory | string | `/etc/vault.d` |
 | vault_data_dir | Restricted data directory | string | `/opt/vault/data` |
+| vault_log_dir | Restricted logs directory | string | `/opt/vault/logs` |
 | vault_tls_dir | TLS files directory | string | `/opt/vault/tls` |
 | vault_ca_cert_dir | Vault's CA certificate directory | string | `/usr/share/ca-certificates/vault` |
 | vault_policy_dir | Policies directory | string | `{{ vault_config_dir }}/policies` |
-| vault_log_file | Audit log file | string | `{{ vault_data_dir }}/vault.log` |
+| vault_log_file | Audit log file | string | `{{ vault_log_dir }}/vault.log` |
+| vault_store_bw | Store root token in Bitwarden | bool | `false` |
+| vault_unseal_key_file | File path for unseal key^ | string | `{{ vault_data_dir }}/.unseal_key` |
+| vault_root_token_file | File path for root token^ | string | `{{ vault_data_dir }}/.root_token` |
+| vault_admin_password | Password for admin user | string | `password` |
+
+>^ Only applicable if `vault_store_bw: true`
 
 ## Consul-template
 

@@ -10,6 +10,12 @@ variable "vault_token" {
   description = "Vault token for provider"
 }
 
+variable "vault_ca_cert_file" {
+  type        = string
+  description = "Local path to Vault CA cert file"
+  default     = "./certs/vault_ca.crt"
+}
+
 variable "vault_audit_path" {
   type        = string
   description = "Vault audit file path"
