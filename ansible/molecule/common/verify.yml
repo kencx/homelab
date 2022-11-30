@@ -1,0 +1,43 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Include default vars
+      include_vars:
+        dir: "{{ role_directory }}/defaults/"
+        extensions:
+          - 'yml'
+          - 'yaml'
+      vars:
+        role_directory: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/roles/{{ lookup('env', 'MOLECULE_SCENARIO_NAME') }}"
+
+    - name: Packages installed
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items: "{{ common_packages }}"
+
+    - name: Hashicorp tools installed
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - nomad
+        - consul
+        - vault
+
+    - name: consul-template installed
+      stat:
+        path: "/usr/bin/consul-template"
+      register: consul_template
+      changed_when: false
+      failed_when: consul_template.stat.exists != true
+
+    - name: bw installed
+      stat:
+        path: "/usr/bin/bw"
+      register: bw
+      changed_when: false
+      failed_when: bw.stat.exists != true

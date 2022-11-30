@@ -7,8 +7,6 @@ galaxy.install: requirements.yml
 	ansible-galaxy install -f -r requirements.yml
 
 # packer
-.PHONY: validate base
-
 packer.validate:
 	cd packer/base && packer validate -var-file="auto.pkrvars.hcl" .
 
@@ -16,9 +14,19 @@ packer.base:
 	cd packer/base && packer build -var-file="auto.pkrvars.hcl" .
 
 # ansible
-.PHONY: ansible.play
 ansible.play:
 	cd ansible && ansible-playbook -i inventory/hosts.yml $(c).yml --user=debian
+
+ansible.dev.play:
+	cd ansible && ansible-playbook -i inventory/hosts.yml $(c).yml --user=debian --limit=dev
+
+# molecule
+mol = create converge verify destroy test login prepare
+mol.$(mol):
+	cd ansible && molecule $@ -s $(scen)
+
+mol.list:
+	cd ansible && molecule list
 
 # restic
 restic.check:

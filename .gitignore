@@ -3,6 +3,7 @@ cloud-config
 
 # ansible
 inventory/*
+**/test.yml
 
 # terraform
 **/.terraform/*
