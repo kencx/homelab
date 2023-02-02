@@ -1,5 +1,15 @@
 ## Work Log
 
+### 02/02/23 11:47
+- Cleaned up `common` role
+  - Replace soon to be deprecated `apt_key` with `get_url`
+  - Move repository key to default keyring `/etc/apt/keyrings`
+  - Install `consul-template` directly with `apt` instead of `unarchive`-ing the
+    binary.
+  - Generalized some OS variables with Ansible facts
+  - Molecule testing of `common` role with `debian/bullseye64` box. Creating our own boxes
+    will come later.
+
 ### 30/11/22 21:40
 - Added Molecule unit tests for `common` and `vault` roles.
   - They use the `molecule-vagrant` driver because I can't be arsed to bother with figuring out systemd on molecule-docker.

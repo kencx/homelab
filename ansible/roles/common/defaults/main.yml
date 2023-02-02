@@ -1,4 +1,6 @@
 ---
+common_user: debian
+common_keyring_dir: "/etc/apt/keyrings"
 common_nfs_dir: "/mnt/storage"
 common_packages:
   - sudo
@@ -13,4 +15,3 @@ common_packages:
   - jq
   - unzip
   - ca-certificates
-user: debian

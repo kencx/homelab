@@ -1,25 +1,15 @@
 ---
-# limit to template group when running manually
 - hosts: all
   become: true
   vars:
     user: debian
 
-  pre_tasks:
-    - name: Ensure Debian user created
-      user:
-        name: debian
-        shell: /bin/bash
-        groups: sudo
-        append: true
-        create_home: true
-        state: present
-
   roles:
-    - name: Install Common
-      role: common
+    - role: common
+      vars:
+        - common_user: "{{ user }}"
 
-    - name: Install docker
+    - name: Install Docker
       role: geerlingguy.docker
       vars:
         # install docker compose plugin instead of docker-compose binary
@@ -38,7 +28,7 @@
             - {rule: 'allow', port: '4648', proto: 'tcp', comment: 'nomad Serf WAN'}  # server only
             - {rule: 'allow', port: '4648', proto: 'udp', comment: 'nomad Serf WAN'}  # server only
             - {rule: 'allow', port: '8200', proto: 'tcp', comment: 'vault UI'}
-            - {rule: 'allow', port: '8300', proto: 'tcp', comment: 'consul RPC'}  # server only
+            - {rule: 'allow', port: '8300', proto: 'tcp', comment: 'consul RPC'}      # server only
             - {rule: 'allow', port: '8301', proto: 'tcp', comment: 'consul Serf LAN'}
             - {rule: 'allow', port: '8301', proto: 'udp', comment: 'consul Serf LAN'}
             - {rule: 'allow', port: '8302', proto: 'tcp', comment: 'consul Serf WAN'}
@@ -47,21 +37,8 @@
             - {rule: 'allow', port: '8600', proto: 'tcp', comment: 'consul DNS'}
             - {rule: 'allow', port: '8600', proto: 'udp', comment: 'consul DNS'}
 
-    - name: Install goss
+    - name: Goss validation
       role: kencx.ansible.goss
       vars:
         - goss_dir: "./goss"
         - goss_file: "base.yml"
-
-  tasks:
-    - name: Reset Nomad
-      block:
-        - name: Stop Nomad
-          systemd:
-            name: nomad
-            state: stopped
-
-        - name: Delete Nomad data
-          file:
-            path: /opt/nomad/data
-            state: absent

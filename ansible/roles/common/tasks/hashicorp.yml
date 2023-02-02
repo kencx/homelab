@@ -1,0 +1,51 @@
+---
+- name: Create keyring directory
+  file:
+    path: "{{ common_keyring_dir }}"
+    mode: 0755
+    owner: root
+    group: root
+    state: directory
+
+# apt-key is being deprecated in Debian 11
+# note the .asc extension is necessary for de-armouring
+# https://www.jeffgeerling.com/blog/2022/aptkey-deprecated-debianubuntu-how-fix-ansible
+- name: Add Hashicorp apt key
+  get_url:
+    url: https://apt.releases.hashicorp.com/gpg
+    dest: "{{ common_keyring_dir }}/hashicorp.asc"
+    mode: 0644
+    force: true
+
+- name: Add Hashicorp apt repository
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by={{ common_keyring_dir }}/hashicorp.asc] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+    filename: hashicorp
+    state: present
+    update_cache: true
+
+- name: Install Hashicorp software
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 86400
+  with_items:
+    - nomad
+    - consul
+    - vault
+    - consul-template
+
+# Nomad starts automatically after installation, which results in issues when it tries
+# to start up with a different configuration later
+- name: Reset Nomad
+  block:
+    - name: Stop Nomad
+      systemd:
+        name: nomad
+        state: stopped
+
+    - name: Delete default Nomad data
+      file:
+        path: /opt/nomad/data
+        state: absent

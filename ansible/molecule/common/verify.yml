@@ -13,6 +13,11 @@
       vars:
         role_directory: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/roles/{{ lookup('env', 'MOLECULE_SCENARIO_NAME') }}"
 
+    - name: User created
+      getent:
+        database: passwd
+        key: "{{ common_user }}"
+
     - name: Packages installed
       apt:
         name: "{{ item }}"
@@ -27,17 +32,24 @@
         - nomad
         - consul
         - vault
+        - consul-template
 
-    - name: consul-template installed
-      stat:
-        path: "/usr/bin/consul-template"
-      register: consul_template
-      changed_when: false
-      failed_when: consul_template.stat.exists != true
+    - name: Nomad stopped
+      systemd:
+        name: nomad
+        state: stopped
 
-    - name: bw installed
+    - name: Bitwarden installed
       stat:
         path: "/usr/bin/bw"
       register: bw
       changed_when: false
       failed_when: bw.stat.exists != true
+
+    - name: NFS share directories created
+      file:
+        path: "{{ common_nfs_dir }}"
+        mode: 0755
+        owner: "{{ common_user }}"
+        group: "{{ common_user }}"
+        state: directory

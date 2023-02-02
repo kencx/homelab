@@ -1,4 +1,18 @@
 ---
+- name: Create user
+  user:
+    name: "{{ common_user }}"
+    shell: /bin/bash
+    groups: sudo
+    append: true
+    create_home: true
+    # password: "{{ password | password_hash('sha512') }}"
+    # update_password: on_create
+    state: present
+
+# - name: Force reset password on first login
+#   command: "chage -d 0 {{ common_user }}"
+
 - name: Update apt packages
   apt:
     update_cache: true
@@ -18,41 +32,11 @@
   retries: 10
   until: apt_action is success or ('/var/lib/dpkg/lock-frontend' not in apt_action.msg)
 
-- name: Add Hashicorp apt repository
-  block:
-    - name: Add Hashicorp APT repository key
-      apt_key:
-        url: https://apt.releases.hashicorp.com/gpg
-        state: present
-
-    - name: Add Hashicorp APT repository
-      apt_repository:
-        repo: "deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
-        state: present
-
-- name: Install Hashicorp tools
-  apt:
-    name: "{{ item }}"
-    state: present
-    update_cache: true
-    cache_valid_time: 86400
-  with_items:
-    - nomad
-    - consul
-    - vault
-
-- name: Install consul-template
-  unarchive:
-    src: "https://releases.hashicorp.com/consul-template/0.29.2/consul-template_0.29.2_linux_amd64.zip"
-    dest: "/usr/bin"
-    remote_src: true
-    mode: 0755
-    owner: root
-    group: root
+- import_tasks: hashicorp.yml
 
 - name: Install Bitwarden CLI
   unarchive:
-    src: "https://vault.bitwarden.com/download/?app=cli&platform=linux"
+    src: "https://vault.bitwarden.com/download/?app=cli&platform={{ ansible_system|lower }}"
     dest: "/usr/bin"
     remote_src: true
     mode: 0755
@@ -63,6 +47,6 @@
   file:
     path: "{{ common_nfs_dir }}"
     mode: 0755
-    owner: "{{ user }}"
-    group: "{{ user }}"
+    owner: "{{ common_user }}"
+    group: "{{ common_user }}"
     state: directory
