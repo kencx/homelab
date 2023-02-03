@@ -5,14 +5,11 @@ driver:
   name: vagrant
   provider:
     name: libvirt
+  default_box: "debian/bullseye64"
 platforms:
   - name: instance
-    box: "kenc/debian-11.5-v2"
-    box_url: "file://../../packer/vagrant/builds/base.libvirt.2022-11-29.box"
+    box: "debian/bullseye64"
     config_options:
-      ssh.username: "debian"
-      ssh.insert_key: false
-      ssh.private_key_path: "~/.ssh/vagrant"
       synced_folder: false
 
 provisioner:

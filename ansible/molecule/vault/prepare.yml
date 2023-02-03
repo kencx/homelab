@@ -1,65 +1,29 @@
 ---
+# Prepares a TLS key pair for testing Vault, signed by the
+# insecure root and intermediate CA
 - hosts: all
   become: true
   vars:
-    root_ca_dir: "/root/ownca/root"
+    root_ca_dir: "./testca/root"
+    intermediate_ca_dir: "./testca/intermediate"
+    local_staging_dir: "./testca/vault"
     vault_tls_dir: "/opt/vault/tls"
+  roles:
+    - role: common
+      vars:
+        common_packages:
+          - curl
+          - unzip
+          - ca-certificates
+          - python3-pip
+
   tasks:
-
-    # Create a temporary root CA and TLS key pair for Vault server instance
-    - name: Install pip
-      apt:
-        name: pip
-        state: present
-
+    # necessary to run modules in community.crypto collection
     - name: Install required dependencies
       pip:
         name: cryptography>=1.2.3
         state: present
 
-    - name: Create root CA directory
-      file:
-        path: "{{ root_ca_dir }}"
-        mode: 0755
-        owner: "root"
-        group: "root"
-        state: directory
-
-    # create root CA
-    - name: Generate root key
-      community.crypto.openssl_privatekey:
-        path: "{{ root_ca_dir }}/ca_key.pem"
-        mode: 0400
-        owner: root
-        group: root
-
-    - name: Create root CSR
-      community.crypto.openssl_csr:
-        path: "{{ root_ca_dir }}/ca.csr"
-        privatekey_path: "{{ root_ca_dir }}/ca_key.pem"
-        common_name: "Root CA"
-        use_common_name_for_san: false
-        basic_constraints:
-          - "CA:TRUE"
-        basic_constraints_critical: true
-        key_usage:
-          - keyCertSign
-        key_usage_critical: true
-        mode: 0640
-        owner: root
-        group: root
-
-    - name: Generate root CA certificate
-      community.crypto.x509_certificate:
-        path: "{{ root_ca_dir }}/ca.crt"
-        provider: selfsigned
-        privatekey_path: "{{ root_ca_dir }}/ca_key.pem"
-        csr_path: "{{ root_ca_dir }}/ca.csr"
-        mode: 0644
-        owner: root
-        group: root
-
-    # generate Vault key pair
     - name: Create Vault TLS directory
       file:
         path: "{{ vault_tls_dir }}"
@@ -87,25 +51,35 @@
           - "IP:{{ ansible_host }}"
           - "DNS:{{ ansible_fqdn }}"
           - "IP:127.0.0.1"
-          # - "IP:{{ cluster_server_ip }}"
           - "DNS:vault.service.consul"
         mode: 0640
         owner: "vault"
         group: "vault"
 
-    - name: Sign Vault certificate with root CA
-      community.crypto.x509_certificate:
-        path: "{{ vault_tls_dir }}/vault.crt"
-        csr_path: "{{ vault_tls_dir }}/host.csr"
-        provider: ownca
-        ownca_path: "{{ root_ca_dir }}/ca.crt"
-        ownca_privatekey_path: "{{ root_ca_dir }}/ca_key.pem"
-        ownca_not_after: "+365d"
-        owner: "vault"
-        group: "vault"
-        mode: 0640
+    - name: Copy remote vault CSR to host
+      fetch:
+        src: "{{ vault_tls_dir }}/host.csr"
+        dest: "{{ local_staging_dir }}/vault.csr"
+        flat: true
 
-    # Trust root CA
+    - name: Sign Vault certificate with intermediate CA
+      community.crypto.x509_certificate:
+        path: "{{ local_staging_dir }}/vault.crt"
+        csr_path: "{{ local_staging_dir }}/vault.csr"
+        provider: ownca
+        ownca_path: "{{ intermediate_ca_dir }}/int.crt"
+        ownca_privatekey_path: "{{ intermediate_ca_dir }}/int_key.pem"
+        ownca_not_after: "+365d"
+        mode: 0640
+      # Because delegate_to becomes sudo by default, we want to
+      # set delegated user to the one currently running playbook.
+      # We don't use become_user as it does not recognize UIDs
+      # or {{ ansible_user_id }} fact.
+      delegate_to: localhost
+      become: false
+      delegate_facts: true
+      remote_user: "{{ ansible_user_id }}"
+
     - name: Create Vault trust store directory
       file:
         path: "/usr/share/ca-certificates/vault"
@@ -114,14 +88,21 @@
         group: "vault"
         state: directory
 
-    - name: Copy signed certificate and CA
+    - name: Copy CA chain to remote
       copy:
-        src: "{{ root_ca_dir }}/ca.crt"
+        src: "{{ local_staging_dir }}/ca-chain.crt"
         dest: "/usr/share/ca-certificates/vault/ca.crt"
-        mode: 0640
+        mode: "0640"
         owner: "vault"
         group: "vault"
-        remote_src: true
+
+    - name: Copy signed certificate to remote
+      copy:
+        src: "{{ local_staging_dir }}/vault.crt"
+        dest: "{{ vault_tls_dir }}/vault.crt"
+        mode: "0640"
+        owner: "vault"
+        group: "vault"
 
     - name: Add certificate-chain to remote ca-certificates.conf
       lineinfile:

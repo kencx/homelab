@@ -1,0 +1,109 @@
+---
+# Create an insecure root CA and intermediate CA for testing
+- hosts: 127.0.0.1
+  connection: local
+  become: false
+  vars:
+    root_ca_dir: "./testca/root"
+    intermediate_ca_dir: "./testca/intermediate"
+    local_staging_dir: "./testca/vault"
+  tasks:
+    - name: Install pip
+      apt:
+        name: pip
+        state: present
+
+    - name: Install required dependencies
+      pip:
+        name: cryptography>=1.2.3
+        state: present
+
+    - name: Create root CA directory
+      file:
+        path: "{{ root_ca_dir }}"
+        mode: 0755
+        state: directory
+
+    - name: Generate root key
+      community.crypto.openssl_privatekey:
+        path: "{{ root_ca_dir }}/ca_key.pem"
+        mode: 0644
+
+    - name: Create root CSR
+      community.crypto.openssl_csr:
+        path: "{{ root_ca_dir }}/ca.csr"
+        privatekey_path: "{{ root_ca_dir }}/ca_key.pem"
+        common_name: "Root CA"
+        use_common_name_for_san: false
+        basic_constraints:
+          - "CA:TRUE"
+        basic_constraints_critical: true
+        key_usage:
+          - keyCertSign
+        key_usage_critical: true
+        mode: 0644
+
+    - name: Generate root CA certificate
+      community.crypto.x509_certificate:
+        path: "{{ root_ca_dir }}/ca.crt"
+        provider: selfsigned
+        privatekey_path: "{{ root_ca_dir }}/ca_key.pem"
+        csr_path: "{{ root_ca_dir }}/ca.csr"
+        mode: 0644
+
+    - name: Create intermediate CA directory
+      file:
+        path: "{{ intermediate_ca_dir }}"
+        mode: 0755
+        state: directory
+
+    - name: Generate intermediate key
+      community.crypto.openssl_privatekey:
+        path: "{{ intermediate_ca_dir }}/int_key.pem"
+        mode: 0644
+
+    - name: Create intermediate CSR
+      community.crypto.openssl_csr:
+        path: "{{ intermediate_ca_dir }}/int.csr"
+        privatekey_path: "{{ intermediate_ca_dir }}/int_key.pem"
+        common_name: "Intermediate CA"
+        use_common_name_for_san: false
+        basic_constraints:
+          - "CA:TRUE"
+        basic_constraints_critical: true
+        key_usage:
+          - keyCertSign
+        key_usage_critical: true
+        mode: 0644
+
+    - name: Generate intermediate CA certificate
+      community.crypto.x509_certificate:
+        path: "{{ intermediate_ca_dir }}/int.crt"
+        csr_path: "{{ intermediate_ca_dir }}/int.csr"
+        provider: ownca
+        ownca_privatekey_path: "{{ root_ca_dir }}/ca_key.pem"
+        ownca_path: "{{ root_ca_dir }}/ca.crt"
+        mode: 0644
+        return_content: true
+      register: intermediate_cert
+
+    - name: Create staging directory
+      file:
+        path: "{{ local_staging_dir }}"
+        mode: 0755
+        state: directory
+
+    - name: Create certificate chain
+      community.crypto.certificate_complete_chain:
+        input_chain: "{{ intermediate_cert.certificate }}"
+        root_certificates:
+          - "{{ root_ca_dir }}/ca.crt"
+      register: certificate_chain
+      when: intermediate_cert is defined
+
+    - name: Write certificate chain
+      copy:
+        content: "{{ ''.join(certificate_chain.complete_chain) }}"
+        dest: "{{ local_staging_dir }}/ca-chain.crt"
+        mode: 0644
+      when: certificate_chain is defined

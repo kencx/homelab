@@ -4,6 +4,7 @@ cloud-config
 # ansible
 inventory/*
 **/test.yml
+**/testca/vault/vault*
 
 # terraform
 **/.terraform/*

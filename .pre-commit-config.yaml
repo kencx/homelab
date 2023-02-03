@@ -2,21 +2,26 @@ default_stages: [push, commit]
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: v4.4.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
-      - id: detect-private-key
       - id: check-merge-conflict
       - id: check-added-large-files
 
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: detect-private-key
+        exclude: ansible/molecule/vault/testca
+
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.13.0
+    rev: v8.15.3
     hooks:
       - id: gitleaks-docker
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.75.0
+    rev: v1.77.0
     hooks:
       - id: terraform_fmt
         args:
