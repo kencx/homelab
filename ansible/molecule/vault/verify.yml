@@ -21,18 +21,15 @@
 
     - name: Check Vault status
       command: vault status -format=json
-      register: vault_status_raw
+      register: vault_status
       changed_when: false
-      failed_when: vault_status_raw.rc == 1
+      failed_when:
+        - vault_status.rc >= 1
 
-    - set_fact:
-        vault_status_json: "{{ vault_status_raw.stdout | from_json }}"
+    - name: Check Vault login as admin
+      command: vault login -method=userpass username=admin password={{ vault_admin_password }}
+      register: vault_login
+      failed_when: "'Success' not in vault_login.stdout"
 
-    - fail:
-        msg: Vault sealed
-      when: not vault_status_json.initialized
-
-    # - name: Vault status
-    #   debug:
-    #     var: vault_status_json
-    #   when: vault_status_json is defined
+    # - debug:
+    #     msg: "{{ vault_login }}"

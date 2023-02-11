@@ -1,5 +1,44 @@
 ## Work Log
 
+### 11/02/23
+- Cleaned up `vault` role for server instances
+  - Vault server tasks are moved to `tasks/server.yml`
+  - Vault initialization is constrained to only be performed on the first run of
+    the role. This will be the only time the root token is read by Ansible.
+  - Initialization consists of initializing Vault, storing the root token and
+    unseal key, logging in as root and provisioning Vault secrets with Terraform
+    provider.
+  - This constraint means that the role's purposes is only to configure and
+    initialize Vault. The management of Vault's secrets is beyond the scope of
+    this role. This prevents further runs of the role from making changes to the
+    its secrets with the root token.
+  - To allow for Molecule testing, the server platform must be added to the
+    `mol_server` group. This hopefully allows us to test client platforms and Vault
+    server/client provisioning in the future.
+
+- Provisioning of Vault-agent has also been added to `vault` role
+  - Vault-agent will be provisioned on server nodes if `vault_setup_agent ==
+    true` and all client nodes.
+  - It requires an existing Vault server instance to be present. The Vault
+    server IP must be provided and it will check that it is running and
+    unsealed before proceeding to provision Vault-agent.
+  - It must fetch Vault's CA cert from the server.
+  - Vault-Agent will use cert auth to authenticate to Vault. This requires
+    Ansible to issue new auth certs and write the certs to the `auth` role.
+    Ansible will authenticate to Vault with AppRole authentication.
+
+- The userpass admin resource is not added on the first run of terraform apply.
+  It must be run twice for the resource to be added. Unsure why.
+
+### 03/02/23 17:46
+- Created insecure root and intermediate CA for testing Vault role. These certs
+  and private keys will be checked into git and should never be used for
+  anything other than testing.
+- I included a `generate_ca.yml` playbook to quickly generate a new testca if
+  needed.
+- `prepare.yml` in molecule/vault uses the ca-chain from testca to produce a
+  TLS key pair to be used by Vault.
+
 ### 02/02/23 11:47
 - Cleaned up `common` role
   - Replace soon to be deprecated `apt_key` with `get_url`
@@ -19,7 +58,7 @@
     the plan works, but that's not ideal is it.
 - Also added support to store the unseal key and root token in the filesystem for `vault` role.
   - This is mainly for dev and testing purposes. Had to add this because I just know
-    I'll overwrite my current instance's unseal key in Bitwarden and cry.
+    I'll overwrite my current instance's unseal key in Bitwarden.
 
 ### 29/11/22
 - Ran Packer `proxmox-iso` builder to create VM template.

@@ -1,0 +1,78 @@
+---
+- name: Copy Vault service file
+  copy:
+    src: "vault.service"
+    dest: "/etc/systemd/system/vault.service"
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - reload vault
+
+- name: Copy Vault config files
+  template:
+    src: "vault.hcl.j2"
+    dest: "{{ vault_config_dir }}/vault.hcl"
+    mode: 0644
+    owner: vault
+    group: vault
+  notify:
+    - reload vault
+
+- name: Create Vault log file audit
+  file:
+    path: "{{ vault_log_file }}"
+    mode: 0640
+    owner: vault
+    group: vault
+    # ensures idempotence
+    access_time: preserve
+    modification_time: preserve
+    state: touch
+
+- name: Set up logrotate for file audit
+  template:
+    src: "logrotate-vault.j2"
+    dest: "/etc/logrotate.d/vault"
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Start Vault
+  systemd:
+    name: vault
+    state: started
+    enabled: true
+  register: vault_started
+
+- name: Wait for Vault port
+  wait_for:
+    port: 8200
+    state: started
+
+- name: Check Vault status
+  command: vault status -format=json
+  register: vault_status_raw
+  changed_when: false
+  failed_when: vault_status_raw.rc == 1
+
+- set_fact:
+    vault_status_json: "{{ vault_status_raw.stdout | from_json }}"
+
+# Initialization will only be performed on the first run of the role:
+#   - Initialize and unseal Vault
+#   - Store root token and unseal key
+#   - Login with root token
+#   - First time provisioning of Vault resources with Terraform provider
+#     with root token
+#
+# After Vault has been initialized, this role will not apply any changes made in
+# terraform/vault. This prevents changes from being applied with the root token after
+# initialization, which can be dangerous. Any changes should be planned and applied
+# outside of the role, either manually or in a CI pipeline.
+
+- name: Vault Initialization
+  import_tasks: init.yml
+  when:
+    - vault_status_json is defined
+    - not vault_status_json.initialized

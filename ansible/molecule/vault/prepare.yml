@@ -14,6 +14,7 @@
         common_packages:
           - curl
           - unzip
+          - vim
           - ca-certificates
           - python3-pip
 

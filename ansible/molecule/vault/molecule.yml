@@ -7,10 +7,12 @@ driver:
     name: libvirt
   default_box: "debian/bullseye64"
 platforms:
-  - name: instance
+  - name: server
     box: "debian/bullseye64"
     config_options:
       synced_folder: false
+    groups:
+      - mol_server
 
 provisioner:
   name: ansible

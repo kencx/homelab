@@ -1,21 +1,20 @@
 ---
-- name: Check Vault status
-  command: vault status -format=json
-  register: vault_status_raw
-  changed_when: false
-  failed_when: vault_status_raw.rc == 1
-
-- set_fact:
-    vault_status_json: "{{ vault_status_raw.stdout | from_json }}"
-
+# A single unseal key is sufficient for our purposes
 - name: Initialize Vault
   command: vault operator init -key-shares=1 -key-threshold=1 -format=json
+  no_log: true
   register: vault_init_raw
-  when: not vault_status_json.initialized
 
 - set_fact:
     vault_init_json: "{{ vault_init_raw.stdout | from_json }}"
+  no_log: true
   when: vault_init_raw is defined and vault_init_raw.stdout is defined
+
+# The initialization of Vault outputs the root token and unseal key(s). We can choose to
+# store these on the filesystem at the set paths or in Bitwarden. If stored on the
+# filesystem, root is required for read access to both files. This is only recommended
+# for testing and development purposes. If stored on Bitwarden, the bw_password variable
+# must be defined and will be used to login to your Bitwarden account.
 
 - name: Store unseal keys on filesystem
   copy:
@@ -24,13 +23,12 @@
     owner: root
     group: root
     mode: 0400
+  no_log: true
   when:
     - vault_store_bw == false
     - vault_init_json is defined
     - vault_init_json.unseal_keys_hex is defined
-  no_log: true
 
-# TODO BW must be logged in
 - name: Store unseal keys in Bitwarden
   script: "bw_store.sh 'Vault Unseal Key' {{ vault_init_json.unseal_keys_hex[0] }} {{ bw_password }}"
   when:
@@ -51,13 +49,13 @@
     owner: root
     group: root
     mode: 0400
+  no_log: true
   when:
     - vault_store_bw == false
     - vault_init_json is defined
     - vault_init_json.root_token is defined
-  no_log: true
 
-- name: Save root token in Bitwarden
+- name: Store root token in Bitwarden
   script: "bw_store.sh 'Vault Root Token' {{ vault_init_json.root_token }} {{ bw_password }}"
   when:
     - vault_store_bw == true
@@ -74,6 +72,7 @@
   shell:
     cmd: "vault operator unseal --format json {{ vault_init_json.unseal_keys_hex[0] }}"
   register: vault_unseal_raw
+  no_log: true
   when:
     - vault_status_json is defined
     - vault_status_json.sealed
@@ -91,39 +90,17 @@
 #     var: vault_unseal_json
 #   when: vault_unseal_raw is defined and vault_unseal_raw.stdout is defined
 
-- name: Read root token from file
-  slurp:
-    src: "{{ vault_root_token_file }}"
-  register: slurped_vault_root_token
-  when:
-    - vault_store_bw == false
-    - vault_init_json is not defined
-    - vault_init_json.root_token is not defined
-
-- set_fact:
-    vault_root_token: "{{ slurped_vault_root_token['content'] | b64decode }}"
-  when:
-    - slurped_vault_root_token is defined
-    - vault_init_json is not defined
-    - vault_init_json.root_token is not defined
-
-# - name: Read root token from Bitwarden
-#   set_fact:
-#     vault_root_token: ""
-#   when:
-#     - vault_store_bw == true
-#     - vault_init_json is not defined
-#     - vault_init_json.root_token is not defined
-
 - set_fact:
     vault_root_token: "{{ vault_init_json.root_token }}"
+  no_log: true
   when:
     - vault_init_json is defined
     - vault_init_json.root_token is defined
 
-- name: Login to Vault with root token
+- name: Login with root token
   shell:
     cmd: vault login --format json {{ vault_root_token }}
+  no_log: true
   register: vault_login_raw
   changed_when: false
   failed_when: vault_login_raw.rc != 0
@@ -153,3 +130,38 @@
   debug:
     var: vault_post_status_json
   when: vault_post_status_json is defined
+
+- set_fact:
+    vault_terraform_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/terraform/vault"
+
+# Terraform provider requires Vault's CA cert on Ansible host
+- name: Push Vault CA cert to Ansible host
+  fetch:
+    src: "{{ vault_ca_cert_dir }}/ca.crt"
+    dest: "{{ vault_terraform_dir }}/certs/vault-ca.crt"
+    flat: true
+
+# Terraform must be installed on Ansible host
+# See ${GIT_REPO}/terraform/vault for resources
+- name: Provision Vault secrets with Terraform provider
+  become: false
+  community.general.terraform:
+    project_path: "{{ vault_terraform_dir }}"
+    state: present
+    force_init: true
+    variables:
+      admin_password: "{{ vault_admin_password }}"
+      vault_token: "{{ vault_root_token }}"
+      vault_address: "https://{{ ansible_default_ipv4.address }}:8200"
+      vault_audit_path: "{{ vault_log_file }}"
+      vault_ca_cert_file: "{{ vault_terraform_dir }}/certs/vault-ca.crt"
+  register: vault_terraform_output
+  no_log: true
+  delegate_to: localhost
+
+- debug:
+    msg: "{{ vault_terraform_output.stdout }}"
+  when: vault_terraform_output is defined
+
+# - name: Revoke root token
+#   when: vault_revoke_root_token|bool
