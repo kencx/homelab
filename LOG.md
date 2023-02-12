@@ -1,5 +1,15 @@
 ## Work Log
 
+### 13/02/23
+- I decided to scrape the previous plan of using AppRole authentication for
+  Ansible because it had too many moving parts. Its much simpler to use TLS cert
+  authentication.
+
+- In the various roles, I have to issue certificates and write the key pair to
+  multiple pairs. This gets tedious fast. I might write a module for DRY. Not a
+  role because I'm not sure about nesting custom roles written in the same git
+  repo yet (do they need to be defined in requirements.yml?).
+
 ### 12/02/23
 - It seems too challenging to use molecule to test the provisioning of Vault
   agents due to its dependency on Vault server instances. I don't see how

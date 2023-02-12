@@ -34,3 +34,9 @@
 
     # - debug:
     #     msg: "{{ vault_login }}"
+
+    - name: Vault-agent service started
+      systemd:
+        name: vault-agent
+        state: started
+        enabled: true

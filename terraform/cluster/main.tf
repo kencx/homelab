@@ -34,27 +34,27 @@ module "server" {
   ssh_public_key  = file(var.ssh_public_key_file)
 }
 
-resource "null_resource" "server" {
-  triggers = {
-    ansible_playbook = md5(file("../../ansible/server.yml"))
-    server_ids       = "${join(",", module.server.*.ip)}"
-  }
-
-  connection {
-    type = "ssh"
-    user = var.ssh_user
-    host = module.server.ip
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "echo 'Restarting cluster'",
-      "sudo systemctl restart nomad",
-      "sudo systemctl restart consul",
-      # "goss -g /tmp/goss.yml validate",
-    ]
-  }
-}
+# resource "null_resource" "server" {
+#   triggers = {
+#     ansible_playbook = md5(file("../../ansible/server.yml"))
+#     server_ids       = "${join(",", module.server.*.ip)}"
+#   }
+#
+#   connection {
+#     type = "ssh"
+#     user = var.ssh_user
+#     host = module.server.ip
+#   }
+#
+#   provisioner "remote-exec" {
+#     inline = [
+#       "echo 'Restarting cluster'",
+#       "sudo systemctl restart nomad",
+#       "sudo systemctl restart consul",
+#       # "goss -g /tmp/goss.yml validate",
+#     ]
+#   }
+# }
 
 module "client" {
   source = "../modules/vm"
@@ -70,32 +70,32 @@ module "client" {
 
   cores     = 2
   sockets   = 2
-  memory    = 4096
-  disk_size = "10G"
+  memory    = 8192
+  disk_size = "15G"
 
   ssh_user        = var.ssh_user
   ssh_private_key = file(var.ssh_private_key_file)
   ssh_public_key  = file(var.ssh_public_key_file)
 }
 
-resource "null_resource" "client" {
-  triggers = {
-    ansible_playbook = md5(file("../../ansible/client.yml"))
-    server_ids       = "${join(",", module.client.*.ip)}"
-  }
-
-  connection {
-    type = "ssh"
-    user = var.ssh_user
-    host = module.client.ip
-  }
-
-  provisioner "local-exec" {
-    command     = "ansible-playbook client.yml -u ${var.ssh_user}"
-    working_dir = "../../ansible"
-    environment = {
-      ANSIBLE_STDOUT_CALLBACK   = "yaml"
-      ANSIBLE_HOST_KEY_CHECKING = false
-    }
-  }
-}
+# resource "null_resource" "client" {
+#   triggers = {
+#     ansible_playbook = md5(file("../../ansible/client.yml"))
+#     server_ids       = "${join(",", module.client.*.ip)}"
+#   }
+#
+#   connection {
+#     type = "ssh"
+#     user = var.ssh_user
+#     host = module.client.ip
+#   }
+#
+#   provisioner "local-exec" {
+#     command     = "ansible-playbook client.yml -u ${var.ssh_user}"
+#     working_dir = "../../ansible"
+#     environment = {
+#       ANSIBLE_STDOUT_CALLBACK   = "yaml"
+#       ANSIBLE_HOST_KEY_CHECKING = false
+#     }
+#   }
+# }

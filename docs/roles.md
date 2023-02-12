@@ -46,10 +46,19 @@ Terraform resources can be found at `homelab/terraform/vault`.
 
 ### Vault Agent
 
-If this role is ran on a client node or `vault_setup_agent` is `true`, it will
-also provision a Vault-Agent instance. It requires an existing
-unsealed Vault server and should be run on client nodes only after the Vault
-server has been setup.
+If this role is ran on a client node or `vault_setup_agent` is `true` (on a
+server node), it will also provision a Vault-Agent instance. It requires an
+existing unsealed Vault server and should be run only after the Vault server has
+been setup.
+
+Vault-agent's method of authentication to Vault is TLS certificate
+authentication. Ansible will generate these certificates and write them to the
+agent's auth role.
+
+>This means Ansible itself requires access to Vault which it receives through
+>authentication using its own TLS certificates, created by Terraform during the
+>provisioning of the Vault server. These certificates were also written to
+>`homelab/certs/`
 
 ### Variables
 | Variable | Description | Type | Default |
@@ -65,6 +74,8 @@ server has been setup.
 | vault_unseal_key_file | File path for unseal key^ | string | `${vault_data_dir}/.unseal_key` |
 | vault_root_token_file | File path for root token^ | string | `${vault_data_dir}/.root_token` |
 | vault_admin_password | Password for admin user | string | `password` |
+| vault_setup_agent | Setup Vault agent on server node | bool | `true` |
+| vault_server_fqdn | Existing Vault server's FQDN | string | `${ansible_default_ipv4.address}` |
 
 >^ Only applicable if `vault_store_bw: false`
 
@@ -73,37 +84,28 @@ server has been setup.
 This role deploys a new Consul-template instance.
 
 ### Prerequisites
-- An existing Vault instance
 - consul-template installed
-- Access to Vault TLS directories
 - Access to template destination directories
 
 ### Setup
-The role creates a new consul-template policy and cert auth role for access to Vault. A
-login helper script is used to access Vault securely, without saving the resulting token
-as plain text on the system.
 
-If a consul-template cert auth role already exists, it should use the existing
-certificates instead of generating its own. As of now, this is done by mounting an NFS
-share with the certificate and private key on the server and client instance. This is a
-temporary measure until something safer is implemented. The cert auth role for
-consul-template also renews its own certificates on expiry.
-
-At the moment, this role runs consul-template as root. This is required because
-consul-template requires access to Vault's TLS directories for connection to the
-encrypted Vault instance and access to any template's destination directories (which are
-the Consul and Nomad TLS directories). I'm still considering alternatives that allow
+Vault-agent is used to authenticate to Vault for consul-template. It only
+requires access to the `vault_agent_token_file`. This means consul-template
+requires access to Vault directories. It also requires access to any template
+destination directories (eg. Consul, Nomad TLS directories). As such, the role
+runs consul-template as root. I'm still considering alternatives that allow
 consul-template to be ran as a non-privileged user.
+
+>Vault and Vault-agent do not have to be installed for the role to run
+>successfully. However, they must be available for the consul-template service to
+>start without error.
 
 ### Variables
 
 | Variable | Description | Type | Default |
 | -------- | ----------- | ---- | ------- |
 | consul_template_dir | Configuration directory | string | `/opt/consul-template` |
-| vault_login_script | Login script path | string | `${consul_template_dir}/login.sh` |
 | vault_address | Vault instance IP address | string | `${ansible_default_ipv4.address}` |
-| vault_tls_dir | TLS files directory | string | `/opt/vault/tls` |
-| vault_policies_dir | Vault Policies directory | string | `/etc/vault.d/policies` |
 
 ## Consul
 
