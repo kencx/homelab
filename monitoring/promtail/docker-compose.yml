@@ -1,0 +1,13 @@
+---
+version: '3.6'
+services:
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:latest
+    restart: unless-stopped
+    command: "-config.file=/etc/promtail/config.yml"
+    volumes:
+      - "./promtail-config.yml:/etc/promtail/config.yml"
+      - "/var/log/journal/:/var/log/journal/:ro"
+      - "/run/log/journal/:/run/log/journal/:ro"
+      - "/etc/machine-id:/etc/machine-id:ro"

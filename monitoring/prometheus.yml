@@ -1,0 +1,60 @@
+---
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'nomad_metrics'
+    consul_sd_configs:
+      - server: "10.10.10.130:8501"
+        scheme: "https"
+        services: ['nomad-client', 'nomad']
+        tls_config:
+          ca_file: "tls/ca.crt"
+
+    relabel_configs:
+      - source_labels: ['__meta_consul_tags']
+        regex: '(.*)http(.*)'
+        action: keep
+      - source_labels: ['__scheme__']
+        target_label: __scheme__
+        replacement: https
+      - source_labels: [__address__]
+        regex: "([^:]+):.+"
+        target_label: "hostname"
+        replacement: "nomad-agent-$1"
+
+    scrape_interval: 10s
+    metrics_path: /v1/metrics
+    params:
+      format: ['prometheus']
+    tls_config:
+      ca_file: "tls/ca.crt"
+
+  # - job_name: 'pve'
+  #   static_configs:
+  #     - targets:
+  #         - 192.168.86.200
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: 10.10.10.131:{{ pve_exporter_port }}
+  #   scrape_interval: 60s
+  #   metrics_path: /pve
+  #   params:
+  #     module: [default]
+
+  - job_name: 'vault'
+    static_configs:
+      - targets:
+          - 10.10.10.130:8200
+    scheme: https
+    tls_config:
+      insecure_skip_verify: true
+    scrape_interval: 60s
+    metrics_path: /v1/sys/metrics
+    params:
+      format: ['prometheus']

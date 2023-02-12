@@ -36,7 +36,7 @@ job "postgres" {
 
         volumes = [
           "[[ .app.postgres.volumes.data ]]:/var/lib/postgresql/data",
-          "local/init.sql:/docker-entrypoint-initdb.d/init.sql",
+          "local/bin:/docker-entrypoint-initdb.d",
         ]
 
         labels = {
@@ -45,17 +45,37 @@ job "postgres" {
       }
 
       env {
-        POSTGRES_USER     = "postgres"
-        POSTGRES_PASSWORD = "postgres"
+        POSTGRES_USER      = "postgres"
+        POSTGRES_PASSWORD  = "postgres"
+        MULTIPLE_DATABASES = "ghostfolio"
       }
 
       template {
         data        = <<EOF
-CREATE USER john WITH PASSWORD 'password';
-CREATE DATABASE foo;
-GRANT ALL PRIVILEGES ON DATABASE foo TO john;
+#!/bin/sh
+
+set -eu
+
+create_user_and_database() {
+	database=$1
+	echo "  Creating user and database '$database'"
+	psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+	    CREATE USER $database;
+        ALTER USER $database WITH PASSWORD '$database';
+	    CREATE DATABASE $database;
+	    GRANT ALL PRIVILEGES ON DATABASE $database TO $database;
+EOSQL
+}
+
+if [ -n "$MULTIPLE_DATABASES" ]; then
+	echo "Multiple database creation requested: $MULTIPLE_DATABASES"
+	for db in $(echo "$MULTIPLE_DATABASES" | tr ',' ' '); do
+		create_user_and_database "$db"
+	done
+	echo "Multiple databases created"
+fi
 EOF
-        destination = "local/init.sql"
+        destination = "${NOMAD_TASK_DIR}/bin/init.sh"
       }
 
       resources {

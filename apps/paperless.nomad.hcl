@@ -1,17 +1,13 @@
 job "paperless" {
   datacenters = ["dc1"]
 
-  group "paperless" {
+  group "paperless-app" {
     count = 1
 
     network {
-      mode = "host"
+      mode = "bridge"
       port "http" {
         to = "8000"
-      }
-
-      port "redis" {
-        to = "6379"
       }
     }
 
@@ -27,6 +23,18 @@ job "paperless" {
         "traefik.http.routers.paperless-proxy.rule=Host(`[[ .app.paperless.domain ]].[[ .common.domain ]]`)",
       ]
 
+      connect {
+        sidecar_service {
+          proxy {
+            upstreams {
+              destination_name = "paperless-redis"
+              local_bind_port  = 6379
+            }
+          }
+          tags = ["dummy"]
+        }
+      }
+
       check {
         type     = "http"
         path     = "/"
@@ -36,20 +44,6 @@ job "paperless" {
 
         success_before_passing   = "3"
         failures_before_critical = "3"
-      }
-    }
-
-    task "redis" {
-      driver = "docker"
-
-      config {
-        image = "redis:6"
-        ports = ["redis"]
-      }
-
-      resources {
-        cpu    = 20
-        memory = 128
       }
     }
 
@@ -77,7 +71,7 @@ job "paperless" {
         USERMAP_GID         = 1000
         PAPERLESS_TIME_ZONE = "Asia/Singapore"
         PAPERLESS_URL       = "https://[[ .app.paperless.domain ]].[[ .common.domain ]]"
-        PAPERLESS_REDIS     = "redis://${NOMAD_ADDR_redis}"
+        PAPERLESS_REDIS     = "redis://${NOMAD_UPSTREAM_ADDR_paperless_redis}"
 
         PAPERLESS_SECRET_KEY   = ""
         PAPERLESS_OCR_LANGUAGE = "eng"
@@ -101,20 +95,46 @@ job "paperless" {
         PAPERLESS_ADMIN_MAIL     = ""
       }
 
-      /*       template { */
-      /*         data        = <<EOF */
-      /* {{ range service "redis" }} */
-      /* PAPERLESS_REDIS=redis://{{ .Address }}:{{ .Port }} */
-      /* {{ end }} */
-      /* EOF */
-      /*         destination = "${NOMAD_SECRETS_DIR}/.env" */
-      /*         env         = true */
-      /**/
-      /*       } */
-
       resources {
         cpu    = 50
         memory = 400
+      }
+    }
+  }
+
+  group "paperless-redis" {
+    count = 1
+
+    network {
+      mode = "bridge"
+      port "redis" {
+        to = "6379"
+      }
+    }
+
+    service {
+      provider = "consul"
+      name     = "paperless-redis"
+      port     = "6379"
+
+      connect {
+        sidecar_service {
+          disable_default_tcp_check = true
+        }
+      }
+    }
+
+    task "redis" {
+      driver = "docker"
+
+      config {
+        image = "redis:6"
+        ports = ["redis"]
+      }
+
+      resources {
+        cpu    = 20
+        memory = 128
       }
     }
   }

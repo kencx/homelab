@@ -1,5 +1,20 @@
 ## Work log
 
+### 21/04/23
+- Setup promtail and loki instances for simple log centralization of `journald`
+  in dev cluster nodes.
+
+### 16/04/23
+- Debugging monitoring setup today:
+    - Managed to scrape Nomad metrics from `consul_sd_configs` after realising I
+      was missing a `tls_config` section.
+    - When trying to debug why the Nomad client instance was not registered in
+      Consul, changing the following configuration parameters worked:
+        - In client's `nomad.hcl`, `consul.verify_ssl` must be `false`. This is
+          different from the server's `nomad.hcl`.
+    - Found useful Grafana dashboards from [this
+      repository](https://github.com/mr-karan/nomad-monitoring).
+
 ### 14/04/23
 - Added mkdocs static documentation on Github Pages. This will be selfhosted in
   the future.

@@ -1,0 +1,11 @@
+apiVersion: 1
+providers:
+  - name: Dashboard
+    folder: 'Services'
+    type: file
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    disableDeletion: true
+    options:
+      path: /dashboards
+      foldersFromFileStructure: true
