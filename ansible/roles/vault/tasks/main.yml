@@ -33,6 +33,11 @@
     - "{{ vault_tls_dir }}/tls.crt"
 
 - import_tasks: server.yml
-  when: ('server' in group_names) or ('mol_server' in group_names)
+  when: >
+    'server' in group_names or
+    'mol_server' in group_names
 
 - import_tasks: agent.yml
+  when: >
+    ('client' in group_names or 'mol_client' in group_names) or
+    (('server' in group_names or 'mol_server in group_names') and vault_setup_agent)

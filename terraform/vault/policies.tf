@@ -12,3 +12,8 @@ resource "vault_policy" "nomad_cluster" {
   name   = "nomad_cluster"
   policy = file("policies/nomad_token.hcl")
 }
+
+resource "vault_policy" "ansible" {
+  name   = "ansible"
+  policy = file("policies/ansible.hcl")
+}

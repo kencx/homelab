@@ -13,7 +13,7 @@ variable "vault_token" {
 variable "vault_ca_cert_file" {
   type        = string
   description = "Local path to Vault CA cert file"
-  default     = "./certs/vault-ca.crt"
+  default     = "../../certs/vault-ca.crt"
 }
 
 variable "vault_audit_path" {

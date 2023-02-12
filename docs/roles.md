@@ -21,6 +21,7 @@ as:
 
 ## Vault
 This role deploys a new Vault instance and performs the required initialization.
+If ran on a client node, it provisions a Vault agent instance instead.
 
 ### Prerequisites
 - Vault installed
@@ -42,6 +43,13 @@ in the filesystem or on Bitwarden.
 It then proceeds to login with the root token and setup the PKI secrets engine
 and various authentication roles with the Terraform provider. A full list of
 Terraform resources can be found at `homelab/terraform/vault`.
+
+### Vault Agent
+
+If this role is ran on a client node or `vault_setup_agent` is `true`, it will
+also provision a Vault-Agent instance. It requires an existing
+unsealed Vault server and should be run on client nodes only after the Vault
+server has been setup.
 
 ### Variables
 | Variable | Description | Type | Default |
@@ -92,8 +100,8 @@ consul-template to be ran as a non-privileged user.
 | Variable | Description | Type | Default |
 | -------- | ----------- | ---- | ------- |
 | consul_template_dir | Configuration directory | string | `/opt/consul-template` |
-| vault_login_script | Login script path | string | `{{ consul_template_dir }}/login.sh` |
-| vault_address | Vault instance IP address | string | `{{ ansible_default_ipv4.address }}` |
+| vault_login_script | Login script path | string | `${consul_template_dir}/login.sh` |
+| vault_address | Vault instance IP address | string | `${ansible_default_ipv4.address}` |
 | vault_tls_dir | TLS files directory | string | `/opt/vault/tls` |
 | vault_policies_dir | Vault Policies directory | string | `/etc/vault.d/policies` |
 
@@ -120,7 +128,7 @@ For encryption, the role creates consul-template templates for:
 | -------- | ----------- | ---- | ------- |
 | consul_config_dir | Configuration directory | string | `/etc/consul.d` |
 | consul_data_dir | Data directory | string | `/opt/consul` |
-| consul_tls_dir | TLS files directory | string | `{{ consul_data_dir }}/tls` |
+| consul_tls_dir | TLS files directory | string | `${consul_data_dir}/tls` |
 | consul_template_config | consul-template configuration file | string | `/opt/consul-template/consul_template.hcl` |
 | consul_bootstrap_expect | (server only) Bootstrap expect | number | `1` |
 | consul_server_ip | (client only) Server's IP address | string | - |
@@ -154,7 +162,7 @@ For encryption, the role creates consul-template templates for:
 | -------- | ----------- | ---- | ------- |
 | nomad_config_dir | Configuration directory | string | `/etc/nomad.d` |
 | nomad_data_dir | Data directory | string | `/opt/nomad` |
-| nomad_tls_dir | TLS files directory | string | `{{ nomad_data_dir }}/tls` |
+| nomad_tls_dir | TLS files directory | string | `${nomad_data_dir}/tls` |
 | consul_template_config | consul-template configuration file | string | `/opt/consul-template/consul_template.hcl` |
 | setup_vault_integration | Sets up Vault integration in server node | bool | `true` |
 | vault_policy_dir | Vault server policy directory | string | `/etc/vault.d/policies` |

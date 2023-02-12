@@ -1,1 +1,130 @@
 ---
+- name: Check status of Vault server
+  command: vault status
+  environment:
+    VAULT_ADDRESS: "https://{{ vault_server_fqdn }}:8200"
+  register: vault_server_status
+  changed_when: false
+  failed_when: vault_server_status.rc != 0
+
+- name: Copy service file
+  copy:
+    src: "vault-agent.service"
+    dest: "/etc/systemd/system/vault-agent.service"
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - reload vault-agent
+
+- name: Copy Vault-agent config files
+  template:
+    src: "vault-agent.hcl.j2"
+    dest: "{{ vault_config_dir }}/vault-agent.hcl"
+    mode: 0644
+    owner: vault
+    group: vault
+  notify:
+    - reload vault-agent
+
+- name: Add token_action.sh script
+  template:
+    src: "token_action.sh.j2"
+    dest: "{{ vault_data_dir }}/token_action.sh"
+    mode: 0700
+    owner: vault
+    group: vault
+
+- set_fact:
+    local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
+
+- name: Push Vault CA cert to client
+  copy:
+    src: "{{ local_cert_dir }}/vault-ca.crt"
+    dest: "{{ vault_ca_cert_dir }}/ca.crt"
+    owner: vault
+    group: vault
+    mode: 0644
+
+- name: Fetch Vault CA certs to Ansibe host
+  fetch:
+    src: "{{ vault_ca_cert_dir }}/ca.crt"
+    dest: "{{ local_cert_dir }}/vault-ca.crt"
+    flat: true
+
+- name: Login with Ansible auth cert
+  become: false
+  uri:
+    url: "https://{{ vault_server_fqdn }}:8200/v1/auth/cert/login"
+    method: POST
+    client_cert: "{{ local_cert_dir }}/ansible.crt"
+    client_key: "{{ local_cert_dir }}/ansible_key.pem"
+    ca_path: "{{ local_cert_dir }}/vault-ca.crt"
+    body: "{ \"name\": \"ansible\" }"
+    body_format: json
+    return_content: true
+  register: vault_ansible_token_raw
+  no_log: true
+  changed_when: false
+  delegate_to: localhost
+
+- set_fact:
+    vault_ansible_token_json: "{{ vault_ansible_token_raw.content | from_json }}"
+  when:
+    - vault_ansible_token_raw is defined
+    - vault_ansible_token_raw.content is defined
+
+- set_fact:
+    vault_ansible_token: "{{ vault_ansible_token_json.auth.client_token }}"
+  when:
+    - vault_ansible_token_json.auth is defined
+    - vault_ansible_token_json.auth.client_token is defined
+
+# TODO add support for multiple agents
+- name: Get certificates for Agent cert auth from Vault server
+  command: vault write -format=json pki_int/issue/auth "common_name=agent@global.vault" "ttl=30d"
+  environment:
+    VAULT_TOKEN: "{{ vault_ansible_token }}"
+    VAULT_ADDR: "https://{{ vault_server_fqdn }}:8200"
+  register: vault_agent_certificate_raw
+  no_log: true
+
+- set_fact:
+    vault_agent_certificate_json: "{{ vault_agent_certificate_raw.stdout | from_json }}"
+  no_log: true
+  when:
+    - vault_agent_certificate_raw is defined
+    - vault_agent_certificate_raw.stdout is defined
+
+- name: Write Agent certificate
+  copy:
+    content: "{{ vault_agent_certificate_json.data.certificate }}"
+    dest: "{{ vault_tls_dir }}/agent.crt"
+    mode: 0600
+    owner: vault
+    group: vault
+  no_log: true
+
+- name: Write Agent private key
+  copy:
+    content: "{{ vault_agent_certificate_json.data.private_key }}"
+    dest: "{{ vault_tls_dir }}/agent_key.pem"
+    mode: 0400
+    owner: vault
+    group: vault
+  no_log: true
+
+# TODO add support for multiple agents
+- name: Write Agent certificate to auth role
+  command: "vault write auth/cert/certs/agent certificate=@{{ vault_tls_dir }}/agent.crt"
+  environment:
+    VAULT_TOKEN: "{{ vault_ansible_token }}"
+    VAULT_ADDR: "https://{{ vault_server_fqdn }}:8200"
+  no_log: true
+
+- name: Start Vault-agent
+  systemd:
+    name: vault-agent
+    state: started
+    enabled: true
+  register: vault_started

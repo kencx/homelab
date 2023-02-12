@@ -20,66 +20,27 @@
   with_items:
     - "{{ consul_template_dir }}"
 
-- name: Create consul-template TLS directory
-  file:
-    path: "{{ consul_template_dir }}/tls"
-    state: directory
-    mode: 0700
-    owner: root
-    group: root
-
 - name: Copy consul-template service file
   template:
     src: "consul-template.service"
-    dest: "/etc/systemd/system/consul_template.service"
+    dest: "/etc/systemd/system/consul-template.service"
     mode: 0644
     owner: root
     group: root
   notify: reload consul_template
 
-# TODO need to create auth certs in advance
 - name: Copy consul-template config
   template:
     src: "consul-template.hcl.j2"
-    dest: "{{ consul_template_dir }}/consul_template.hcl"
+    dest: "{{ consul_template_dir }}/consul-template.hcl"
     mode: 0640
     owner: root
     group: root
   notify: reload consul_template
 
-- name: Vault setup
-  import_tasks: vault_setup.yml
-  when: "'server' in group_names"
-  run_once: true
-
-- name: Copy login script
-  template:
-    src: "login.sh.j2"
-    dest: "{{ vault_login_script }}"
-    mode: 0700
-    owner: root
-    group: root
-
-- name: Copy renew token script
-  template:
-    src: "renew_token.sh.j2"
-    dest: "{{ consul_template_dir }}/renew_token.sh"
-    mode: 0700
-    owner: root
-    group: root
-
-- name: Add cronjob to renew Vault token
-  cron:
-    name: "Renew Vault token"
-    user: root
-    state: present
-    minute: 0
-    hour: "*/10"
-    job: "{{ consul_template_dir }}/renew_token.sh"
-
 - name: Start consul-template
   systemd:
-    name: consul_template
+    name: consul-template
     state: started
     enabled: true
     daemon_reload: true

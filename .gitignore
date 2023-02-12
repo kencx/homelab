@@ -1,5 +1,7 @@
 .cache/*
 cloud-config
+certs/*
+!certs/.gitkeep
 
 # ansible
 inventory/*

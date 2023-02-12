@@ -34,41 +34,35 @@ resource "vault_auth_backend" "cert" {
   }
 }
 
-resource "vault_pki_secret_backend_cert" "consul_template" {
+# todo strange error with issuing certs, unable to find ca certficiate?
+resource "vault_pki_secret_backend_cert" "ansible" {
   depends_on  = [vault_pki_secret_backend_role.auth_role]
   backend     = vault_mount.pki_int.path
   name        = vault_pki_secret_backend_role.auth_role.name
-  common_name = "consul_template@global.vault"
-  ttl         = "24h"
+  common_name = "ansible@global.vault"
+  ttl         = "30d"
 }
 
-# TODO need to be pushed to server
-resource "local_file" "consul_template_cert" {
-  content         = vault_pki_secret_backend_cert.consul_template.certificate
-  filename        = "${path.module}/certs/consul_template.crt"
-  file_permission = "0640"
+resource "local_file" "ansible_cert" {
+  content         = vault_pki_secret_backend_cert.ansible.certificate
+  filename        = "../../certs/ansible.crt"
+  file_permission = "0600"
 }
 
-resource "local_sensitive_file" "consul_template_key" {
-  content         = vault_pki_secret_backend_cert.consul_template.private_key
-  filename        = "${path.module}/certs/consul_template.pem"
+resource "local_file" "ansible_key" {
+  content         = vault_pki_secret_backend_cert.ansible.private_key
+  filename        = "../../certs/ansible_key.pem"
   file_permission = "0400"
 }
 
-resource "local_file" "consul_template_ca" {
-  content         = vault_pki_secret_backend_cert.consul_template.issuing_ca
-  filename        = "${path.module}/certs/consul_template_ca.crt"
-  file_permission = "0640"
-}
-
-resource "vault_cert_auth_backend_role" "consul_template" {
+resource "vault_cert_auth_backend_role" "ansible" {
   backend        = vault_auth_backend.cert.path
-  name           = "consul_template"
-  display_name   = "consul_template"
-  certificate    = vault_pki_secret_backend_cert.consul_template.certificate
+  name           = "ansible"
+  display_name   = "ansible"
+  certificate    = vault_pki_secret_backend_cert.ansible.certificate
   token_ttl      = 86400
   token_period   = 86400
-  token_policies = ["consul_template"]
+  token_policies = ["ansible"]
 }
 
 data "vault_auth_backend" "token" {

@@ -12,3 +12,6 @@ vault_unseal_key_file: "{{ vault_data_dir }}/.unseal_key"
 vault_root_token_file: "{{ vault_data_dir }}/.root_token"
 
 vault_admin_password: "password"
+
+vault_setup_agent: true
+vault_server_fqdn: "{{ ansible_default_ipv4.address }}"

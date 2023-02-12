@@ -1,0 +1,30 @@
+[Unit]
+Description=Vault Agent
+Wants=network-online.target
+After=network-online.target
+StartLimitInterval = 60
+StartLimitBurst = 3
+
+[Service]
+User=vault
+Group=vault
+
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStart=/usr/bin/vault agent -config=/etc/vault.d/vault-agent.hcl
+KillMode=process
+KillSignal=SIGINT
+LimitNOFILE=65536
+LimitNPROC=infinity
+Restart=on-failure
+RestartSec=2
+
+ProtectSystem=full
+PrivateTmp=yes
+CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
+AmbientCapabilities=CAP_IPC_LOCK
+ProtectHome=read-only
+PrivateDevices=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

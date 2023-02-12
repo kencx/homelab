@@ -1,5 +1,33 @@
 ## Work Log
 
+### 12/02/23
+- It seems too challenging to use molecule to test the provisioning of Vault
+  agents due to its dependency on Vault server instances. I don't see how
+  molecule can bring up a separate host. Perhaps it is sufficient to test Vault
+  agent provisioning on the same server host.
+
+- Ansible needs to authenticate to Vault multiple times and AppRole seems to be
+  the best way to do this. The proposed method of authentication will go like
+  this:
+    1. Vault must have an AppRole `ansible` with policy `ansible`. This policy
+       will contain all actions Ansible needs to perform (eg. issue certs, write
+       certs to auth roles)
+    2. Vault will also have a separate secretID token for Ansible to login
+       against to generate a secretID dynamically. Its policy will only contain
+       this action.
+    3. Terraform will require its separate roleID token to obtain the roleID. It
+       will need to target the resource and Ansible will read its output. Its
+       policy will only allow reading of the roleID.
+    4. Ansible will obtain the secretID via a separate ansible_secretid_token
+       stored in Ansible Vault.
+    5. Ansible can now login to Vault with roleID and secretID.
+
+- The unstable nature of Vault's Terraform provider could be due to an existing
+  state file that is present during testing. This poses a problem for actual
+  runs vs Molecule tests as they are using the same state file. We would have to
+  separate these states or use different workspaces. For now, I've added a
+  `terraform destroy` step beforehand to reset any changes.
+
 ### 11/02/23
 - Cleaned up `vault` role for server instances
   - Vault server tasks are moved to `tasks/server.yml`

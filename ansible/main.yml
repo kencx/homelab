@@ -1,0 +1,59 @@
+---
+# - hosts: server
+#   become: true
+#   tasks:
+#     - name: Create root, intermediate CA for Vault
+
+- hosts: server
+  become: true
+  roles:
+    - name: Mount NFS shares
+      role: kencx.ansible.nfs
+      vars:
+        nfs_share_mounts: {}
+    - role: vault
+    - role: consul-template
+    - role: consul
+    - role: nomad
+
+  tasks:
+    - name: Register Vault as Consul service
+      import_tasks: vault_consul_register.yml
+
+    - name: Register Nomad as Consul service
+      import_tasks: nomad_consul_register.yml
+
+    - name: Goss smoke test
+      import_role:
+        name: kencx.ansible.goss
+      vars:
+        - goss_dir: "./goss"
+        - goss_file: "server.yml"
+
+- hosts: client
+  become: true
+  roles:
+    - name: Mount NFS shares
+      role: kencx.ansible.nfs
+      vars:
+        nfs_share_mounts:
+          - src: "{{ nfs_ip }}:/home/debian/apps/test-apps"
+            path: "/mnt/storage"
+            state: mounted
+    - role: vault
+      vars:
+        - vault_server_fqdn: "{{ cluster_server_ip }}"
+    - role: consul-template
+    - role: consul
+    - role: nomad
+
+  tasks:
+    - name: Register Nomad client as Consul service
+      import_tasks: nomad_consul_register.yml
+
+    - name: Goss smoke test
+      import_role:
+        name: kencx.ansible.goss
+      vars:
+        - goss_dir: "./goss"
+        - goss_file: "client.yml"

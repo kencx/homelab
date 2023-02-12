@@ -76,3 +76,7 @@
   when:
     - vault_status_json is defined
     - not vault_status_json.initialized
+
+- name: Unset root token
+  set_fact:
+    vault_root_token: ""

@@ -1,38 +1,6 @@
-# https://github.com/hashicorp/consul-template/blob/main/docs/configuration.md#consul-template
 vault {
   address = "https://{{ vault_address }}:8200"
+  vault_agent_token_file = "{{ vault_agent_token_file_path }}"
   unwrap_token = false
   renew_token = false
-}
-
-{% if 'server' in group_names %}
-template {
-  contents = <<EOF
-{{ '{{' }} with pkiCert "pki_int/issue/client" "common_name=ctemplate" "ttl=30d" {{ '}}' }}
-{{ '{{' }} .Cert {{ '}}' }}
-{{ '{{' }} if .Key {{ '}}' }}
-{{ '{{' }} .Key | writeToFile "{{ consul_template_dir }}/tls/consul_template_key.pem" "root" "root" "0400" {{ '}}' }}
-{{ '{{' }} end {{ '}}' }}
-{{ '{{' }} end {{ '}}' }}
-EOF
-  destination = "{{ consul_template_dir }}/tls/consul_template_cert.pem"
-  user = "root"
-  group = "root"
-  perms = 0600
-  # reload certs in consul_template auth role
-  command = "date; vault write auth/cert/certs/consul_template certificate=@{{ consul_template_dir }}/tls/consul_template_cert.pem"
-}
-{% endif %}
-
-template {
-  contents = <<EOF
-{% raw %}{{ with secret "auth/token/lookup-self" }}
-{{ .Data.accessor }}
-{{ end }}
-{% endraw %}
-EOF
-  destination = "{{ consul_template_dir }}/accessor"
-  user = "root"
-  group = "root"
-  perms = 0400
 }

@@ -131,18 +131,35 @@
     var: vault_post_status_json
   when: vault_post_status_json is defined
 
+# See terraform/vault for resources
+# Note that Terraform must be installed on Ansible host
+
 - set_fact:
     vault_terraform_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/terraform/vault"
 
-# Terraform provider requires Vault's CA cert on Ansible host
-- name: Push Vault CA cert to Ansible host
+- set_fact:
+    vault_terraform_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
+
+- name: Copy Vault CA cert to Ansible host
   fetch:
     src: "{{ vault_ca_cert_dir }}/ca.crt"
-    dest: "{{ vault_terraform_dir }}/certs/vault-ca.crt"
+    dest: "{{ vault_terraform_cert_dir }}/vault-ca.crt"
     flat: true
 
-# Terraform must be installed on Ansible host
-# See ${GIT_REPO}/terraform/vault for resources
+# Clear any existing state from previous Vault server or Molecule testing. Because
+# this is only run when Vault has not been initialized, it does not delete
+# any important data.
+- name: Delete existing state from Terraform if any
+  become: false
+  community.general.terraform:
+    project_path: "{{ vault_terraform_dir }}"
+    state: absent
+    variables:
+      vault_token: "{{ vault_root_token }}"
+      vault_address: "https://{{ ansible_default_ipv4.address }}:8200"
+      vault_ca_cert_file: "{{ vault_terraform_cert_dir }}/vault-ca.crt"
+  delegate_to: localhost
+
 - name: Provision Vault secrets with Terraform provider
   become: false
   community.general.terraform:
@@ -150,11 +167,11 @@
     state: present
     force_init: true
     variables:
-      admin_password: "{{ vault_admin_password }}"
       vault_token: "{{ vault_root_token }}"
       vault_address: "https://{{ ansible_default_ipv4.address }}:8200"
+      vault_ca_cert_file: "{{ vault_terraform_cert_dir }}/vault-ca.crt"
       vault_audit_path: "{{ vault_log_file }}"
-      vault_ca_cert_file: "{{ vault_terraform_dir }}/certs/vault-ca.crt"
+      admin_password: "{{ vault_admin_password }}"
   register: vault_terraform_output
   no_log: true
   delegate_to: localhost
@@ -162,6 +179,3 @@
 - debug:
     msg: "{{ vault_terraform_output.stdout }}"
   when: vault_terraform_output is defined
-
-# - name: Revoke root token
-#   when: vault_revoke_root_token|bool

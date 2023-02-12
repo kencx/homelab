@@ -1,0 +1,42 @@
+vault {
+  address     = "https://{{ vault_server_fqdn }}:8200"
+  ca_cert     = "{{ vault_ca_cert_dir }}/ca.crt"
+  client_cert = "{{ vault_tls_dir }}/agent.crt"
+  client_key  = "{{ vault_tls_dir }}/agent_key.pem"
+}
+
+auto_auth {
+  method "cert" {
+    name = "auth"
+  }
+
+  sink "file" {
+    config = {
+      path = "{{ vault_data_dir }}/.vault-token"
+      mode = 0400
+    }
+  }
+}
+
+template {
+  contents    = <<EOF
+{{ '{{' }} with pkiCert "pki_int/issue/auth" "common_name=agent@global.vault" "ttl=30d" {{ '}}' }}
+{{ '{{' }} .Cert {{ '}}' }}
+{{ '{{' }} if .Key {{ '}}' }}
+{{ '{{' }} .Key | writeToFile "{{ vault_tls_dir }}/agent_key.pem" "vault" "vault" "0400" {{ '}}' }}
+{{ '{{' }} end {{ '}}' }}
+{{ '{{' }} end {{ '}}' }}
+EOF
+  destination = "{{ vault_tls_dir }}/agent.crt"
+  exec = {
+    command = [
+      "{{ vault_data_dir }}/token_action.sh",
+      "write",
+      "auth/cert/certs/agent",
+      "certificate=@{{ vault_tls_dir }}/agent.crt",
+    ]
+  }
+  user  = "vault"
+  group = "vault"
+  perms = 0600
+}

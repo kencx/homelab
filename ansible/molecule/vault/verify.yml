@@ -29,6 +29,7 @@
     - name: Check Vault login as admin
       command: vault login -method=userpass username=admin password={{ vault_admin_password }}
       register: vault_login
+      changed_when: false
       failed_when: "'Success' not in vault_login.stdout"
 
     # - debug:

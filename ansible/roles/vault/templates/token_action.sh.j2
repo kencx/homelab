@@ -1,0 +1,4 @@
+#!/bin/bash
+
+VAULT_ADDR=https://"{{ vault_server_fqdn }}":8200 VAULT_TOKEN=$(cat "{{ vault_data_dir
+}}"/.vault-token) vault "$@"
