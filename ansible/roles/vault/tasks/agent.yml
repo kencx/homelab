@@ -116,7 +116,7 @@
 
 # TODO add support for multiple agents
 - name: Write Agent certificate to auth role
-  command: "vault write auth/cert/certs/agent certificate=@{{ vault_tls_dir }}/agent.crt"
+  command: "vault write auth/cert/certs/agent certificate=@{{ vault_tls_dir }}/agent.crt token_policies=consul_template"
   environment:
     VAULT_TOKEN: "{{ vault_ansible_token }}"
     VAULT_ADDR: "https://{{ vault_server_fqdn }}:8200"

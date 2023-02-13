@@ -1,5 +1,5 @@
 ---
-- name: reload consul_template
+- name: reload consul-template
   systemd:
-    name: consul_template
+    name: consul-template
     state: reloaded

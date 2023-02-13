@@ -5,6 +5,10 @@ auto_encrypt {
   allow_tls = true
 }
 
+connect {
+  enabled = true
+}
+
 {% if setup_consul_watches %}
 watches = [
   {

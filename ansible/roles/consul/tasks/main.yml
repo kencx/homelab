@@ -18,6 +18,41 @@
     group: consul
     state: directory
 
+- set_fact:
+    local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
+
+- name: Login with Ansible auth cert
+  become: false
+  uri:
+    url: "{{ consul_vault_addr }}/v1/auth/cert/login"
+    method: POST
+    client_cert: "{{ local_cert_dir }}/ansible.crt"
+    client_key: "{{ local_cert_dir }}/ansible_key.pem"
+    ca_path: "{{ local_cert_dir }}/vault-ca.crt"
+    body: "{ \"name\": \"ansible\" }"
+    body_format: json
+    return_content: true
+  register: consul_ansible_token_raw
+  no_log: true
+  changed_when: false
+  delegate_to: localhost
+
+- set_fact:
+    consul_ansible_token_json: "{{ consul_ansible_token_raw.content | from_json }}"
+  when:
+    - consul_ansible_token_raw is defined
+    - consul_ansible_token_raw.content is defined
+
+- set_fact:
+    consul_ansible_token: "{{ consul_ansible_token_json.auth.client_token }}"
+  when:
+    - consul_ansible_token_json.auth is defined
+    - consul_ansible_token_json.auth.client_token is defined
+
+- fail:
+    msg: Vault token was not obtained successfully
+  when: consul_ansible_token is not defined
+
 - name: Setup Consul Gossip Encryption
   become: true
   import_tasks: gossip.yml

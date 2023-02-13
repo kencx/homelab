@@ -11,7 +11,7 @@
     - name: Issue new certificate
       shell:
         cmd: |
-          vault write -format=json pki_int/issue/cluster \
+          vault write -format=json pki_int/issue/client \
           "common_name=nomad-client.dc1.consul" \
           "ttl=24h" \
       environment:
@@ -50,6 +50,9 @@
       when: nomad_consul_tls_json is defined and nomad_consul_tls_json.data is defined
   when: nomad_consul_cert is defined and not nomad_consul_cert.stat.exists
 
+
+# TODO ca_file must contain full CA chain for Connect integration to work
+# Envoy proxy requires the full CA chain to communicate with Consul
 - name: Consul Integration in Nomad
   blockinfile:
     path: "{{ nomad_config_dir }}/nomad.hcl"
@@ -71,7 +74,7 @@
     block: |
       template {
         contents = <<EOF
-      {{ '{{' }} with pkiCert "pki_int/issue/cluster" "common_name=nomad-client.dc1.consul" "ttl=24h" {{ '}}' }}
+      {{ '{{' }} with pkiCert "pki_int/issue/client" "common_name=nomad-client.dc1.consul" "ttl=24h" {{ '}}' }}
       {{ '{{' }} .Cert {{ '}}' }}
       {{ '{{' }} if .CA {{ '}}' }}
       {{ '{{' }} .CA | writeToFile "{{ nomad_tls_dir }}/consul-ca.crt" "nomad" "nomad" "0600" {{ '}}' }}

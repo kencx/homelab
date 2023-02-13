@@ -1,12 +1,17 @@
 ---
+# Write a new Consul gossip key to Vault
+# This is generated on the first server node only. Subsequent server and client nodes
+# will use the existing secret
 - name: Save gossip key to Vault
   shell:
     cmd: |
-      if ! vault kv get -field=gossip_key kv/cluster/consul_config >/dev/null 2>&1; then
-        vault kv put kv/cluster/consul_config gossip_key=$(consul keygen)
+      if ! vault kv get -field=gossip_key kvv2/cluster/consul_config >/dev/null 2>&1; then
+        vault kv put kvv2/cluster/consul_config gossip_key=$(consul keygen)
       else
         echo "gossip_key present"
       fi
+  environment:
+    VAULT_TOKEN: "{{ consul_ansible_token }}"
   register: prepare_gossip_key
   changed_when: "'present' not in prepare_gossip_key.stdout"
   when: "'server' in group_names"
@@ -19,13 +24,13 @@
 # requires helper-script
 - name: Add gossip key to Consul configuration
   blockinfile:
-    path: "{{ consul_template_config }}"
+    path: "{{ consul_template_config_dir }}/consul-template.hcl"
     marker: "# {mark} Consul gossip"
     validate: consul-template -config=%s -parse-only
     block: |
       template {
         contents = <<EOF
-      {% raw %}{{ with secret "kv/data/cluster/consul_config" }}
+      {% raw %}{{ with secret "kvv2/data/cluster/consul_config" }}
       encrypt = "{{ .Data.data.gossip_key }}"
       {{ end }}
       {% endraw %}

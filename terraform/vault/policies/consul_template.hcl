@@ -16,6 +16,10 @@ path "auth/cert/certs/consul_template" {
 }
 
 # manage kv secrets engine
-path "kv/data/cluster/*" {
-  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+path "kvv2/data/cluster/*" {
+  capabilities = ["create", "read", "update"]
+}
+
+path "auth/token/create/nomad_cluster" {
+  capabilities = ["create", "update", "sudo"]
 }

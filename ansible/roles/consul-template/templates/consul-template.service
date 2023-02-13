@@ -6,7 +6,7 @@ After=network-online.target
 [Service]
 #User=consul-template
 #Group=consul-template
-ExecStart=/usr/bin/consul-template -config="{{ consul_template_dir }}/consul-template.hcl" -log-level=info
+ExecStart=/usr/bin/consul-template -config="{{ consul_template_config_dir }}/consul-template.hcl" -log-level=info
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 KillSignal=SIGINT

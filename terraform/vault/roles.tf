@@ -11,7 +11,7 @@ resource "vault_pki_secret_backend_role" "server_role" {
   allow_subdomains   = true
   enforce_hostnames  = true
 
-  client_flag = false
+  client_flag = true
   server_flag = true
 }
 

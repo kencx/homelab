@@ -11,7 +11,7 @@
     - name: Issue new certificate
       shell:
         cmd: |
-          vault write -format=json pki_int/issue/cluster \
+          vault write -format=json pki_int/issue/client \
           "common_name=vault-client.dc1.consul" \
           "ttl=24h" \
       environment:
@@ -75,7 +75,7 @@
     block: |
       template {
         contents = <<EOF
-      {{ '{{' }} with pkiCert "pki_int/issue/cluster" "common_name=vault-client.dc1.consul" "ttl=24h" {{ '}}' }}
+      {{ '{{' }} with pkiCert "pki_int/issue/client" "common_name=vault-client.dc1.consul" "ttl=24h" {{ '}}' }}
       {{ '{{' }} .Cert {{ '}}' }}
       {{ '{{' }} if .CA {{ '}}' }}
       {{ '{{' }} .CA | writeToFile "{{ vault_tls_dir }}/consul-ca.crt" "vault" "vault" "0600" {{ '}}' }}

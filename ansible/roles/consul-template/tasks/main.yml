@@ -25,7 +25,7 @@
     mode: 0644
     owner: root
     group: root
-  notify: reload consul_template
+  notify: reload consul-template
 
 - name: Copy consul-template config
   template:
@@ -34,7 +34,7 @@
     mode: 0640
     owner: root
     group: root
-  notify: reload consul_template
+  notify: reload consul-template
 
 - name: Start consul-template
   systemd:

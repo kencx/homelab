@@ -5,19 +5,23 @@
   register: consul_cert
   changed_when: false
 
-# Ensure logged into Vault
+- set_fact:
+    cert_role: "{{ 'server' if ('server' in group_names) else 'client' }}"
+
+# TODO Generate client certs for CLI, UI
 - name: Create CA, certificate and private key for Consul TLS
   block:
     - name: Issue new certificate
       shell:
         cmd: |
-          vault write -format=json pki_int/issue/cluster \
+          vault write -format=json pki_int/issue/{{ cert_role }} \
           "common_name={{ consul_common_name }}" \
           "ttl=24h" \
           "alt_names=localhost,{{ consul_alt_names }}" \
           "ip_sans={{ consul_ip_sans }}"
       environment:
         VAULT_ADDR: "{{ consul_vault_addr }}"
+        VAULT_TOKEN: "{{ consul_ansible_token }}"
       register: consul_tls_raw
 
     - set_fact:
@@ -54,13 +58,13 @@
 
 - name: Add TLS template stanza to consul-template
   blockinfile:
-    path: "{{ consul_template_config }}"
+    path: "{{ consul_template_config_dir }}/consul-template.hcl"
     marker: "# {mark} Consul TLS"
     validate: consul-template -config=%s -parse-only
     block: |
       template {
         contents = <<EOF
-      {{ '{{' }} with pkiCert "pki_int/issue/cluster" "common_name={{ consul_common_name }}" "ttl=24h" "alt_names=localhost,{{ consul_alt_names }}" "ip_sans={{ consul_ip_sans }}" {{ '}}' }}
+      {{ '{{' }} with pkiCert "pki_int/issue/{{ cert_role }}" "common_name={{ consul_common_name }}" "ttl=24h" "alt_names=localhost,{{ consul_alt_names }}" "ip_sans={{ consul_ip_sans }}" {{ '}}' }}
       {{ '{{' }} .Cert {{ '}}' }}
       {{ '{{' }} if .CA {{ '}}' }}
       {{ '{{' }} .CA | writeToFile "{{ consul_tls_dir }}/ca.crt" "consul" "consul" "0600" {{ '}}' }}
@@ -77,7 +81,3 @@
         command = "date && if systemctl is-active consul; then service consul reload; fi"
       }
   notify: reload consul-template
-
-# TODO
-# generate client certs for CLI
-# generate client certs for UI (maybe)

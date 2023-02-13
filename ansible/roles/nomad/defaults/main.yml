@@ -2,11 +2,10 @@
 nomad_config_dir: "/etc/nomad.d"
 nomad_data_dir: "/opt/nomad/data"
 nomad_tls_dir: "{{ nomad_data_dir }}/tls"
-consul_template_config: "/opt/consul-template/consul_template.hcl"
+consul_template_config_dir: "/etc/consul-template/"
 
 # vault
 setup_vault_integration: true
-vault_policy_dir: "/etc/vault.d/policies"
 
 # server
 nomad_bootstrap_expect: 1

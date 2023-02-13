@@ -1,5 +1,11 @@
 ## Work Log
 
+### 14/02/23
+- Discovered that Consul mTLS certificates require both Extended Key Usage of
+  Server and Client Authentication. This means the `pki_int/issue/server` role
+  needs both server and client flags turned on. This is probably true for Nomad
+  as well.
+
 ### 13/02/23
 - I decided to scrape the previous plan of using AppRole authentication for
   Ansible because it had too many moving parts. Its much simpler to use TLS cert

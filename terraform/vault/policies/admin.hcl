@@ -17,6 +17,8 @@ path "/sys/policies/acl/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
 
+# TODO deny changing self policy
+
 # List existing policies
 path "sys/policies/acl" {
   capabilities = ["list"]
@@ -42,7 +44,7 @@ path "sys/auth" {
 ## KV Secrets Engine
 
 # manage kv secrets engine
-path "kv/*" {
+path "kvv2/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
 

@@ -15,12 +15,12 @@ tls {
   verify_https_client = false
 }
 
-{% setup_vault_integration %}
+{% if setup_vault_integration %}
 # vault token set as env variable
 vault {
   enabled = true
   address = "{{ nomad_vault_addr }}"
-  create_from_role = "nomad-cluster"
+  create_from_role = "nomad_cluster"
 }
 {% endif %}
 
