@@ -1,3 +1,4 @@
 ---
-consul_template_dir: "/opt/consul-template"
-vault_address: "{{ ansible_default_ipv4.address }}"
+consul_template_config_dir: "/etc/consul-template"
+vault_server_fqdn: "{{ ansible_default_ipv4.address }}"
+vault_agent_token_file_path: "/opt/vault/data/.vault-token"

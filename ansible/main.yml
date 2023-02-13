@@ -4,7 +4,8 @@
 #   tasks:
 #     - name: Create root, intermediate CA for Vault
 
-- hosts: server
+- hosts: server, !dev
+  tags: server
   become: true
   roles:
     - name: Mount NFS shares
@@ -12,6 +13,8 @@
       vars:
         nfs_share_mounts: {}
     - role: vault
+      vars:
+        - vault_setup_agent: true
     - role: consul-template
     - role: consul
     - role: nomad
@@ -30,8 +33,9 @@
         - goss_dir: "./goss"
         - goss_file: "server.yml"
 
-- hosts: client
+- hosts: client, !dev
   become: true
+  tags: client
   roles:
     - name: Mount NFS shares
       role: kencx.ansible.nfs
@@ -44,6 +48,8 @@
       vars:
         - vault_server_fqdn: "{{ cluster_server_ip }}"
     - role: consul-template
+      vars:
+        - vault_server_fqdn: "{{ cluster_server_ip }}"
     - role: consul
     - role: nomad
 

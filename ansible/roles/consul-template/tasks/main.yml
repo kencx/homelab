@@ -1,7 +1,5 @@
 ---
-# Vault Root CA and Intermediate CA must be initialized and configured
 # consul-template requires write access to all template destination directories.
-
 # - name: Create consul-template user
 #   user:
 #     name: consul-template
@@ -18,7 +16,7 @@
     owner: root
     group: root
   with_items:
-    - "{{ consul_template_dir }}"
+    - "{{ consul_template_config_dir }}"
 
 - name: Copy consul-template service file
   template:
@@ -32,7 +30,7 @@
 - name: Copy consul-template config
   template:
     src: "consul-template.hcl.j2"
-    dest: "{{ consul_template_dir }}/consul-template.hcl"
+    dest: "{{ consul_template_config_dir }}/consul-template.hcl"
     mode: 0640
     owner: root
     group: root
