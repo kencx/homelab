@@ -6,6 +6,14 @@
   needs both server and client flags turned on. This is probably true for Nomad
   as well.
 
+- All Ansible roles ran successfully for a dev cluster, albeit with an issue
+  about Vault-agent. On clusters with more than one Vault-agent service running
+  (eg. 1 server and 1 client node), Ansible needs to write to different cert auth
+  role paths to differentiate them. This can be easily done by identifying them
+  via their hostname, but Ansible's and consul_template's policy must also
+  support writing to these paths. Vault policies do not support regex but
+  templating can be used, which I have to look into.
+
 ### 13/02/23
 - I decided to scrape the previous plan of using AppRole authentication for
   Ansible because it had too many moving parts. Its much simpler to use TLS cert

@@ -1,8 +1,36 @@
 ---
+- set_fact:
+    local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
+
+- name: Fetch Vault CA certs to Ansibe host
+  fetch:
+    src: "{{ vault_ca_cert_dir }}/ca.crt"
+    dest: "{{ local_cert_dir }}/vault-ca.crt"
+    flat: true
+  delegate_to: "{{ vault_server_fqdn }}"
+
+- name: Push Vault CA cert to client
+  copy:
+    src: "{{ local_cert_dir }}/vault-ca.crt"
+    dest: "{{ vault_ca_cert_dir }}/ca.crt"
+    owner: vault
+    group: vault
+    mode: 0644
+
+- name: Add certificate-chain to remote ca-certificates.conf
+  lineinfile:
+    path: "/etc/ca-certificates.conf"
+    line: "vault/ca.crt"
+
+- name: Update remote trust store
+  command: update-ca-certificates
+  register: update_cert_output
+  changed_when: '"1 added" in update_cert_output.stdout'
+
 - name: Check status of Vault server
   command: vault status
   environment:
-    VAULT_ADDRESS: "https://{{ vault_server_fqdn }}:8200"
+    VAULT_ADDR: "https://{{ vault_server_fqdn }}:8200"
   register: vault_server_status
   changed_when: false
   failed_when: vault_server_status.rc != 0
@@ -34,23 +62,6 @@
     mode: 0700
     owner: vault
     group: vault
-
-- set_fact:
-    local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
-
-- name: Push Vault CA cert to client
-  copy:
-    src: "{{ local_cert_dir }}/vault-ca.crt"
-    dest: "{{ vault_ca_cert_dir }}/ca.crt"
-    owner: vault
-    group: vault
-    mode: 0644
-
-- name: Fetch Vault CA certs to Ansibe host
-  fetch:
-    src: "{{ vault_ca_cert_dir }}/ca.crt"
-    dest: "{{ local_cert_dir }}/vault-ca.crt"
-    flat: true
 
 - name: Login with Ansible auth cert
   become: false
@@ -115,6 +126,7 @@
   no_log: true
 
 # TODO add support for multiple agents
+# TODO add path to ansible policy
 - name: Write Agent certificate to auth role
   command: "vault write auth/cert/certs/agent certificate=@{{ vault_tls_dir }}/agent.crt token_policies=consul_template"
   environment:
