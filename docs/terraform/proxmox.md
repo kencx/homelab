@@ -1,7 +1,3 @@
-# Terraform
-
-## Proxmox
-
 Terraform uses the
 [telmate/proxmox](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs)
 provider to communicate with the Proxmox API. The `proxmox` provider must be
@@ -15,7 +11,7 @@ provider "proxmox" {
 }
 ```
 
-### Overview
+## Overview
 
 There are two custom modules available `terraform/modules/{vm,lxc}` for
 provisioning a VM and LXC respectively.
@@ -24,7 +20,7 @@ Cluster nodes are provisioned with the `vm` module. Each resource has a
 `null_resource` with a `local_exec` provisioner that calls its Ansible playbook.
 These provisioners are triggered by changes in their configured Ansible playbooks.
 
-### Commands
+## Deployment
 
 To start the deployment, ensure all variables are appropriately populated in
 `terraform.tfvars`.
@@ -36,9 +32,9 @@ $ terraform plan
 $ terraform apply
 ```
 
-### Variables
+## Variables
 
-#### VM
+### VM
 
 | Variable             | Description                          | Type   | Default    |
 | -------------------- | ------------------------------------ | ------ | ---------- |
@@ -58,36 +54,14 @@ $ terraform apply
 | ssh_private_key_file | Filepath of private SSH key          | string |            |
 | ssh_public_key_file  | Filepath of public SSH key           | string |            |
 
-- Currently, only `pm_user` and `pm_password` are supported
+## Notes
+
 - The given `template_name` must be exist. This should be the same name in
-  Packer
+  Packer.
 
-## Vault
-This uses the [Vault](https://registry.terraform.io/providers/hashicorp/vault/latest/docs) provider to declaratively create secrets in a running Vault instance. The Vault provider must be configured appropriately:
+### Proxmox credentials and LXC bind mounts
 
-```tf
-provider "vault" {
-  address      = var.vault_address
-  token        = var.vault_token
-  ca_cert_file = var.vault_ca_cert_file
-}
-```
-
-> There are intermittent issues with issuing certificates with the Terraform
-> provider. More testing needs to be done to find out the problem. In the
-> meantime, I recommend manually issuing certificates with the command line or
-> scripts.
-
-### Variables
-
-| Variable             | Description                          | Type   | Default    |
-| -------------------- | ------------------------------------ | ------ | ---------- |
-| vault_address        | Vault address | string | `https://localhost:8200`          |
-| vault_token        | (Root) Vault token for provider  | string |                  |
-| vault_ca_cert_file | Local path to Vault CA cert file | string | `./certs/vault_ca.crt` |
-| vault_audit_path   | Vault audit file path            | string | `/vault/logs/vault.log`|
-| admin_password     | Password for admin user          | string | |
-| allowed_server_domains | List of allowed_domains for PKI server role | list(string) | `["service.consul", "dc1.consul", "dc1.nomad", "global.nomad"]`|
-| allowed_client_domains | List of allowed_domains for PKI client role | list(string) | `["service.consul", "dc1.consul", "dc1.nomad", "global.nomad"]` |
-| allowed_auth_domains   | List of allowed_domains for PKI auth role | list(string) | `["global.vault"]`|
-| allowed_vault_domains  | List of allowed_domains for PKI vault role | list(string) | `["vault.service.consul", "global.vault"]`|
+Credentials `proxmox_user="root@pam"` and `proxmox_password` must be used
+in place of the API token credentials if you require bind mounts. There is [no
+support](https://bugzilla.proxmox.com/show_bug.cgi?id=2582) for mounting bind
+mounts to LXC via an API token.

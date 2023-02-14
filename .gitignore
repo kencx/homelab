@@ -1,4 +1,5 @@
 .cache/*
+.venv/*
 cloud-config
 certs/*
 !certs/.gitkeep

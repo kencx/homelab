@@ -1,36 +1,27 @@
-# Packer
+[Packer](https://packer.io) is used to create golden images in Proxmox with the
+community [Proxmox builder
+plugin](https://www.packer.io/plugins/builders/proxmox).
 
-Packer uses the community [Proxmox](https://www.packer.io/plugins/builders/proxmox)
-builder to create templates. There are two types of builders: `proxmox-clone`
-and `proxmox-iso`.
-
-## Build
-
-1. Create and populate the `auto.pkrvars.hcl` variable file.
-
-2. Run the build:
-
-```bash
-$ packer validate -var-file="auto.pkrvars.hcl" .
-$ packer build -var-file="auto.pkrvars.hcl" .
-```
-
->If a template of the same `vm_id` already exists, you may force its re-creation
->with the `--force` flag:
->
->~~~bash
->$ packer build -var-file="auto.pkrvars.hcl" --force .
->~~~
->
->This is only available on `packer-plugin-proxmox` v1.1.2.
+Two different builders are supported: `proxmox-iso` and `proxmox-clone` to
+target both ISO and cloud-init images for virtual machine template creation in
+Proxmox.
 
 ## Proxmox-clone
 
-The `proxmox-clone` builder creates a VM template from an existing template. The
-existing template must have an attached cloud-init drive for the builder to
-add the SSH communicator configuration.
+The `proxmox-clone` builder creates a new VM template from an existing one. This
+existing template [must
+have](https://pve.proxmox.com/wiki/Cloud-Init_Support#_preparing_cloud_init_templates):
 
-It performs the following actions:
+- An attached cloud-init drive for the builder to add the SSH communicator
+  configuration.
+- `cloud-init` installed.
+
+!!! note
+    See [Import Cloud Image](cloud_image.md) for how to manually import a pre-configured cloud
+    image.
+
+The builder performs the following actions:
+
 1. Clone existing template.
 2. Add SSH communicator configuration via cloud-init.
 3. Connect via SSH and run shell provisioner scripts to prepare VM for Ansible.
@@ -81,6 +72,29 @@ The `proxmox-iso` builder creates a VM template from an ISO file.
 | memory           | Memory in MB                          | number | 1024    |
 | ssh_username     | User to SSH into during provisioning  | string |         |
 
+## Build Images
+
+1. Create and populate the `auto.pkrvars.hcl` variable file.
+
+2. Run the build:
+
+```bash
+$ packer validate -var-file="auto.pkrvars.hcl" .
+$ packer build -var-file="auto.pkrvars.hcl" .
+```
+
+If a template of the same `vm_id` already exists, you may force its re-creation
+with the `--force` flag:
+
+```bash
+$ packer build -var-file="auto.pkrvars.hcl" --force .
+```
+
+>This is only available from `packer-plugin-proxmox` v1.1.2.
+
+
 ## Notes
-- Currently, only `proxmox_username` and `proxmox_password` are supported
-- The given `ssh_username` must already exist
+- Currently, only `proxmox_username` and `proxmox_password` are supported for
+  authentication.
+- The given `ssh_username` must already exist in the VM template when using
+  `proxmox-clone`.

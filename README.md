@@ -1,8 +1,16 @@
 # Hubble Homelab
 
-This repository contains infrastructure-as-code and configuration for the automated
-provisioning of my Proxmox homelab. It provisions a Nomad + Consul + Vault mini-cluster
-for personal use.
+This repository contains infrastructure-as-code for the automated deployment and
+management of a Hashicorp (Nomad + Consul + Vault) cluster. The cluster is
+hosted on Proxmox as a personal, private homelab.
+
+## Disclaimer
+This project is in pre-alpha status and subject to breaking changes. Please:
+
+- Do read the documentation.
+- Do not run any code on your machine directly as is, in case of data loss. Some
+  playbooks may perform destructive actions that are irreversible!
+- Do use this repository for ideas or as an example for your own homelab setup.
 
 ## Overview
 
@@ -11,79 +19,74 @@ minimally of one server node and one client node with NFS mounted storage from a
 NAS instance.
 
 ### Features
+- [x] Golden image creation with Packer
+- [x] Declarative configuration of Vault with Terraform
+- [x] Automated post-provisioning with Ansible
 - [x] Nomad container scheduling and orchestration
 - [x] Consul service discovery
 - [x] Secure node communication via mTLS
 - [x] Personal Certificate Authority hosted on Vault
-- [x] Automated certificate management with consul-template, Traefik
+- [x] Automated certificate management with Vault and consul-template
+- [x] Let's Encrypt certificates on Traefik reverse proxy
+- [x] Scheduled, automated backups with Restic and Autorestic
 
 ## Provisioning
 
-The infrastructure-as-code in this project aims to allow the user to provision a fully
-functional cluster from scratch with minimal manual intervention. The cluster requires
-at least two hosts: one server and one client node.
+This repository aims to provision a functional cluster from scratch with manual
+intervention. It uses:
 
-The three key provisioning steps are:
+- Packer for creating golden images in Proxmox
+- Terraform for deploying Proxmox VMs and/or LXCs
+- Ansible for configuration management
 
-1. VM image creation with Packer & Ansible
-2. Provisioning with Terraform
-3. Post-provisioning with Ansible
+The cluster requires a minimum of two hosts: one server and one client node.
 
-### Packer Image Creation
+### Golden Images with Packer
 
-Each VM is provisoned from a common base Debian 11 image created with Packer and
-Ansible, as seen in `packer/base-clone`. The templating process installs common packages,
-performs security hardening and other common tasks.
+Packer's
+[Proxmox](https://developer.hashicorp.com/packer/plugins/builders/proxmox)
+builder is used to build a base Proxmox VM template from an existing Debian 11
+cloud image. It clones an existing template and uses Ansible to execute common
+provisioning tasks such as installing common packages and security hardening. On
+completion, the VM is converted into a Proxmox template.
 
-Refer to [docs/packer](docs/packer.md) for more information.
+>Packer can also build images from an ISO with `proxmox-iso`. This is currently a
+>work-in-progress.
 
 ### Provisioning with Terraform
 
-Terraform provisons VMs from the created images on Proxmox with the
+Terraform provisions Proxmox VMs from the previously-created golden images with
+the
 [telmate/proxmox](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs)
-provider. All resources utilize a custom `base` module in which contains sane
-defaults and sets up SSH access.
-
-Configuration variables for `base` are found at [docs/terraform](docs/terraform.md).
+provider. It utilizes cloud-init to set up the host's hostname, user and SSH
+access keys.
 
 ### Post-provisioning with Ansible
 
-Post-provisioning is performed on each host with Ansible playbooks. These playbooks use
-modular and independent [roles](docs/roles.md) to set up software configurations in
-each node, depending on their type.
+Finally, Ansible configures and starts the Hashicorp software necessary to run a
+functional cluster. The Ansible playbooks use modular and independent roles to
+set up hosts as a server or client node.
 
 On server nodes,
 
-1. Vault is started and initialized with TLS encryption. After unsealing, first-time
-   setup is performed with the root token.
-2. Consul-template is configured with limited access to Vault. It will be the main tool
-   to automate Vault credential rotation.
+1. Vault is initialized with TLS encryption. After unsealing, first-time
+   setup is performed with the root token and Terraform.
+2. Consul-template is configured with limited access to Vault via Vault-agent.
 3. Nomad and Consul are configured with mTLS encryption in server mode.
 4. A smoke test is performed with [Goss](https://github.com/aelsabbahy/goss).
 
-On client nodes, after the server playbooks are run,
+On client nodes, after the server nodes are up,
 
-1. Consul-template is configured with limited access to the remote Vault server.
+1. Consul-template is configured with limited access to the remote Vault server
+   via Vault-agent.
 2. Nomad and Consul are configured with mTLS encryption in client mode.
 3. A smoke test is performed with [Goss](https://github.com/aelsabbahy/goss).
-4. All Nomad jobs in `apps/` are provisioned.
 
-Refer to [docs/setup](docs/setup.md) for detailed information.
-
-## VPS
-
-A Hetzner VPS is provisioned to run various web applications. It is bootstrapped
-with `cloud-config` and exposed via a Nginx reverse proxy.
-
-## Backups
-
-Autorestic performs daily backups to an external USB hard drive and Backblaze
-B2.
-
-## Notes
-
-#### Proxmox API and LXC bind mounts
->NOTE: Credentials `proxmox_user="root@pam"` and `proxmox_password` must be used
->in place of the API token credentials if you require bind mounts. There is [no
->support](https://bugzilla.proxmox.com/show_bug.cgi?id=2582) for mounting bind
->mounts to LXC via an API token.
+## TODO
+- [ ] systemd notification on failure
+- [ ] Monitoring stack on separate node
+- [ ] Nomad, Consul ACLs
+- [ ] Run consul-template as non-root user
+- [ ] Nomad, Consul automated gossip key rotation
+- [ ] CI/CD pipeline for provisioning steps
+- [ ] Wireguard VPN
