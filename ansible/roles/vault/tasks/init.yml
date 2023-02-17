@@ -146,9 +146,10 @@
     dest: "{{ vault_terraform_cert_dir }}/vault-ca.crt"
     flat: true
 
-# Clear any existing state from previous Vault server or Molecule testing. Because
-# this is only run when Vault has not been initialized, it does not delete
-# any important data.
+# Clear any existing state from previous Vault server or Molecule testing. THIS CAN
+# DELETE IMPORTANT DATA! Take care when running tests when a state file already exists.
+
+# TODO split prod and test states into separate workspaces or project dirs
 - name: Delete existing state from Terraform if any
   become: false
   community.general.terraform:
@@ -166,6 +167,7 @@
     project_path: "{{ vault_terraform_dir }}"
     state: present
     force_init: true
+    check_destroy: true
     variables:
       vault_token: "{{ vault_root_token }}"
       vault_address: "https://{{ ansible_default_ipv4.address }}:8200"
