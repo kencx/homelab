@@ -1,0 +1,3 @@
+{% for export in nfs_exports %}
+{{ export.dir }} {{ export.ip }}({{ export.opts }})
+{% endfor %}

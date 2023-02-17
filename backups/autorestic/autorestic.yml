@@ -21,6 +21,7 @@ locations:
     to:
       - hdd
       - remote
+    cron: '0 6 * * *'
     forget: prune
     hooks:
       <<: *hooks
@@ -30,6 +31,8 @@ locations:
           - /home/debian/archives
           - /home/debian/.*
           - /home/debian/borgmatic
+          - /home/debian/scripts
+          - /home/debian/logs
 
   archives:
     from: /home/debian/archives

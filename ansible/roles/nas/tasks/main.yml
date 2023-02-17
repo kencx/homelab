@@ -1,0 +1,33 @@
+---
+- name: Install NFS utilities
+  apt:
+    name:
+      - nfs-common
+      - nfs-kernel-server
+    state: present
+
+- name: Create NFS export directories
+  file:
+    path: "{{ item.dir }}"
+    mode: 0755
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    state: directory
+  with_items: "{{ nfs_exports }}"
+
+- name: Copy NFS exports file
+  template:
+    src: "exports.j2"
+    dest: "/etc/exports"
+    owner: root
+    group: root
+    mode: 0644
+  notify: reload nfs
+
+- name: Start NFS
+  systemd:
+    name: nfs-kernel-server
+    state: started
+    enabled: true
+
+- import_tasks: autorestic.yml

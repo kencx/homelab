@@ -1,0 +1,65 @@
+---
+# - name: Install restic
+# - name: Install autorestic
+
+- name: Create autorestic directories
+  file:
+    path: "{{ item }}"
+    mode: 0755
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    state: directory
+  with_items:
+    - "{{ autorestic_script_dir }}"
+    - "{{ autorestic_log_dir }}"
+
+- set_fact:
+    nas_backup_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/backups/autorestic"
+
+- name: Copy autorestic.yml
+  template:
+    src: "{{ nas_backup_dir }}/autorestic.yml"
+    dest: "/home/{{ user }}/.autorestic.yml"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: 0644
+
+- name: Copy autorestic.env
+  copy:
+    src: "{{ nas_backup_dir }}/autorestic.env"
+    dest: "/home/{{ user }}/.autorestic.env"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: 0600
+
+- name: Validate autorestic config
+  command: autorestic check
+  changed_when: false
+
+- name: Copy backup scripts
+  copy:
+    src: "{{ nas_backup_dir }}/{{ item }}"
+    dest: "{{ autorestic_script_dir }}/{{ item }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: 0644
+  with_items:
+    - backup-script
+    - restore-script
+    - secrets.sh
+
+- name: Setup cronjob
+  cron:
+    name: Daily Backup
+    hour: '6'
+    minute: '0'
+    job: "/home/{{ user }}/scripts/backup-script"
+    state: present
+
+- name: Setup logrotate for autorestic.log
+  template:
+    src: "logrotate-autorestic.j2"
+    dest: "/etc/logrotate.d/autorestic"
+    owner: root
+    group: root
+    mode: 0644

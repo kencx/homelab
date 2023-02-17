@@ -1,0 +1,7 @@
+---
+user: debian
+nfs_exports: {}
+
+autorestic_script_dir: "/home/{{ user }}/scripts"
+autorestic_log_dir: "/home/{{ user }}/logs"
+autorestic_log_file: "{{ autorestic_log_dir }}/autorestic.log"
