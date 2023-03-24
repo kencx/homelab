@@ -149,11 +149,11 @@
 # Clear any existing state from previous Vault server or Molecule testing. THIS CAN
 # DELETE IMPORTANT DATA! Take care when running tests when a state file already exists.
 
-# TODO split prod and test states into separate workspaces or project dirs
 - name: Delete existing state from Terraform if any
   become: false
   community.general.terraform:
     project_path: "{{ vault_terraform_dir }}"
+    workspace: "{{ vault_terraform_workspace }}"
     state: absent
     variables:
       vault_token: "{{ vault_root_token }}"
@@ -165,6 +165,7 @@
   become: false
   community.general.terraform:
     project_path: "{{ vault_terraform_dir }}"
+    workspace: "{{ vault_terraform_workspace }}"
     state: present
     force_init: true
     check_destroy: true
