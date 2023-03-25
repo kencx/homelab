@@ -6,7 +6,7 @@
   shell:
     cmd: |
       if ! vault kv get -field=gossip_key kvv2/cluster/nomad_config >/dev/null 2>&1; then
-        vault kv put kvv2/cluster/nomad_config gossip_key=$(nomad operator keygen)
+        vault kv put kvv2/cluster/nomad_config gossip_key=$(nomad operator gossip keyring generate)
       else
         echo "gossip_key present"
       fi
