@@ -7,7 +7,7 @@
 # new token to the file.
 #
 # However, if Nomad is restarted after the token in the file has expired, Nomad is
-# unable to produce a new token for startup automatiicaly. As such, consul-template
+# unable to produce a new token for startup automatically. As such, consul-template
 # writes a new plain text token in the file when it expires, ensuring a valid token is
 # always available in the file.
 - name: Check if token file exists
@@ -19,7 +19,8 @@
 - name: Create Vault token file
   block:
     - name: Generate token for Vault integration with Nomad
-      command: vault token create -role nomad_cluster -period 72h -orphan -format=json
+      # command: vault token create -role nomad_cluster -period 72h -orphan -format=json
+      command: vault write auth/token/create/nomad_cluster "period=72h"
       environment:
         VAULT_ADDR: "{{ nomad_vault_addr }}"
         VAULT_TOKEN: "{{ nomad_ansible_token }}"
@@ -47,7 +48,7 @@
     block: |
       template {
         contents = <<EOF
-      {{ '{{' }} with secret "auth/token/create/nomad_cluster" "period=72h" "orphan=true" {{ '}}' }}
+      {{ '{{' }} with secret "auth/token/create/nomad_cluster" "period=72h" {{ '}}' }}
       VAULT_TOKEN={{ '{{' }} .Auth.ClientToken {{ '}}' }}
       {{ '{{' }} end {{ '}}' }}
       EOF

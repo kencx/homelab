@@ -1,5 +1,14 @@
 ## Work Log
 
+### 26/03/23
+- Updated Consul config to v1.15
+- Updated Nomad keygen generation command
+- Creating orphan, renewable Nomad-Vault integration token requires sudo
+  privileges in policy path `auth/token/create/nomad_cluster` for `ansible` and
+  `consul_template` policies. `auth/token/create-orphan` could not be used as
+  the resulting orphan token will inherit the policies of the currently used
+  "parent" token.
+
 ### 25/03/23
 - Add support for different Terraform workspaces when initializing Vault.
 - Add support for writing to different cert auth role paths when running

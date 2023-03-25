@@ -15,11 +15,6 @@ path "auth/agent/certs/*" {
   capabilities = ["create", "update"]
 }
 
-# required to self-update auth cert
-path "auth/cert/certs/consul_template" {
-  capabilities = ["create", "update"]
-}
-
 # manage kv secrets engine
 path "kvv2/data/cluster/*" {
   capabilities = ["create", "read", "update"]

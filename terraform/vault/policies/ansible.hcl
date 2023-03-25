@@ -22,6 +22,6 @@ path "kvv2/data/cluster/nomad_config" {
   capabilities = ["read", "create"]
 }
 
-path "auth/token/create-orphan" {
-  capabilities = ["create", "update"]
+path "auth/token/create/nomad_cluster" {
+  capabilities = ["create", "update", "sudo"]
 }
