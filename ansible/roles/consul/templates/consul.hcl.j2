@@ -4,11 +4,11 @@ bind_addr   = {% raw %}"{{ GetInterfaceIP \"eth0\" }}"
 {% endraw %}
 client_addr = "0.0.0.0"
 
-# TODO Consul v1.14 deprecates grpc to grpc_tls
 ports {
-  http = -1
-  https = 8501
-  grpc = 8502
+  http     = -1
+  https    = 8501
+  grpc     = 8502
+  grpc_tls = 8503
 }
 
 tls {
