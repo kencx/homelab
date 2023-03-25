@@ -2,30 +2,38 @@
 - set_fact:
     local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
 
-- name: Fetch Vault CA certs to Ansibe host
-  fetch:
-    src: "{{ vault_ca_cert_dir }}/ca.crt"
-    dest: "{{ local_cert_dir }}/vault-ca.crt"
-    flat: true
-  delegate_to: "{{ vault_server_fqdn }}"
+- name: Check if Vault CA cert exists on client
+  stat:
+    path: "{{ vault_ca_cert_dir }}/ca.crt"
+  register: vault_ca_cert
 
-- name: Push Vault CA cert to client
-  copy:
-    src: "{{ local_cert_dir }}/vault-ca.crt"
-    dest: "{{ vault_ca_cert_dir }}/ca.crt"
-    owner: vault
-    group: vault
-    mode: 0644
+- name: Trust CA cert
+  when: not vault_ca_cert.stat.exists
+  block:
+    - name: Fetch Vault CA certs to Ansibe host
+      fetch:
+        src: "{{ vault_ca_cert_dir }}/ca.crt"
+        dest: "{{ local_cert_dir }}/vault-ca.crt"
+        flat: true
+      delegate_to: "{{ vault_server_fqdn }}"
 
-- name: Add certificate-chain to remote ca-certificates.conf
-  lineinfile:
-    path: "/etc/ca-certificates.conf"
-    line: "vault/ca.crt"
+    - name: Push Vault CA cert to client
+      copy:
+        src: "{{ local_cert_dir }}/vault-ca.crt"
+        dest: "{{ vault_ca_cert_dir }}/ca.crt"
+        owner: vault
+        group: vault
+        mode: 0644
 
-- name: Update remote trust store
-  command: update-ca-certificates
-  register: update_cert_output
-  changed_when: '"1 added" in update_cert_output.stdout'
+    - name: Add certificate-chain to remote ca-certificates.conf
+      lineinfile:
+        path: "/etc/ca-certificates.conf"
+        line: "vault/ca.crt"
+
+    - name: Update remote trust store
+      command: update-ca-certificates
+      register: update_cert_output
+      changed_when: '"1 added" in update_cert_output.stdout'
 
 - name: Check status of Vault server
   command: vault status
@@ -91,9 +99,14 @@
     - vault_ansible_token_json.auth is defined
     - vault_ansible_token_json.auth.client_token is defined
 
-# TODO add support for multiple agents
+# TODO don't overwrite if exists
+# - name: Check if Agent certificate exists on client
+#   stat:
+#     path: "{{ vault_tls_dir }}/agent.crt"
+#   register: vault_agent_cert
+
 - name: Get certificates for Agent cert auth from Vault server
-  command: vault write -format=json pki_int/issue/auth "common_name=agent@global.vault" "ttl=30d"
+  command: vault write -format=json pki_int/issue/auth "common_name=agent-{{ ansible_fqdn }}@global.vault" "ttl=30d"
   environment:
     VAULT_TOKEN: "{{ vault_ansible_token }}"
     VAULT_ADDR: "https://{{ vault_server_fqdn }}:8200"
@@ -120,15 +133,13 @@
   copy:
     content: "{{ vault_agent_certificate_json.data.private_key }}"
     dest: "{{ vault_tls_dir }}/agent_key.pem"
-    mode: 0400
+    mode: 0600
     owner: vault
     group: vault
   no_log: true
 
-# TODO add support for multiple agents
-# TODO add path to ansible policy
 - name: Write Agent certificate to auth role
-  command: "vault write auth/cert/certs/agent certificate=@{{ vault_tls_dir }}/agent.crt token_policies=consul_template"
+  command: "vault write auth/agent/certs/{{ ansible_fqdn }} certificate=@{{ vault_tls_dir }}/agent.crt token_policies=consul_template"
   environment:
     VAULT_TOKEN: "{{ vault_ansible_token }}"
     VAULT_ADDR: "https://{{ vault_server_fqdn }}:8200"

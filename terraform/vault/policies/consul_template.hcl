@@ -10,6 +10,11 @@ path "pki_int/issue/client" {
   capabilities = ["create", "update"]
 }
 
+# required to update vault agent auth cert
+path "auth/agent/certs/*" {
+  capabilities = ["create", "update"]
+}
+
 # required to self-update auth cert
 path "auth/cert/certs/consul_template" {
   capabilities = ["create", "update"]

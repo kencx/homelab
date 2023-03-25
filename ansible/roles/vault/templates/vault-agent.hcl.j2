@@ -7,7 +7,8 @@ vault {
 
 auto_auth {
   method "cert" {
-    name = "auth"
+    name = "{{ ansible_fqdn }}"
+    mount_path = "auth/agent"
   }
 
   sink "file" {
@@ -20,10 +21,10 @@ auto_auth {
 
 template {
   contents    = <<EOF
-{{ '{{' }} with pkiCert "pki_int/issue/auth" "common_name=agent@global.vault" "ttl=30d" {{ '}}' }}
+{{ '{{' }} with pkiCert "pki_int/issue/auth" "common_name=agent-{{ ansible_fqdn }}@global.vault" "ttl=30d" {{ '}}' }}
 {{ '{{' }} .Cert {{ '}}' }}
 {{ '{{' }} if .Key {{ '}}' }}
-{{ '{{' }} .Key | writeToFile "{{ vault_tls_dir }}/agent_key.pem" "vault" "vault" "0400" {{ '}}' }}
+{{ '{{' }} .Key | writeToFile "{{ vault_tls_dir }}/agent_key.pem" "vault" "vault" "0600" {{ '}}' }}
 {{ '{{' }} end {{ '}}' }}
 {{ '{{' }} end {{ '}}' }}
 EOF
@@ -32,7 +33,7 @@ EOF
     command = [
       "{{ vault_data_dir }}/token_action.sh",
       "write",
-      "auth/cert/certs/agent",
+      "auth/agent/certs/{{ ansible_fqdn }}",
       "certificate=@{{ vault_tls_dir }}/agent.crt",
     ]
   }

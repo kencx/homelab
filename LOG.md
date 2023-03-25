@@ -1,5 +1,10 @@
 ## Work Log
 
+### 25/03/23
+- Add support for different Terraform workspaces when initializing Vault.
+- Add support for writing to different cert auth role paths when running
+  multiple Vault-agent services.
+
 ### 14/02/23
 - Discovered that Consul mTLS certificates require both Extended Key Usage of
   Server and Client Authentication. This means the `pki_int/issue/server` role

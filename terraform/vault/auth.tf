@@ -34,6 +34,15 @@ resource "vault_auth_backend" "cert" {
   }
 }
 
+resource "vault_auth_backend" "agent_cert" {
+  type = "cert"
+  path = "agent"
+  tune {
+    default_lease_ttl = "2h"
+    max_lease_ttl     = "24h"
+  }
+}
+
 # todo strange error with issuing certs, unable to find ca certficiate?
 resource "vault_pki_secret_backend_cert" "ansible" {
   depends_on  = [vault_pki_secret_backend_role.auth_role]
