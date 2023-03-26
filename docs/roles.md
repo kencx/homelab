@@ -18,6 +18,8 @@ as:
 | common_keyring_dir | Keyring directory path for external apt repositories | string | `/etc/apt/keyrings` |
 | common_nfs_dir | NFS share directory path | string | `/mnt/storage` |
 | common_packages | List of common packages to be installed | list(string) | See `defaults.yml` for full list |
+| common_reset_nomad | Clear Nomad data directory | boolean | `true` |
+| common_dotfiles_url | Dotfiles Git repository URL | string | `""` |
 
 ## Vault
 This role deploys a new Vault instance and performs the required initialization.
@@ -155,8 +157,8 @@ depending on the host's group name.
 ### Setup
 For encryption, the role creates consul-template templates for:
 
-- Nomad's gossip key. A new key is added with `nomad operator keygen` if it does not already
-	exist
+- Nomad's gossip key. A new key is added with `nomad operator gossip keyring
+  generate` if it does not already exist
 - Nomad TLS certs
 - Vault token for Vault integration
 

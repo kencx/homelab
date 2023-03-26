@@ -8,6 +8,9 @@
   `consul_template` policies. `auth/token/create-orphan` could not be used as
   the resulting orphan token will inherit the policies of the currently used
   "parent" token.
+- Add flag to not delete existing Nomad data after I deleted existing Nomad data
+  lol.
+- Add bash aliases to cluster hosts in `common`.
 
 ### 25/03/23
 - Add support for different Terraform workspaces when initializing Vault.

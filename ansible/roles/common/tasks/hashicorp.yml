@@ -49,3 +49,4 @@
       file:
         path: /opt/nomad/data
         state: absent
+  when: common_reset_nomad

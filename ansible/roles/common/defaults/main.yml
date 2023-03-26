@@ -15,3 +15,5 @@ common_packages:
   - jq
   - unzip
   - ca-certificates
+common_reset_nomad: true
+common_dotfiles_url: ""
