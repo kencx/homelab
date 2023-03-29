@@ -31,6 +31,12 @@ variable "vmid" {
   default     = 400
 }
 
+variable "tags" {
+  type        = string
+  description = "VM tags"
+  default     = "dev"
+}
+
 variable "template_name" {
   type        = string
   description = "Template to clone"

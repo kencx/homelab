@@ -16,9 +16,15 @@ variable "vmid" {
   default     = 400
 }
 
-variable "template_name" {
+variable "tags" {
   type        = string
-  description = "VM Template Name"
+  description = "VM tags"
+  default     = ""
+}
+
+variable "clone_template_name" {
+  type        = string
+  description = "VM Template name to clone"
 }
 
 variable "onboot" {

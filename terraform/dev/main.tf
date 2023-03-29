@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "telmate/proxmox"
-      version = ">= 2.9.6"
+      version = ">= 2.9.10"
     }
   }
 }
@@ -18,16 +18,17 @@ module "dev" {
 
   hostname    = "dev"
   vmid        = 130
+  tags        = var.tags
   target_node = var.target_node
 
-  template_name = var.template_name
-  onboot        = var.onboot
-  oncreate      = var.oncreate
+  clone_template_name = var.template_name
+  onboot              = var.onboot
+  oncreate            = var.oncreate
 
   cores     = 1
   sockets   = 1
   memory    = 1024
-  disk_size = "4G"
+  disk_size = "10G"
 
   ssh_user        = var.ssh_user
   ssh_private_key = file(var.ssh_private_key_file)
@@ -35,20 +36,43 @@ module "dev" {
 }
 
 module "dev-client" {
+  count  = 1
   source = "../modules/vm"
 
   hostname    = "dev-client"
   vmid        = 131
   target_node = var.target_node
 
-  template_name = var.template_name
-  onboot        = var.onboot
-  oncreate      = var.oncreate
+  clone_template_name = var.template_name
+  onboot              = var.onboot
+  oncreate            = var.oncreate
 
   cores     = 1
   sockets   = 1
   memory    = 1024
-  disk_size = "4G"
+  disk_size = "15G"
+
+  ssh_user        = var.ssh_user
+  ssh_private_key = file(var.ssh_private_key_file)
+  ssh_public_key  = file(var.ssh_public_key_file)
+}
+
+module "dev-control" {
+  count  = 0
+  source = "../modules/vm"
+
+  hostname    = "dev-control"
+  vmid        = 135
+  target_node = var.target_node
+
+  clone_template_name = var.template_name
+  onboot              = var.onboot
+  oncreate            = var.oncreate
+
+  cores     = 1
+  sockets   = 1
+  memory    = 1024
+  disk_size = "10G"
 
   ssh_user        = var.ssh_user
   ssh_private_key = file(var.ssh_private_key_file)

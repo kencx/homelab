@@ -11,10 +11,11 @@ terraform {
 resource "proxmox_vm_qemu" "base" {
   name = var.hostname
   vmid = var.vmid
+  tags = var.tags
 
   target_node = var.target_node
 
-  clone      = var.template_name
+  clone      = var.clone_template_name
   full_clone = true
 
   onboot   = var.onboot
