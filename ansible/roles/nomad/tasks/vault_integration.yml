@@ -20,7 +20,7 @@
   block:
     - name: Generate token for Vault integration with Nomad
       # command: vault token create -role nomad_cluster -period 72h -orphan -format=json
-      command: vault write auth/token/create/nomad_cluster "period=72h"
+      command: vault write -format=json auth/token/create/nomad_cluster "period=72h"
       environment:
         VAULT_ADDR: "{{ nomad_vault_addr }}"
         VAULT_TOKEN: "{{ nomad_ansible_token }}"
