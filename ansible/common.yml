@@ -7,7 +7,9 @@
   roles:
     - role: common
       vars:
-        - common_user: "{{ user }}"
+        common_user: "{{ user }}"
+        common_reset_nomad: true
+        common_dotfiles_url: https://github.com/kencx/dotfiles.git
 
     - name: Install Docker
       role: geerlingguy.docker

@@ -1,4 +1,12 @@
-## Work Log
+## Work log
+
+### 28/03/23
+- Updated to telmate/proxmox 2.6.14
+- Manually created `debian11-cloud-image` template image from Debian cloud
+  image.
+- Build `debian11-base-packer` golden image with Packer and Ansible from cloud
+  image.
+- Provision VM successfully with Terraform and golden image.
 
 ### 26/03/23
 - Updated Consul config to v1.15
@@ -117,6 +125,12 @@
   - Generalized some OS variables with Ansible facts
   - Molecule testing of `common` role with `debian/bullseye64` box. Creating our own boxes
     will come later.
+
+### 01/12/22 18:00
+- Add support for cloud-init in Proxmox templates.
+  - It was a simple fix: I forgot to install cloud-init during preseeding.
+  - Terraform now handles cloud-init configuration during provisioning automatically
+    with the Proxmox provider
 
 ### 30/11/22 21:40
 - Added Molecule unit tests for `common` and `vault` roles.

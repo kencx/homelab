@@ -15,5 +15,6 @@ common_packages:
   - jq
   - unzip
   - ca-certificates
+  - qemu-guest-agent
 common_reset_nomad: true
 common_dotfiles_url: ""

@@ -16,26 +16,26 @@ variable "proxmox_node" {
   default = "pve"
 }
 
-variable "iso_url" {
+variable "clone_vm" {
   type        = string
-  description = "ISO file URL"
-}
-
-variable "iso_checksum" {
-  type        = string
-  description = "ISO file checksum"
+  description = "Name of existing VM template to clone"
 }
 
 variable "vm_id" {
   type        = number
-  default     = 9000
-  description = "ID of temp VM during build process"
+  description = "ID of VM template"
+  default     = 5000
 }
 
 variable "vm_name" {
   type        = string
-  description = "VM name"
-  default     = "base"
+  description = "Name of VM template"
+}
+
+variable "template_description" {
+  type        = string
+  description = "Description of VM template"
+  default     = "Debian 11 base image"
 }
 
 variable "cores" {
@@ -56,32 +56,28 @@ variable "memory" {
   default     = 1024
 }
 
-variable "root_password" {
-  type        = string
-  description = "Root password"
-  default     = "vagrant"
-}
-
 variable "ssh_username" {
-  type        = string
-  description = "SSH username"
-  default     = "debian"
+  type = string
 }
 
-variable "ssh_password" {
+variable "ip_address" {
   type        = string
-  description = "SSH password"
-  default     = "vagrant"
+  description = "Temporary IP address of VM template"
+  default     = "10.10.10.250"
+}
+
+variable "gateway" {
+  type        = string
+  description = "Gateway of VM template"
+  default     = "10.10.10.1"
 }
 
 variable "ssh_public_key_path" {
   type        = string
   description = "SSH Public Key Path"
-  default     = "~/.ssh/vagrant.pub"
 }
 
 variable "ssh_private_key_path" {
   type        = string
   description = "SSH Private Key Path"
-  default     = "~/.ssh/vagrant"
 }

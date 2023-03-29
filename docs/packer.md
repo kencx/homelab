@@ -1,18 +1,71 @@
 # Packer
 
 Packer uses the community [Proxmox](https://www.packer.io/plugins/builders/proxmox)
-builder to create templates.
+builder to create templates. There are two types of builders: `proxmox-clone`
+and `proxmox-iso`.
 
-### Commands
-To start building, create a variable file `auto.pkrvars.hcl` and populate it.
+## Build
+
+1. Create and populate the `auto.pkrvars.hcl` variable file.
+
+2. Run the build:
 
 ```bash
-$ cd packer/base
 $ packer validate -var-file="auto.pkrvars.hcl" .
 $ packer build -var-file="auto.pkrvars.hcl" .
 ```
 
-## Variables
+>If a template of the same `vm_id` already exists, you may force its re-creation
+>with the `--force` flag:
+>
+>~~~bash
+>$ packer build -var-file="auto.pkrvars.hcl" --force .
+>~~~
+>
+>This is only available on `packer-plugin-proxmox` v1.1.2.
+
+## Proxmox-clone
+
+The `proxmox-clone` builder creates a VM template from an existing template. The
+existing template must have an attached cloud-init drive for the builder to
+add the SSH communicator configuration.
+
+It performs the following actions:
+1. Clone existing template.
+2. Add SSH communicator configuration via cloud-init.
+3. Connect via SSH and run shell provisioner scripts to prepare VM for Ansible.
+4. Install and start `qemu-guest-agent`.
+5. Run Ansible provisioner with `common.yml` playbook.
+6. Stop and convert VM to desired template with new (empty) cloud-init drive.
+
+### Variables
+
+| Variable              | Description                           | Type   | Default |
+| ----------------      | ------------------------------------- | ------ | ------- |
+| proxmox_url           | Proxmox URL Endpoint                  | string |         |
+| proxmox_username      | Proxmox username                      | string |         |
+| proxmox_password      | Proxmox pw                            | string |         |
+| proxmox_node          | Proxmox node to start VM in           | string | `pve`   |
+| clone_vm              | Name of existing VM template to clone | string |         |
+| vm_id                 | ID of final VM template               | number | 5000    |
+| vm_name               | Name of final VM template             | string |         |
+| template_description  | Description of final VM template      | string |         |
+| cores                 | Number of CPU cores                   | number | 1       |
+| sockets               | Number of CPU sockets                 | number | 1       |
+| memory                | Memory in MB                          | number | 1024    |
+| ssh_username          | User to SSH into during provisioning  | string |         |
+| ip_address            | Temporary IP address of VM template   | string | `10.10.10.250` |
+| gateway               | Gateway of VM template                | string | `10.10.10.1` |
+| ssh_public_key_path   | Custom SSH public key path            | string |         |
+| ssh_private_key_path  | Custom SSH private key path           | string |         |
+
+## Proxmox-ISO
+
+>This builder configuration is a work-in-progress!!
+
+The `proxmox-iso` builder creates a VM template from an ISO file.
+
+### Variables
 
 | Variable         | Description                           | Type   | Default |
 | ---------------- | ------------------------------------- | ------ | ------- |
@@ -28,8 +81,6 @@ $ packer build -var-file="auto.pkrvars.hcl" .
 | memory           | Memory in MB                          | number | 1024    |
 | ssh_username     | User to SSH into during provisioning  | string |         |
 
-### Notes
+## Notes
 - Currently, only `proxmox_username` and `proxmox_password` are supported
-- By default, the temporary VM created will use IP `10.10.10.250`.
-- The given `vm_id` must be available
 - The given `ssh_username` must already exist
