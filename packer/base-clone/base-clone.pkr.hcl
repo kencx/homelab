@@ -9,8 +9,8 @@ packer {
 
 locals {
   ssh_public_key = file(var.ssh_public_key_path)
-  template_desc = "${var.template_description}. Created by Packer on ${formatdate("YYYY-MM-DD", timestamp())}"
-  ipv4 = "${var.ip_address}/24"
+  template_desc  = "${var.template_description}. Created by Packer on ${formatdate("YYYY-MM-DD", timestamp())}"
+  ipv4           = "${var.ip_address}/24"
 }
 
 source "proxmox-clone" "base" {
@@ -19,17 +19,17 @@ source "proxmox-clone" "base" {
   password    = var.proxmox_password
   node        = var.proxmox_node
 
-  clone_vm     = var.clone_vm
-  full_clone   = true
-  task_timeout = "5m"
+  clone_vm                 = var.clone_vm
+  full_clone               = true
+  task_timeout             = "5m"
   insecure_skip_tls_verify = true
 
-  qemu_agent = true
-  cloud_init = true
+  qemu_agent              = true
+  cloud_init              = true
   cloud_init_storage_pool = "volumes"
 
-  vm_id   = var.vm_id
-  vm_name = var.vm_name
+  vm_id                = var.vm_id
+  vm_name              = var.vm_name
   template_description = local.template_desc
 
   os              = "l26"
@@ -48,15 +48,15 @@ source "proxmox-clone" "base" {
   }
 
   ipconfig {
-    ip = local.ipv4
+    ip      = local.ipv4
     gateway = var.gateway
   }
 
-  ssh_host     = var.ip_address
-  ssh_username = var.ssh_username
+  ssh_host             = var.ip_address
+  ssh_username         = var.ssh_username
   ssh_private_key_file = var.ssh_private_key_path
-  ssh_port     = 22
-  ssh_timeout  = "10m"
+  ssh_port             = 22
+  ssh_timeout          = "10m"
 }
 
 build {
@@ -102,7 +102,7 @@ build {
       "ANSIBLE_STDOUT_CALLBACK=yaml",
       "ANSIBLE_HOST_KEY_CHECKING=False",
     ]
-    use_proxy = false
+    use_proxy    = false
     pause_before = "5s"
   }
 }
