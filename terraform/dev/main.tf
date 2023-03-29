@@ -41,6 +41,7 @@ module "dev-client" {
 
   hostname    = "dev-client"
   vmid        = 131
+  tags        = var.tags
   target_node = var.target_node
 
   clone_template_name = var.template_name
@@ -63,6 +64,7 @@ module "dev-control" {
 
   hostname    = "dev-control"
   vmid        = 135
+  tags        = var.tags
   target_node = var.target_node
 
   clone_template_name = var.template_name

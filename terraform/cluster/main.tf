@@ -20,9 +20,9 @@ module "server" {
   vmid        = 110
   target_node = var.target_node
 
-  template_name = var.template_name
-  onboot        = var.onboot
-  oncreate      = var.oncreate
+  clone_template_name = var.template_name
+  onboot              = var.onboot
+  oncreate            = var.oncreate
 
   cores     = 2
   sockets   = 2
@@ -64,9 +64,9 @@ module "client" {
   vmid        = 111
   target_node = var.target_node
 
-  template_name = var.template_name
-  onboot        = var.onboot
-  oncreate      = var.oncreate
+  clone_template_name = var.template_name
+  onboot              = var.onboot
+  oncreate            = var.oncreate
 
   cores     = 2
   sockets   = 2
