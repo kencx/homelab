@@ -45,11 +45,13 @@ resource "vault_auth_backend" "agent_cert" {
 
 # todo strange error with issuing certs, unable to find ca certficiate?
 resource "vault_pki_secret_backend_cert" "ansible" {
-  depends_on  = [vault_pki_secret_backend_role.auth_role]
-  backend     = vault_mount.pki_int.path
-  name        = vault_pki_secret_backend_role.auth_role.name
-  common_name = "ansible@global.vault"
-  ttl         = "30d"
+  depends_on            = [vault_pki_secret_backend_role.auth_role]
+  backend               = vault_mount.pki_int.path
+  name                  = vault_pki_secret_backend_role.auth_role.name
+  common_name           = "ansible@global.vault"
+  ttl                   = "72h"
+  auto_renew            = true
+  min_seconds_remaining = 86400
 }
 
 resource "local_file" "ansible_cert" {
