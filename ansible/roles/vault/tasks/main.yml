@@ -11,7 +11,6 @@
     - "{{ vault_data_dir }}/raft"
     - "{{ vault_log_dir }}"
     - "{{ vault_tls_dir }}"
-    - "{{ vault_policy_dir }}"
 
 - name: Create Vault config directories
   file:

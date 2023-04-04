@@ -4,7 +4,6 @@ vault_data_dir: "/opt/vault/data"
 vault_log_dir: "/opt/vault/logs"
 vault_tls_dir: "/opt/vault/tls"
 vault_ca_cert_dir: "/usr/share/ca-certificates/vault"
-vault_policy_dir: "{{ vault_config_dir }}/policies"
 vault_log_file: "{{ vault_log_dir }}/vault.log"
 
 vault_store_bw: false

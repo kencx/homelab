@@ -106,7 +106,7 @@
 #   register: vault_agent_cert
 
 - name: Get certificates for Agent cert auth from Vault server
-  command: vault write -format=json pki_int/issue/auth "common_name=agent-{{ ansible_fqdn }}@global.vault" "ttl=30d"
+  command: vault write -format=json pki_int/issue/auth "common_name=agent-{{ ansible_fqdn }}@global.vault" "ttl=72h"
   environment:
     VAULT_TOKEN: "{{ vault_ansible_token }}"
     VAULT_ADDR: "https://{{ vault_server_fqdn }}:8200"
