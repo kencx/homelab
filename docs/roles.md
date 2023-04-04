@@ -15,6 +15,7 @@ as:
 | Variable | Description | Type | Default |
 | -------- | ----------- | ---- | ------- |
 | common_user | User to be created | string | `debian` |
+| common_timezone | Timezone to set | string | `Asia/Singapore` |
 | common_keyring_dir | Keyring directory path for external apt repositories | string | `/etc/apt/keyrings` |
 | common_nfs_dir | NFS share directory path | string | `/mnt/storage` |
 | common_packages | List of common packages to be installed | list(string) | See `defaults.yml` for full list |
@@ -70,7 +71,6 @@ agent's auth role.
 | vault_log_dir | Restricted logs directory | string | `/opt/vault/logs` |
 | vault_tls_dir | TLS files directory | string | `/opt/vault/tls` |
 | vault_ca_cert_dir | Vault's CA certificate directory | string | `/usr/share/ca-certificates/vault` |
-| vault_policy_dir | Policies directory | string | `${vault_config_dir}/policies` |
 | vault_log_file | Audit log file | string | `${vault_log_dir}/vault.log` |
 | vault_store_bw | Store root token in Bitwarden | bool | `false` |
 | vault_unseal_key_file | File path for unseal key^ | string | `${vault_data_dir}/.unseal_key` |

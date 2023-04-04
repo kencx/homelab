@@ -13,6 +13,10 @@
 # - name: Force reset password on first login
 #   command: "chage -d 0 {{ common_user }}"
 
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ common_timezone }}"
+
 - name: Update apt packages
   apt:
     update_cache: true
