@@ -1,5 +1,20 @@
 ## Work log
 
+### 04/04/23
+- Created `issue_cert` role to issue custom certificate from configured Vault
+  roles. It also optionally adds a template stanza to consul-template. This role
+  is useful for registering Nomad and Vault to Consul for integration.
+- Take note that Ansible auth certificate must be renewed with Terraform. I
+  should created a separate Terraform policy and auth token to perform this
+  action.
+
+### 29/03/23
+- Provision and configured dev and dev-client cluster to test stability.
+- Nomad TLS certificates have become mismatched more than once, possibly because
+  consul-template seems to be unable to write private keys with mode 0400.
+  However, consul-template does not throw a permission error. At the same time,
+  Consul is unaffected.
+
 ### 28/03/23
 - Updated to telmate/proxmox 2.6.14
 - Manually created `debian11-cloud-image` template image from Debian cloud

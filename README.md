@@ -32,7 +32,7 @@ The three key provisioning steps are:
 ### Packer Image Creation
 
 Each VM is provisoned from a common base Debian 11 image created with Packer and
-Ansible, as seen in `packer/base`. The templating process installs common packages,
+Ansible, as seen in `packer/base-clone`. The templating process installs common packages,
 performs security hardening and other common tasks.
 
 Refer to [docs/packer](docs/packer.md) for more information.
@@ -42,8 +42,7 @@ Refer to [docs/packer](docs/packer.md) for more information.
 Terraform provisons VMs from the created images on Proxmox with the
 [telmate/proxmox](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs)
 provider. All resources utilize a custom `base` module in which contains sane
-defaults and sets up SSH access. Post-provisioning is then performed with Ansible with
-the help of `null_resource`.
+defaults and sets up SSH access.
 
 Configuration variables for `base` are found at [docs/terraform](docs/terraform.md).
 
@@ -70,10 +69,6 @@ On client nodes, after the server playbooks are run,
 4. All Nomad jobs in `apps/` are provisioned.
 
 Refer to [docs/setup](docs/setup.md) for detailed information.
-
-## Networking
-
-TODO
 
 ## VPS
 

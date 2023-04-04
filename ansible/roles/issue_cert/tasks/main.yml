@@ -1,0 +1,112 @@
+---
+- name: Check if certificate for exists
+  stat:
+    path: "{{ issue_cert_path }}"
+  register: cert
+  changed_when: false
+
+- set_fact:
+    local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
+
+- name: Login with Ansible auth cert
+  become: false
+  uri:
+    url: "{{ issue_cert_vault_addr }}/v1/auth/cert/login"
+    method: POST
+    client_cert: "{{ local_cert_dir }}/ansible.crt"
+    client_key: "{{ local_cert_dir }}/ansible_key.pem"
+    ca_path: "{{ local_cert_dir }}/vault-ca.crt"
+    body: "{ \"name\": \"ansible\" }"
+    body_format: json
+    return_content: true
+  register: ansible_token_raw
+  no_log: true
+  changed_when: false
+  delegate_to: localhost
+
+- set_fact:
+    ansible_token_json: "{{ ansible_token_raw.content | from_json }}"
+  when:
+    - ansible_token_raw is defined
+    - ansible_token_raw.content is defined
+
+- set_fact:
+    ansible_token: "{{ ansible_token_json.auth.client_token }}"
+  when:
+    - ansible_token_json.auth is defined
+    - ansible_token_json.auth.client_token is defined
+
+- fail:
+    msg: Vault token was not obtained successfully
+  when: ansible_token is not defined
+
+- name: Issue certificate
+  block:
+    - name: Issue new certificate from Vault
+      shell:
+        cmd: |
+          vault write -format=json pki_int/issue/{{ issue_cert_role }} \
+          "common_name={{ issue_cert_common_name }}" \
+          "ttl={{ issue_cert_ttl }}" \
+      environment:
+        VAULT_ADDR: "{{ issue_cert_vault_addr }}"
+        VAULT_TOKEN: "{{ ansible_token }}"
+      register: issued_cert_raw
+
+    - set_fact:
+        issued_cert_json: "{{ issued_cert_raw.stdout | from_json }}"
+      when: issued_cert_raw is defined and issued_cert_raw.stdout is defined
+
+    - name: Write certificate
+      copy:
+        content: "{{ issued_cert_json.data.certificate }}"
+        dest: "{{ issue_cert_path }}"
+        mode: 0600
+        owner: "{{ issue_cert_owner }}"
+        group: "{{ issue_cert_group }}"
+      when: issued_cert_json is defined and issued_cert_json.data is defined
+
+    - name: Write private key
+      copy:
+        content: "{{ issued_cert_json.data.private_key }}"
+        dest: "{{ issue_cert_key_path }}"
+        mode: 0400
+        owner: "{{ issue_cert_owner }}"
+        group: "{{ issue_cert_group }}"
+      when: issued_cert_json is defined and issued_cert_json.data is defined
+
+    - name: Create CA
+      copy:
+        content: "{{ issued_cert_json.data.issuing_ca }}"
+        dest: "{{ issue_cert_ca_path }}"
+        mode: 0640
+        owner: "{{ issue_cert_owner }}"
+        group: "{{ issue_cert_group }}"
+      when: issued_cert_json is defined and issued_cert_json.data is defined
+  when: cert is defined and not cert.stat.exists
+
+- name: Add TLS template stanza to consul-template
+  blockinfile:
+    path: "{{ issue_cert_consul_template_config }}"
+    marker: "{{ issue_cert_consul_template_marker }}"
+    validate: consul-template -config=%s -parse-only
+    block: |
+      template {
+        contents = <<EOF
+      {{ '{{' }} with pkiCert "pki_int/issue/{{ issue_cert_role }}" "common_name={{ issue_cert_common_name }}" "ttl={{ issue_cert_ttl }}" {{ '}}' }}
+      {{ '{{' }} .Cert {{ '}}' }}
+      {{ '{{' }} if .CA {{ '}}' }}
+      {{ '{{' }} .CA | writeToFile "{{ issue_cert_ca_path }}" "{{ issue_cert_owner }}" "{{ issue_cert_group }}" "0600" {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
+      {{ '{{' }} if .Key {{ '}}' }}
+      {{ '{{' }} .Key | writeToFile "{{ issue_cert_key_path }}" "{{ issue_cert_owner }}" "{{ issue_cert_group }}" "0400" {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
+      EOF
+        destination = "{{ issue_cert_path }}"
+        perms = 0600
+        user = "{{ issue_cert_owner }}"
+        group = "{{ issue_cert_group }}"
+        command = "date && if systemctl is-active {{ issue_cert_service }}; then service {{ issue_cert_service }} reload; fi"
+      }
+  when: issue_cert_add_template

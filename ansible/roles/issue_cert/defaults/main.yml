@@ -1,0 +1,17 @@
+---
+issue_cert_role: "client"
+issue_cert_common_name: ""
+issue_cert_ttl: "24h"
+issue_cert_vault_addr: "https://localhost:8200"
+
+issue_cert_owner: ""
+issue_cert_group: ""
+
+issue_cert_path: "cert.crt"
+issue_cert_key_path: "key.pem"
+issue_cert_ca_path: "ca.crt"
+
+issue_cert_add_template: true
+issue_cert_consul_template_config: "/etc/consul-template/consul-template.hcl"
+issue_cert_consul_template_marker: "# {mark} TLS"
+issue_cert_service: ""
