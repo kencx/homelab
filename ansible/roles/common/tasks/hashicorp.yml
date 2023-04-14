@@ -26,15 +26,17 @@
 
 - name: Install Hashicorp software
   apt:
-    name: "{{ item }}"
+    name: "{{ item.pkg }}={{ item.version }}"
     state: present
-    update_cache: true
-    cache_valid_time: 86400
   with_items:
-    - nomad
-    - consul
-    - vault
-    - consul-template
+    - pkg: nomad
+      version: "{{ common_nomad_version }}"
+    - pkg: consul
+      version: "{{ common_consul_version }}"
+    - pkg: vault
+      version: "{{ common_vault_version }}"
+    - pkg: consul-template
+      version: "{{ common_consul_template_version }}"
 
 # Nomad starts automatically after installation, which results in issues when it tries
 # to start up with a different configuration later
