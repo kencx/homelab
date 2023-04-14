@@ -3,6 +3,7 @@
 cloud-config
 certs/*
 !certs/.gitkeep
+**/site/*
 
 # ansible
 inventory/*
