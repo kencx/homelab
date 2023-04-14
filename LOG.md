@@ -1,11 +1,18 @@
 ## Work log
 
+### 14/04/23
+- Added mkdocs static documentation on Github Pages. This will be selfhosted in
+  the future.
+- Added ability to configure the version of Hashicorp software being installed
+  in `common`. Default versions are set for the role, allowing a minimum
+  supported version to be defined.
+
 ### 04/04/23
 - Created `issue_cert` role to issue custom certificate from configured Vault
   roles. It also optionally adds a template stanza to consul-template. This role
   is useful for registering Nomad and Vault to Consul for integration.
 - Take note that Ansible auth certificate must be renewed with Terraform. I
-  should created a separate Terraform policy and auth token to perform this
+  should have created a separate Terraform policy and auth token to perform this
   action.
 
 ### 29/03/23
