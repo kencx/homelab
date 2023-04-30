@@ -1,6 +1,9 @@
 #!/bin/bash
 
-DISK_UUID=""
+set -euo pipefail
+
+DISK=""
+DISK_UUID="$(lsblk -nlo UUID $DISK)"
 MOUNT_DIR="/mnt/kd"
 CONFIG_DIR=""
 AUTORESTIC_CONFIG_FILE="$CONFIG_DIR/.autorestic.yml"
@@ -11,25 +14,24 @@ if [ ! -e "$AUTORESTIC_LOG_FILE" ]; then
 	touch "$AUTORESTIC_LOG_FILE"
 fi
 
-{
-	echo "-------------------------------------------"
-	echo "Starting backup at $(date '+%Y-%m-%d %H:%M:%S')."
-	SECONDS=0
+# redirect output
+exec &> >(tee -a "${AUTORESTIC_LOG_FILE}")
 
-	# mount
-	if [ ! -e "/dev/disk/by-uuid/$DISK_UUID" ] ; then
-		echo "Backup disk not found! Exiting..."
-	fi
-	echo "Mounting backup disk"
-	sudo mount "/dev/disk/by-uuid/$DISK_UUID" "$MOUNT_DIR"
+echo "==========================================="
+echo "| Starting backup at $(date '+%Y-%m-%d %H:%M:%S') | "
+echo "==========================================="
+SECONDS=0
 
-	sudo autorestic -c "$AUTORESTIC_CONFIG_FILE" backup -av --ci
+# mount
+echo "Mounting backup disk $DISK"
+mount "/dev/disk/by-uuid/$DISK_UUID" "$MOUNT_DIR"
 
-	# unmount
-	echo "Unmounting backup disk"
-	sudo umount "$MOUNT_DIR"
+autorestic -c "$AUTORESTIC_CONFIG_FILE" backup -av --ci
 
-	duration="$SECONDS"
-	echo "Backup completed in $(($duration / 60))m $(($duration % 60))s"
+# unmount
+echo "Unmounting backup disk $DISK"
+umount "$MOUNT_DIR"
 
-} 2>&1 | tee -a "$AUTORESTIC_LOG_FILE" # write to log file
+duration="$SECONDS"
+echo "Backup completed in $((duration / 60))m $((duration % 60))s"
+echo ""
