@@ -36,7 +36,11 @@
   retries: 10
   until: apt_action is success or ('/var/lib/dpkg/lock-frontend' not in apt_action.msg)
 
+# Note: The Hashicorp apt server only supports amd64 packages. For arm64, download the
+# individual zip files instead.
+# See https://github.com/hashicorp/terraform/issues/27378
 - import_tasks: hashicorp.yml
+  when: ansible_architecture == 'x86_64'
 
 - name: Install Bitwarden CLI
   unarchive:

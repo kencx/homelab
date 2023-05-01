@@ -30,3 +30,9 @@ as:
 
 This role clears any existing `/opt/nomad/data` directories to a blank slate. To disable this
 behaviour, set `common_reset_nomad: false`.
+
+This role only supports Ubuntu/Debian amd64 systems with `apt`.
+
+The Hashicorp apt server [only supports amd64
+packages](https://github.com/hashicorp/terraform/issues/27378). For arm64
+systems, download the individual zip files instead.
