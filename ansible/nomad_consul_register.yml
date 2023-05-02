@@ -59,7 +59,7 @@
     marker: "# {mark} Consul Integration"
     block: |
       consul {
-        address = "{{ ansible_default_ipv4.address }}:8501"
+        address = "127.0.0.1:8501"
         ssl       = true
         ca_file   = "{{ nomad_tls_dir }}/consul-ca.crt"
         cert_file = "{{ nomad_tls_dir }}/consul-cert.crt"
