@@ -44,6 +44,7 @@ nav:
       - Consul: 'roles/consul.md'
       - Consul Template: 'roles/consul-template.md'
       - Issue Cert: 'roles/issue_cert.md'
+      - NAS: 'roles/nas.md'
       - Nomad: 'roles/nomad.md'
       - Vault: 'roles/vault.md'
   - Backups: backups.md

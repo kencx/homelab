@@ -10,8 +10,8 @@
   file:
     path: "{{ item.dir }}"
     mode: 0755
-    owner: "{{ user }}"
-    group: "{{ user }}"
+    owner: "{{ nas_user }}"
+    group: "{{ nas_user }}"
     state: directory
   with_items: "{{ nfs_exports }}"
 
@@ -30,4 +30,6 @@
     state: started
     enabled: true
 
-- import_tasks: autorestic.yml
+- import_tasks: install_restic.yml
+- import_tasks: install_autorestic.yml
+- import_tasks: backups.yml

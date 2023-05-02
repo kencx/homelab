@@ -1,7 +1,61 @@
 ---
-user: debian
-nfs_exports: {}
+nas_user: debian
+nas_nfs_exports: {}
+nas_backup_partition: "/dev/sdb1"
+nas_backup_mount_dir: "/mnt/kd"
+nas_backup_time: "06:00:00"
 
-autorestic_script_dir: "/home/{{ user }}/scripts"
-autorestic_log_dir: "/home/{{ user }}/logs"
+restic_version: "0.15.2"
+autorestic_version: "1.7.7"
+autorestic_bin_dir: "/usr/local/bin"
+autorestic_config_dir: "/root"
+autorestic_log_dir: "/var/log/autorestic"
 autorestic_log_file: "{{ autorestic_log_dir }}/autorestic.log"
+
+autorestic_config:
+  global:
+    forget:
+      keep-daily: 7
+      keep-weekly: 4
+      keep-monthly: 3
+      keep-yearly: 1
+
+  extras:
+    hooks: &hooks
+      failure:
+        - 'echo "[ERROR] Backup failed!"'
+
+  locations:
+    all:
+      from: /home/debian
+      to:
+        - hdd
+        - remote
+      cron: '0 6 * * *'
+      forget: prune
+      hooks:
+        <<: *hooks
+      options:
+        backup:
+          exclude:
+            - /home/debian/archives
+            - /home/debian/.*
+            - /home/debian/scripts
+
+    archives:
+      from: /home/debian/archives
+      to:
+        - hdd
+        - remote
+      forget: prune
+      hooks:
+        <<: *hooks
+
+  backends:
+    remote:
+      type: b2
+      path: "nas-server-restic"
+
+    hdd:
+      type: local
+      path: "{{ nas_backup_mount_dir }}/restic"

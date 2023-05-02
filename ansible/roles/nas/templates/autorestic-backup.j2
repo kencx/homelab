@@ -2,12 +2,11 @@
 
 set -euo pipefail
 
-DISK=""
+DISK="{{ nas_backup_partition }}"
 DISK_UUID="$(lsblk -nlo UUID $DISK)"
-MOUNT_DIR="/mnt/kd"
-CONFIG_DIR=""
-AUTORESTIC_CONFIG_FILE="$CONFIG_DIR/.autorestic.yml"
-AUTORESTIC_LOG_FILE="$CONFIG_DIR/logs/autorestic.log"
+MOUNT_DIR="{{ nas_backup_mount_dir }}"
+AUTORESTIC_CONFIG_FILE="{{ autorestic_config_dir }}/.autorestic.yml"
+AUTORESTIC_LOG_FILE="{{ autorestic_log_file }}"
 
 if [ ! -e "$AUTORESTIC_LOG_FILE" ]; then
 	mkdir -p "$(dirname $AUTORESTIC_LOG_FILE)"
@@ -17,21 +16,21 @@ fi
 # redirect output
 exec &> >(tee -a "${AUTORESTIC_LOG_FILE}")
 
+DATE="$(date '+%Y-%m-%d %H:%M:%S')"
+
 echo "==========================================="
-echo "| Starting backup at $(date '+%Y-%m-%d %H:%M:%S') | "
+echo "| Starting backup on $DATE | "
 echo "==========================================="
 SECONDS=0
 
-# mount
 echo "Mounting backup disk $DISK"
 mount "/dev/disk/by-uuid/$DISK_UUID" "$MOUNT_DIR"
 
 autorestic -c "$AUTORESTIC_CONFIG_FILE" backup -av --ci
 
-# unmount
 echo "Unmounting backup disk $DISK"
 umount "$MOUNT_DIR"
 
 duration="$SECONDS"
-echo "Backup completed in $((duration / 60))m $((duration % 60))s"
-echo ""
+echo "Backup on $DATE completed in $((duration / 60))m $((duration % 60))s"
+exit 0

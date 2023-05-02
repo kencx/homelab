@@ -1,6 +1,0 @@
-[Unit]
-Description=Runs autorestic backup
-ConditionPathExists=/mnt/kd
-
-[Service]
-ExecStart=/home/debian/scripts/backup-script

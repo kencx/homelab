@@ -1,0 +1,33 @@
+---
+- name: Check restic exists
+  stat:
+    path: "{{ autorestic_bin_dir }}/restic"
+  register: restic_path
+
+- name: Check restic version
+  shell: restic version | awk '{print $2}'
+  register: restic_installed_version
+  changed_when: false
+  when: restic_path.stat.exists
+
+# TODO
+# - name: Install restic
+#   when: restic_installed_version.stdout is version(restic_version, '<')
+#   block:
+#     - name: Download restic
+#       ansible.builtin.get_url:
+#         url: ""
+#         dest: ""
+#         checksum: ""
+#         mode: 0644
+#
+#     - name: Extract restic
+#       ansible.builtin.command:
+#         chdir: ""
+#         cmd: "bzip2 -d"
+#
+#     - name: Copy restic binary to install directory
+#       ansible.builtin.copy:
+#         src: ""
+#         dest: "{{ autorestic_bin_dir }}"
+#         mode: 0755

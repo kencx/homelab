@@ -5,35 +5,27 @@
 The backup plan follows the [3-2-1 backup
 strategy](https://www.backblaze.com/blog/the-3-2-1-backup-strategy). It ensures
 backups are automatic, redundant and offsite with restic,
-[autorestic](https://autorestic.vercel.app/) and cron.
+[autorestic](https://autorestic.vercel.app/) and systemd.
+
+## Setup
+
+An `autorestic-backup` script is run daily with autorestic and systemd. It
+requires:
+
+- An external hard drive
+- A [Backblaze](https://www.backblaze.com/b2/cloud-storage.html) B2 account
+
+The script and systemd units can be configured via the Ansible [nas
+role](roles/nas.md) or manually.
 
 ## Configuration
 
-1. Populate `autorestic.yml` appropriately.
-2. Populate `autorestic.env`:
+1. Ensure the external hard drive is present and functional.
+2. Configure the `autorestic-backup` script with the backup drive's partition.
+3. Configure `autorestic.yml` (see [autorestic docs](https://autorestic.vercel.app/config) ).
+4. Configure `autorestic.env` with the correct credentials.
 
-```
-AUTORESTIC_HDD_RESTIC_PASSWORD=
-
-AUTORESTIC_REMOTE_RESTIC_PASSWORD=
-AUTORESTIC_REMOTE_B2_ACCOUNT_ID=
-AUTORESTIC_REMOTE_B2_ACCOUNT_KEY=
-```
-
-3. Populate variables in `backup-script`:
-
-```bash
-# UUID of external hard drive
-DISK_UUID=
-
-# Mount point of external hard drive
-MOUNT_DIR=
-
-# location of .autorestic.yml file
-CONFIG_DIR=
-```
-
-### Backblaze
+### Credentials
 
 Backblaze requires a Backblaze keyID and Backblaze application key for the
 specified Backblaze path.
@@ -43,7 +35,7 @@ specified Backblaze path.
 Check the configuration for any issues
 
 ```
-$ autorestic check
+$ autorestic check [--config /path/to/config]
 ```
 
 Perform a backup on all locations

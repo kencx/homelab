@@ -1,0 +1,19 @@
+[Unit]
+Description=Runs autorestic backup
+ConditionPathExists={{ nas_backup_mount_dir }}
+Requires=network.target
+OnFailure=backup-failure.service
+
+[Service]
+Type=oneshot
+ExecStart={{ autorestic_bin_dir }}/autorestic-backup
+
+# security hardening
+PrivateTmp=true
+ProtectSystem=full
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+ReadWritePaths={{ nas_backup_mount_dir }} {{ autorestic_log_dir }} /home/debian
