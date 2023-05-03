@@ -7,6 +7,14 @@
     group: root
     state: directory
 
+- name: Create NAS backup restore directory
+  file:
+    path: "{{ nas_backup_restore_dir }}"
+    mode: 0755
+    owner: "{{ nas_user }}"
+    group: "{{ nas_user }}"
+    state: directory
+
 - name: Check backup partition exists
   block:
     - assert:
@@ -20,7 +28,6 @@
     - assert:
         that: nas_backup_partition | regex_search("/dev/(.*)", "\\1") | first in partitions
         fail_msg: "{{ nas_backup_partition }} not found"
-
 
 - name: Copy autorestic.yml
   template:
@@ -61,11 +68,14 @@
 
 - name: Copy backup script
   template:
-    src: "autorestic-backup.j2"
-    dest: "{{ autorestic_bin_dir }}/autorestic-backup"
+    src: "{{ item }}.j2"
+    dest: "{{ autorestic_bin_dir }}/{{ item }}"
     owner: root
     group: root
     mode: 0755
+  with_items:
+    - autorestic-backup
+    - generate-restore-test-files
 
 - name: Copy backup systemd service and timer
   template:

@@ -3,6 +3,7 @@ nas_user: debian
 nas_nfs_exports: {}
 nas_backup_partition: "/dev/sdb1"
 nas_backup_mount_dir: "/mnt/kd"
+nas_backup_restore_dir: "/home/debian/restore-test"
 nas_backup_time: "06:00:00"
 
 restic_version: "0.15.2"
@@ -40,7 +41,6 @@ autorestic_config:
           exclude:
             - /home/debian/archives
             - /home/debian/.*
-            - /home/debian/scripts
 
     archives:
       from: /home/debian/archives

@@ -6,6 +6,7 @@ OnFailure=backup-failure.service
 
 [Service]
 Type=oneshot
+ExecStartPre={{ autorestic_bin_dir }}/generate-restore-test-files
 ExecStart={{ autorestic_bin_dir }}/autorestic-backup
 
 # security hardening

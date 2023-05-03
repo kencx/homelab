@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -eu
+
+TEST_DIR="{{ nas_backup_restore_dir }}"
+
+if [ ! -d "$TEST_DIR" ]; then
+    mkdir -p "$TEST_DIR"
+fi
+
+dd if=/dev/random of="$TEST_DIR/test-$(date +%Y-%m-%d)" count=10 >/dev/null 2>&1
+
+# delete files older than 5 days
+cd $TEST_DIR && find . -type f ! -newerct "$(date --date='-5 days' '+%Y/%m/%d %H:%M:%S')" -delete
