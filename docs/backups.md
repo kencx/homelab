@@ -59,7 +59,10 @@ specified Backblaze path.
 
 ## Monitoring
 
-TODO
+After a successful backup, a custom `backup-exporter` script parses the log file
+and generates Prometheus metrics for consumption by node exporter's
+textfile-collector. These metrics are sent to Prometheus where they can be used
+to visualize backup metrics and send alerts on failure.
 
 ## Usage
 

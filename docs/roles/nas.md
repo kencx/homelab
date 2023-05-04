@@ -10,6 +10,8 @@ See [backups](../backups.md) for more information.
 | nas_backup_partition | Backup disk partition | string | `/dev/sdb1` |
 | nas_backup_mount_dir | Backup mount location | string | `/mnt/kd` |
 | nas_backup_restore_dir | Backup restore test directory | string | `/home/debian/restore-test` |
+| nas_backup_export_dir | Backup metrics directory | string | `/home/debian/node_exporter` |
+| nas_backup_export_file | Backup metrics file | string | `${nas_backup_export_dir}/restic.prom` |
 | nas_backup_time | Time to start daily backup | string | `06:00:00` |
 | restic_version | Latest restic version to install | string | `0.15.2` |
 | autorestic_version | Latest autorestic version to install | string | `1.7.7` |

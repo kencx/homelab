@@ -15,6 +15,14 @@
     group: "{{ nas_user }}"
     state: directory
 
+- name: Create NAS backup exporter directory
+  file:
+    path: "{{ nas_backup_export_dir }}"
+    mode: 0755
+    owner: "{{ nas_user }}"
+    group: "{{ nas_user }}"
+    state: directory
+
 - name: Check backup partition exists
   block:
     - assert:
@@ -66,7 +74,7 @@
 #   command: autorestic --config {{ autorestic_config_dir }}/.autorestic.yml check
 #   changed_when: false
 
-- name: Copy backup script
+- name: Copy backup scripts
   template:
     src: "{{ item }}.j2"
     dest: "{{ autorestic_bin_dir }}/{{ item }}"
@@ -76,6 +84,14 @@
   with_items:
     - autorestic-backup
     - generate-restore-test-files
+
+- name: Copy exporter script
+  copy:
+    src: "backup-exporter"
+    dest: "{{ autorestic_bin_dir }}/backup-exporter"
+    owner: root
+    group: root
+    mode: 0755
 
 - name: Copy backup systemd service and timer
   template:

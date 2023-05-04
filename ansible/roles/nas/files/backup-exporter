@@ -1,0 +1,183 @@
+#!/usr/bin/env python3
+
+import argparse
+import datetime
+import re
+
+from itertools import islice
+from pathlib import Path
+
+
+def extract_latest_run(log_file):
+    log_file = Path(log_file)
+    current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+    start = re.compile(f"Starting backup on {current_date}")
+
+    if log_file.is_file():
+        with open(log_file, "r") as f:
+            # only extract last run on the same day
+            start_indexes = [i for i, line in enumerate(f) if start.findall(line)]
+            if len(start_indexes):
+                f.seek(0)
+                return list(islice(f, start_indexes[-1], None))
+    return list()
+
+
+def extract_lines(lines, start, end):
+    start_idx = [i for i, line in enumerate(lines) if start.search(line)][0]
+    end_idx = [i for i, line in enumerate(lines[start_idx:]) if
+               end.search(line)][0] + start_idx
+    return lines[start_idx:end_idx]
+
+
+def extract_location(lines, location):
+    start = re.compile(f"Backing up location \"{location}\"")
+    end = re.compile(f"Forgetting for location \"{location}\"")
+    return extract_lines(lines, start, end)
+
+
+def extract_backend(lines, backend):
+    start = re.compile(f"Backend: {backend}")
+    end = re.compile("snapshot .*? saved")
+    return extract_lines(lines, start, end)
+
+
+def extract_metrics(lines, location, backend):
+    # Files:           0 new,     0 changed, 11621 unmodified
+    # Dirs:            0 new,     2 changed,  1338 unmodified
+    # Added to the repository: 724 B (862 B stored)
+    # processed 11621 files, 14.647 GiB in 0:02
+
+    files = re.compile(r"Files:.*?(\d+) new.*?(\d+) changed.*?(\d+) unmodified")
+    dirs = re.compile(r"Dirs:.*?(\d+) new.*?(\d+) changed.*?(\d+) unmodified")
+    added = re.compile(r"Added to the repository: (\d+(\.\d*)?|\.\d+) ([G|T|M|K]?i?B)")
+    total = re.compile(r"processed (\d+) files, (\d+(\.\d*)?|\.\d+) ([G|T|M|K]?i?B) in ((\d+:)?\d+:\d+)")
+
+    m_files = files.search("".join(lines))
+    m_dirs = dirs.search("".join(lines))
+    m_added = added.search("".join(lines))
+    m_total = total.search("".join(lines))
+
+    metrics = """
+restic_repo_files{{location="{location}",backend="{backend}",state="new"}} {files_new}
+restic_repo_files{{location="{location}",backend="{backend}",state="changed"}} {files_changed}
+restic_repo_files{{location="{location}",backend="{backend}",state="unmodified"}} {files_unmodified}
+restic_repo_dirs{{location="{location}",backend="{backend}",state="new"}} {dirs_new}
+restic_repo_dirs{{location="{location}",backend="{backend}",state="changed"}} {dirs_changed}
+restic_repo_dirs{{location="{location}",backend="{backend}",state="unmodified"}} {dirs_unmodified}
+restic_repo_bytes_added{{location="{location}",backend="{backend}"}} {bytes_added}
+restic_repo_bytes_total{{location="{location}",backend="{backend}"}} {bytes_total}
+restic_repo_total_files{{location="{location}",backend="{backend}"}} {total_files}
+restic_repo_duration_seconds{{location="{location}",backend="{backend}"}} {duration}
+    """.format(
+        backend=backend,
+        location=location,
+        files_new=m_files.group(1),
+        files_changed=m_files.group(2),
+        files_unmodified=m_files.group(3),
+        dirs_new=m_dirs.group(1),
+        dirs_changed=m_dirs.group(2),
+        dirs_unmodified=m_dirs.group(3),
+        bytes_added=convert_to_bytes(m_added.group(1), m_added.group(3)),
+        bytes_total=convert_to_bytes(m_total.group(2), m_total.group(4)),
+        total_files=m_total.group(1),
+        duration=convert_to_sec(m_total.group(5))
+    )
+    return metrics.strip()
+
+
+def convert_to_bytes(num, unit):
+    if unit == 'KiB':
+        factor = 1024
+    elif unit == 'KB':
+        factor = 1000
+    elif unit == 'MiB':
+        factor = 1048576
+    elif unit == 'MB':
+        factor = 1000000
+    elif unit == 'GiB':
+        factor = 1073741824
+    elif unit == 'GB':
+        factor = 1000000000
+    elif unit == 'TiB':
+        factor = 1099511627776
+    elif unit == 'TB':
+        factor = 1000000000000
+    elif unit == 'B':
+        factor = 1
+    else:
+        factor = 1
+    return float(num) * factor
+
+
+def convert_to_sec(time_str):
+    time_lst = time_str.split(":")
+    # HH:MM:SS
+    if len(time_lst) > 2:
+        return int(time_lst[0]) * 3600 + int(time_lst[1]) * 60 + int(time_lst[2])
+    # MM:SS
+    return int(time_lst[0]) * 60 + int(time_lst[1])
+
+
+def backup_failed_metric():
+    return [
+        f"restic_backup_failure{{timestamp=\"{datetime.datetime.now().timestamp()}\"}} 1"
+    ]
+
+
+def write_metrics(metrics, file):
+    # last line must be \n
+    metrics += [
+        f"restic_backup_failure{{timestamp=\"{datetime.datetime.now().timestamp()}\"}} 0",
+        " "
+    ]
+    with open(file, "w+") as f:
+        f.write("\n".join(metrics))
+
+
+def main():
+    run = extract_latest_run(args.log_file)
+    if not len(run):
+        print("Failed to parse log file or backup failed!")
+        write_metrics(backup_failed_metric(), args.export)
+        exit(0)
+
+    locations = ["archives", "all"]
+    backends = ["remote", "hdd"]
+    metrics = []
+
+    for loc in locations:
+        loc_lines = extract_location(run, loc)
+
+        if len(loc_lines) > 0:
+            for be in backends:
+                backend_lines = extract_backend(loc_lines, be)
+                if len(backend_lines) > 0:
+                    metrics_str = extract_metrics(backend_lines, loc, be)
+                    metrics.append(metrics_str)
+        else:
+            metrics += backup_failed_metric()
+
+    write_metrics(metrics, args.export)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Parses backup log file to produce Prometheus metrics"
+    )
+    parser.add_argument(
+        "-l",
+        "--log_file",
+        required=True,
+        type=str,
+        help="Backup log file to parse",
+    )
+    parser.add_argument(
+        "-e",
+        "--export",
+        required=True,
+        type=str,
+        help="Metrics file",
+    )
+    args = parser.parse_args()
+    main()

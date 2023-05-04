@@ -8,6 +8,7 @@ OnFailure=backup-failure.service
 Type=oneshot
 ExecStartPre={{ autorestic_bin_dir }}/generate-restore-test-files
 ExecStart={{ autorestic_bin_dir }}/autorestic-backup
+ExecStartPost={{ autorestic_bin_dir }}/backup-exporter -l {{ autorestic_log_file }} -e {{ nas_backup_export_file }}
 
 # security hardening
 PrivateTmp=true
