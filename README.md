@@ -32,7 +32,7 @@ NAS instance.
 
 ## Provisioning
 
-This repository aims to provision a functional cluster from scratch with manual
+This repository aims to provision a functional cluster from scratch without manual
 intervention. It uses:
 
 - Packer for creating golden images in Proxmox
