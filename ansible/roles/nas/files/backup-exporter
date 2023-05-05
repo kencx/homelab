@@ -119,18 +119,18 @@ def convert_to_sec(time_str):
     return int(time_lst[0]) * 60 + int(time_lst[1])
 
 
-def backup_failed_metric():
-    return [
-        f"restic_backup_failure{{timestamp=\"{datetime.datetime.now().timestamp()}\"}} 1"
-    ]
+def add_general_metrics(success):
+    num = 1 if success else 0
+    m = """
+restic_backup_success {num}
+restic_backup_latest_datetime {timestamp}
+    """.format(num=num, timestamp=datetime.datetime.now().timestamp())
+    return m.strip()
 
 
 def write_metrics(metrics, file):
     # last line must be \n
-    metrics += [
-        f"restic_backup_failure{{timestamp=\"{datetime.datetime.now().timestamp()}\"}} 0",
-        " "
-    ]
+    metrics.append(" ")
     with open(file, "w+") as f:
         f.write("\n".join(metrics))
 
@@ -139,7 +139,7 @@ def main():
     run = extract_latest_run(args.log_file)
     if not len(run):
         print("Failed to parse log file or backup failed!")
-        write_metrics(backup_failed_metric(), args.export)
+        write_metrics([add_general_metrics(False)], args.export)
         exit(0)
 
     locations = ["archives", "all"]
@@ -156,8 +156,9 @@ def main():
                     metrics_str = extract_metrics(backend_lines, loc, be)
                     metrics.append(metrics_str)
         else:
-            metrics += backup_failed_metric()
+            metrics.append(add_general_metrics(False))
 
+    metrics.append(add_general_metrics(True))
     write_metrics(metrics, args.export)
 
 
