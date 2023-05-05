@@ -9,7 +9,8 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "./prometheus/rules.yml:/etc/prometheus/rules.yml"
       - "./ca.crt:/etc/prometheus/tls/ca.crt"
     networks:
       monitoring:
@@ -22,10 +23,8 @@ services:
     command: "-config.file=/etc/loki/config.yml"
     ports:
       - 3100:3100
-      - 7946
-      - 9095
     volumes:
-      - ./loki-config.yml:/etc/loki/config.yml
+      - ./loki/loki-config.yml:/etc/loki/config.yml
     networks:
       monitoring:
         ipv4_address: "172.19.0.4"
@@ -44,6 +43,19 @@ services:
     networks:
       monitoring:
         ipv4_address: "172.19.0.3"
+
+  alertmanager:
+    container_name: alertmanager
+    image: prom/alertmanager
+    restart: unless-stopped
+    command: "-config.file=/etc/alertmanager/alertmanager.yml"
+    ports:
+      - 9093:9093
+    volumes:
+      - ./alertmanager:/etc/alertmanager/
+    networks:
+      monitoring:
+        ipv4_address: "172.19.0.5"
 
 networks:
   monitoring:

@@ -1,0 +1,10 @@
+---
+route:
+  receiver: "telegram"
+
+receivers:
+  - name: "telegram"
+    telegram_configs:
+      - bot_token: ""
+        chat_id:
+        message: "{{ .CommonAnnotations.summary }}"

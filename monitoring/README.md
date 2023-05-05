@@ -14,11 +14,11 @@ Prometheus scrapes metrics from the following sources:
 
 - [x] consul: Nomad metrics
 - [x] static: Vault metrics
+- [x] static: Custom backup metrics from node-exporter
 - [ ] static: Proxmox metrics from pve-exporter
 - [ ] consul: Consul metrics
 - [ ] static: Certificate expiration from cert-exporter
 - [ ] static: Pihole metrics from pihole-exporter
-- [ ] static: (Maybe) Backups from node-exporter
 
 Grafana taps into the Prometheus datasource to populate dashboards.
 
