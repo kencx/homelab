@@ -39,7 +39,7 @@ job "actual" {
       driver = "docker"
 
       config {
-        image = "jlongster/actual-server:[[ .app.actual.image ]]"
+        image = "ghcr.io/actualbudget/actual-server:[[ .app.actual.image ]]"
         ports = ["http"]
 
         volumes = [
