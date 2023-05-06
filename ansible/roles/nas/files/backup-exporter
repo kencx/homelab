@@ -120,7 +120,7 @@ def convert_to_sec(time_str):
 
 
 def add_general_metrics(success):
-    num = 1 if success else 0
+    num = 0 if success else 1
     m = """
 restic_backup_success {num}
 restic_backup_latest_datetime {timestamp}
