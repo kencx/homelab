@@ -1,4 +1,4 @@
-.PHONY: pre-commit install
+.PHONY: pre-commit docs
 
 pre-commit:
 	pre-commit run --all-files
@@ -28,12 +28,8 @@ mol.$(mol):
 mol.list:
 	cd ansible && molecule list
 
-# restic
-restic.check:
-	sudo autorestic exec check -av
+docs.install: docs/requirements.txt
+	source .venv/bin/activate && pip install -r docs/requirements.txt
 
-restic.unlock:
-	sudo autorestic exec unlock -av
-
-restic.snapshot:
-	sudo autorestic exec snapshots -av
+docs:
+	source .venv/bin/activate && mkdocs serve
