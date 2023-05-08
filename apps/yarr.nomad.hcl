@@ -51,12 +51,15 @@ job "yarr" {
         /* } */
       }
 
-      env {
+      vault {
+        policies = ["nomad_yarr"]
       }
 
       template {
         data        = <<EOF
-YARR_AUTH="user:pass"
+{{ with secret "kvv2/data/prod/nomad/yarr" }}
+YARR_AUTH="{{ .Data.data.username }}":"{{ .Data.data.password }}"
+{{ end }}
 EOF
         destination = "secrets/auth.env"
         env         = true
