@@ -7,5 +7,5 @@ providers:
     allowUiUpdates: true
     disableDeletion: true
     options:
-      path: /dashboards
+      path: /etc/grafana/provisioning/dashboards
       foldersFromFileStructure: true
