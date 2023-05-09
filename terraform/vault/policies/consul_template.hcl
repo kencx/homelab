@@ -15,11 +15,12 @@ path "auth/agent/certs/*" {
   capabilities = ["create", "update"]
 }
 
+# required to update nomad_startup auth cert
+path "auth/cert/certs/nomad_startup" {
+  capabilities = ["create", "update"]
+}
+
 # manage kv secrets engine
 path "kvv2/data/cluster/*" {
   capabilities = ["create", "read", "update"]
-}
-
-path "auth/token/create/nomad_cluster" {
-  capabilities = ["create", "update", "sudo"]
 }

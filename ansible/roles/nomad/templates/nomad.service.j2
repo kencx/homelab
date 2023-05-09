@@ -7,14 +7,22 @@ After=network-online.target
 {% if 'server' in group_names %}
 User=nomad
 Group=nomad
-{% if setup_vault_integration %}
-EnvironmentFile={{ nomad_data_dir }}/.vault_token
-{% endif %}
 {% endif %}
 
 ExecReload=/bin/kill -HUP $MAINPID
+{% if 'server' in group_names %}
+    {% if setup_vault_integration %}
+ExecStart={{ nomad_data_dir }}/nomad-startup.sh
+# Handle child process when stopped
+KillMode=control-group
+    {% else %}
 ExecStart=/usr/bin/nomad agent -config /etc/nomad.d
 KillMode=process
+    {% endif %}
+{% else %}
+ExecStart=/usr/bin/nomad agent -config /etc/nomad.d
+KillMode=process
+{% endif %}
 KillSignal=SIGINT
 LimitNOFILE=65536
 LimitNPROC=infinity

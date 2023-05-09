@@ -1,61 +1,121 @@
 ---
-# Both Nomad and consul-template perform renewal of the Vault token, but for entirely
-# different reasons.
+# Nomad perform automatic renewal of the given Vault token in-memory. However, if Nomad
+# is stopped or restarted after the token has expired, Nomad is unable to produce a new
+# token for startup automatically. To solve this, Nomad is started via a custom startup
+# script that generates a new Vault token with the required policies.
 #
-# This file is simply for starting the Nomad service with a valid VAULT_TOKEN env
-# variable. On its expiry, Nomad will renew the token in memory without writing the
-# new token to the file.
-#
-# However, if Nomad is restarted after the token in the file has expired, Nomad is
-# unable to produce a new token for startup automatically. As such, consul-template
-# writes a new plain text token in the file when it expires, ensuring a valid token is
-# always available in the file.
-- name: Check if token file exists
-  stat:
-    path: "{{ nomad_data_dir }}/.vault_token"
-  register: nomad_vault_token
+# Because this token generation requires its own token, we opted for a cert auth role
+# with limited permissions. The auth certificates are managed by consul-template,
+# similar to the Vault agent auth role.
+
+- name: Copy Nomad startup script
+  template:
+    src: "nomad-startup.sh.j2"
+    dest: "{{ nomad_data_dir }}/nomad-startup.sh"
+    mode: 0700
+    owner: nomad
+    group: nomad
+
+- set_fact:
+    local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
+
+- name: Login with Ansible auth cert
+  become: false
+  uri:
+    url: "{{ nomad_vault_addr }}/v1/auth/cert/login"
+    method: POST
+    client_cert: "{{ local_cert_dir }}/ansible.crt"
+    client_key: "{{ local_cert_dir }}/ansible_key.pem"
+    ca_path: "{{ local_cert_dir }}/vault-ca.crt"
+    body: "{ \"name\": \"ansible\" }"
+    body_format: json
+    return_content: true
+  register: nomad_ansible_token_raw
+  no_log: true
   changed_when: false
+  delegate_to: localhost
 
-- name: Create Vault token file
-  block:
-    - name: Generate token for Vault integration with Nomad
-      # command: vault token create -role nomad_cluster -period 72h -orphan -format=json
-      command: vault write -format=json auth/token/create/nomad_cluster "period=72h"
-      environment:
-        VAULT_ADDR: "{{ nomad_vault_addr }}"
-        VAULT_TOKEN: "{{ nomad_ansible_token }}"
-      register: nomad_vault_token_raw
+- set_fact:
+    nomad_ansible_token_json: "{{ nomad_ansible_token_raw.content | from_json }}"
+  when:
+    - nomad_ansible_token_raw is defined
+    - nomad_ansible_token_raw.content is defined
 
-    - set_fact:
-        nomad_vault_token_json: "{{ nomad_vault_token_raw.stdout | from_json }}"
-      when: nomad_vault_token_raw is defined and nomad_vault_token_raw.stdout is defined
+- set_fact:
+    nomad_ansible_token: "{{ nomad_ansible_token_json.auth.client_token }}"
+  when:
+    - nomad_ansible_token_json.auth is defined
+    - nomad_ansible_token_json.auth.client_token is defined
 
-    - name: Write token file
-      copy:
-        content: "VAULT_TOKEN={{ nomad_vault_token_json.auth.client_token }}"
-        dest: "{{ nomad_data_dir }}/.vault_token"
-        mode: 0600
-        owner: nomad
-        group: nomad
-      when: nomad_vault_token_json is defined and nomad_vault_token_json.auth.client_token is defined
-  when: nomad_vault_token is defined and not nomad_vault_token.stat.exists
+# TODO don't overwrite if exists
+# - name: Check if nomad_startup certificate exists
+#   stat:
+#     path: "{{ nomad_tls_dir }}/nomad_startup.crt"
+#   register: nomad_startup_cert
 
-- name: Add nomad_cluster token template stanza to consul-template
+- name: Get certificates for nomad-startup cert auth from Vault server
+  command: vault write -format=json pki_int/issue/auth "common_name=nomad-startup@global.vault" "ttl=72h"
+  environment:
+    VAULT_TOKEN: "{{ nomad_ansible_token }}"
+    VAULT_ADDR: "{{ nomad_vault_addr }}"
+  register: nomad_startup_certificate_raw
+  no_log: true
+
+- set_fact:
+    nomad_startup_certificate_json: "{{ nomad_startup_certificate_raw.stdout | from_json }}"
+  no_log: true
+  when:
+    - nomad_startup_certificate_raw is defined
+    - nomad_startup_certificate_raw.stdout is defined
+
+- name: Write nomad_startup certificate
+  copy:
+    content: "{{ nomad_startup_certificate_json.data.certificate }}"
+    dest: "{{ nomad_tls_dir }}/nomad_startup.crt"
+    mode: 0600
+    owner: nomad
+    group: nomad
+  no_log: true
+
+- name: Write nomad_startup private key
+  copy:
+    content: "{{ nomad_startup_certificate_json.data.private_key }}"
+    dest: "{{ nomad_tls_dir }}/nomad_startup_key.pem"
+    mode: 0400
+    owner: nomad
+    group: nomad
+  no_log: true
+
+- name: Write nomad_startup certificate to auth role
+  command: "vault write auth/cert/certs/nomad_startup certificate=@{{ nomad_tls_dir }}/nomad_startup.crt token_policies=nomad_startup, nomad_cluster token_ttl=86400"
+  environment:
+    VAULT_TOKEN: "{{ nomad_ansible_token }}"
+    VAULT_ADDR: "{{ nomad_vault_addr }}"
+  no_log: true
+
+- name: Add nomad_startup cert template stanza to consul-template
   blockinfile:
     path: "{{ consul_template_config_dir }}/consul-template.hcl"
-    marker: "# {mark} Nomad Vault Token"
+    marker: "# {mark} Nomad startup TLS"
     validate: consul-template -config=%s -parse-only
     block: |
       template {
         contents = <<EOF
-      {{ '{{' }} with secret "auth/token/create/nomad_cluster" "period=72h" {{ '}}' }}
-      VAULT_TOKEN={{ '{{' }} .Auth.ClientToken {{ '}}' }}
+      {{ '{{' }} with pkiCert "pki_int/issue/auth" "common_name=nomad-startup@global.vault" "ttl=72h" {{ '}}' }}
+      {{ '{{' }} .Cert {{ '}}' }}
+      {{ '{{' }} if .CA {{ '}}' }}
+      {{ '{{' }} .CA | writeToFile "{{ nomad_tls_dir }}/nomad_startup_ca.crt" "nomad" "nomad" "0600" {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
+      {{ '{{' }} if .Key {{ '}}' }}
+      {{ '{{' }} .Key | writeToFile "{{ nomad_tls_dir }}/nomad_startup_key.pem" "nomad" "nomad" "0400" {{ '}}' }}
+      {{ '{{' }} end {{ '}}' }}
       {{ '{{' }} end {{ '}}' }}
       EOF
-        destination = "{{ nomad_data_dir }}/.vault_token"
+        destination = "{{ nomad_tls_dir }}/nomad_startup.crt"
         perms = 0600
         user = "nomad"
         group = "nomad"
-        command = "date && if systemctl is-active nomad; then service nomad restart; fi"
+        command = "date; vault write auth/cert/certs/nomad_startup certificate=@{{ nomad_tls_dir }}/nomad_startup.crt"
+      }
       }
   notify: reload consul-template

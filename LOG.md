@@ -1,5 +1,40 @@
 ## Work log
 
+### 09/05/23
+- I realised I've been misunderstanding the required Vault tokens in Nomad's
+  Vault integration:
+    - To use [Vault
+      integration](https://developer.hashicorp.com/nomad/docs/integrations/vault-integration),
+      Nomad servers are provided a **periodic** Vault token that has permissions
+      to generate tokens from a configured token role. This periodic token
+      should have the
+      [capabilities](https://developer.hashicorp.com/nomad/docs/integrations/vault-integration#required-vault-policies)
+      to read, create and revoke tokens with the provided token role and renew
+      itself.
+    - The token role is configured in a Nomad server's configuration with the
+      `create_from_role` key in the Vault stanza. This token role configures the
+      allowlist and denylist of policies accessible to Nomad tasks. Nomad uses
+      this token role to create child tokens that are made available to the
+      tasks. The tasks can then use the token to obtain their relevant secrets
+      from Vault, depending on the stated policies in the `task.vault` block in
+      the Nomad jobspec.
+    - Nomad manages the renewal of the periodic Vault token and any child tokens
+      automatically. However, there is an edge case: when Nomad restarts after
+      the **original** periodic Vault token has expired. Because Nomad renews
+      all tokens in-memory, the original token is not overwritten and cannot be
+      used when starting Nomad.
+- To handle this:
+    - A Nomad startup script is used to generate a new periodic token on-demand.
+      The token is not written to disk and is always paired to a single Nomad
+      process. This removes the need for consul-template to manage the token,
+      but we require any additional token to create this token in the first
+      place. I opted to use certificate authentication with consul-template
+      managing the auth certificates.
+    - However, using the script creates a child process which must be killed
+      when the service is stopped. Hence, `nomad.service`'s `KillMode` must be
+      set from `process` to `control-group`. This should be fine for Nomad
+      servers since they do not produce child allocations.
+
 ### 21/04/23
 - Setup promtail and loki instances for simple log centralization of `journald`
   in dev cluster nodes.

@@ -43,7 +43,6 @@ resource "vault_auth_backend" "agent_cert" {
   }
 }
 
-# todo strange error with issuing certs, unable to find ca certficiate?
 resource "vault_pki_secret_backend_cert" "ansible" {
   depends_on            = [vault_pki_secret_backend_role.auth_role]
   backend               = vault_mount.pki_int.path
@@ -82,9 +81,8 @@ data "vault_auth_backend" "token" {
 
 resource "vault_token_auth_backend_role" "nomad_cluster" {
   role_name              = "nomad_cluster"
-  allowed_policies       = ["nomad_yarr"]
+  allowed_policies       = ["nomad_yarr", "nomad_linkding"]
   allowed_entity_aliases = ["nomad_token"]
-  disallowed_policies    = ["nomad_cluster"]
   token_period           = 259200 # 72h
   orphan                 = true
   renewable              = true
