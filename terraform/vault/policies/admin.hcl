@@ -5,6 +5,10 @@ path "sys/health" {
   capabilities = ["read", "sudo"]
 }
 
+path "sys/audit" {
+  capabilities = ["read", "create", "sudo"]
+}
+
 # Manage leases
 path "sys/leases/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
@@ -41,6 +45,15 @@ path "sys/auth" {
   capabilities = ["read"]
 }
 
+## IdentityEntity
+path "identity/entity/*" {
+  capabilities = ["create", "update", "delete", "read"]
+}
+
+path "identity/entity-alias/*" {
+  capabilities = ["create", "update", "delete", "read"]
+}
+
 ## KV Secrets Engine
 
 # manage kv secrets engine
@@ -59,6 +72,10 @@ path "sys/mounts" {
 }
 
 ## PKI - Intermediate CA
+
+path "pki/config/urls" {
+  capabilities = ["read"]
+}
 
 # Create, update roles
 path "pki_int/roles/*" {
