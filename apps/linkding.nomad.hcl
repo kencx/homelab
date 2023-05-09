@@ -55,11 +55,24 @@ job "linkding" {
         }
       }
 
+      vault {
+        policies = ["nomad_linkding"]
+      }
+
       env {
         LD_DISABLE_BACKGROUND_TASKS = "False"
         LD_DISABLE_URL_VALIDATION   = "False"
-        LD_SUPERUSER_NAME           = ""
-        LD_SUPERUSER_PASSWORD       = ""
+      }
+
+      template {
+        data        = <<EOF
+{{ with secret "kvv2/data/prod/nomad/linkding" }}
+LD_SUPERUSER_NAME="{{ .Data.data.username }}"
+LD_SUPERUSER_PASSWORD="{{ .Data.data.password }}"
+{{ end }}
+EOF
+        destination = "secrets/auth.env"
+        env         = true
       }
 
       resources {
