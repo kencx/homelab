@@ -1,5 +1,10 @@
 ## Work log
 
+### 10/05/23
+- I forgot about signal handling in the previous iteration of `nomad.service`.
+- To fix this, we execute Nomad as a child process in `nomad-startup.sh` and
+  replaced `nomad.service` type with `forking`.
+
 ### 09/05/23
 - I realised I've been misunderstanding the required Vault tokens in Nomad's
   Vault integration:

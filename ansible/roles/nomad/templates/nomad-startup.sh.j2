@@ -10,4 +10,4 @@ NOMAD_TOKEN="$(VAULT_TOKEN=$TOKEN vault write -field=token auth/token/create-orp
     "policies=nomad_cluster" \
     "period=72h")"
 
-VAULT_TOKEN="$NOMAD_TOKEN" /usr/bin/nomad agent -config {{ nomad_config_dir }}
+VAULT_TOKEN="$NOMAD_TOKEN" /usr/bin/nomad agent -config {{ nomad_config_dir }} &
