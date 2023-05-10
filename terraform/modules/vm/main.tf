@@ -30,7 +30,6 @@ resource "proxmox_vm_qemu" "base" {
   scsihw  = "virtio-scsi-pci"
 
   disk {
-    slot    = 0
     size    = var.disk_size
     type    = "scsi"
     storage = "volumes"

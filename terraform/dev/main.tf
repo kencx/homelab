@@ -14,6 +14,7 @@ provider "proxmox" {
 }
 
 module "dev" {
+  count  = 1
   source = "../modules/vm"
 
   hostname    = "dev"
@@ -59,7 +60,7 @@ module "dev-client" {
 }
 
 module "dev-control" {
-  count  = 0
+  count  = 1
   source = "../modules/vm"
 
   hostname    = "dev-control"
