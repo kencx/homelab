@@ -131,7 +131,7 @@
   no_log: true
   when:
     - vault_agent_certificate_json is defined
-    - vault_agent_certificate_json.stdout is defined
+    - vault_agent_certificate_json.data is defined
 
 - name: Write Agent private key
   copy:
@@ -143,7 +143,7 @@
   no_log: true
   when:
     - vault_agent_certificate_json is defined
-    - vault_agent_certificate_json.stdout is defined
+    - vault_agent_certificate_json.data is defined
 
 - name: Write Agent certificate to auth role
   command: "vault write auth/agent/certs/{{ ansible_fqdn }} certificate=@{{ vault_tls_dir }}/agent.crt token_policies=consul_template"

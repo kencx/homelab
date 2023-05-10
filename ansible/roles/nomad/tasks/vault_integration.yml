@@ -79,7 +79,7 @@
   no_log: true
   when:
     - nomad_startup_certificate_json is defined
-    - nomad_startup_certificate_json.stdout is defined
+    - nomad_startup_certificate_json.data is defined
 
 - name: Write nomad_startup private key
   copy:
@@ -91,7 +91,7 @@
   no_log: true
   when:
     - nomad_startup_certificate_json is defined
-    - nomad_startup_certificate_json.stdout is defined
+    - nomad_startup_certificate_json.data is defined
 
 - name: Write nomad_startup certificate to auth role
   command: "vault write auth/cert/certs/nomad_startup certificate=@{{ nomad_tls_dir }}/nomad_startup.crt 'token_policies=nomad_startup, nomad_cluster' token_ttl=86400"
