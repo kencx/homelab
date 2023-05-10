@@ -2,13 +2,14 @@
 Description=Vault
 Wants=network-online.target
 After=network-online.target
-StartLimitInterval = 60
-StartLimitBurst = 3
+StartLimitInterval=60
+StartLimitBurst=3
 
 [Service]
 User=vault
 Group=vault
 
+Type=notify
 ExecReload=/bin/kill -HUP $MAINPID
 ExecStart=/usr/bin/vault server -config /etc/vault.d
 ExecStop=/usr/bin/vault operator step-down

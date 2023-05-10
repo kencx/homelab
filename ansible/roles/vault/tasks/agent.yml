@@ -99,11 +99,10 @@
     - vault_ansible_token_json.auth is defined
     - vault_ansible_token_json.auth.client_token is defined
 
-# TODO don't overwrite if exists
-# - name: Check if Agent certificate exists on client
-#   stat:
-#     path: "{{ vault_tls_dir }}/agent.crt"
-#   register: vault_agent_cert
+- name: Check if Agent certificate exists on client
+  stat:
+    path: "{{ vault_tls_dir }}/agent.crt"
+  register: vault_agent_cert
 
 - name: Get certificates for Agent cert auth from Vault server
   command: vault write -format=json pki_int/issue/auth "common_name=agent-{{ ansible_fqdn }}@global.vault" "ttl=72h"
@@ -111,6 +110,7 @@
     VAULT_TOKEN: "{{ vault_ansible_token }}"
     VAULT_ADDR: "https://{{ vault_server_fqdn }}:8200"
   register: vault_agent_certificate_raw
+  when: not vault_agent_cert.stat.exists
   no_log: true
 
 - set_fact:
@@ -127,7 +127,11 @@
     mode: 0600
     owner: vault
     group: vault
+  register: vault_agent_certificate_written
   no_log: true
+  when:
+    - vault_agent_certificate_json is defined
+    - vault_agent_certificate_json.stdout is defined
 
 - name: Write Agent private key
   copy:
@@ -137,6 +141,9 @@
     owner: vault
     group: vault
   no_log: true
+  when:
+    - vault_agent_certificate_json is defined
+    - vault_agent_certificate_json.stdout is defined
 
 - name: Write Agent certificate to auth role
   command: "vault write auth/agent/certs/{{ ansible_fqdn }} certificate=@{{ vault_tls_dir }}/agent.crt token_policies=consul_template"
@@ -144,6 +151,9 @@
     VAULT_TOKEN: "{{ vault_ansible_token }}"
     VAULT_ADDR: "https://{{ vault_server_fqdn }}:8200"
   no_log: true
+  when:
+    - vault_agent_certificate_written is defined
+    - vault_agent_certificate_written is changed
 
 - name: Start Vault-agent
   systemd:
