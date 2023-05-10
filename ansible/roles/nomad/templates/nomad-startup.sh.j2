@@ -4,7 +4,7 @@ set -euo pipefail
 
 TOKEN="$(vault login --token-only -method=cert \
     -client-cert={{ nomad_tls_dir }}/nomad_startup.crt \
-    -client-cert={{ nomad_tls_dir }}/nomad_startup_key.pem)"
+    -client-key={{ nomad_tls_dir }}/nomad_startup_key.pem)"
 
 NOMAD_TOKEN="$(VAULT_TOKEN=$TOKEN vault write -field=token auth/token/create-orphan \
     "policies=nomad_cluster" \
