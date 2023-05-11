@@ -7,7 +7,7 @@ resource "vault_auth_backend" "userpass" {
   }
 }
 
-# admin userpass for UI login
+# admin user
 resource "vault_generic_endpoint" "admin" {
   depends_on           = [vault_auth_backend.userpass]
   path                 = "auth/userpass/users/admin"
@@ -19,6 +19,24 @@ resource "vault_generic_endpoint" "admin" {
 {
   "password": "${var.admin_password}",
   "token_policies": ["admin"],
+  "token_ttl": "2h",
+  "token_max_ttl": "24h"
+}
+EOF
+}
+
+# kv user for managing kv secrets only
+resource "vault_generic_endpoint" "kvuser" {
+  depends_on           = [vault_auth_backend.userpass]
+  path                 = "auth/userpass/users/kvuser"
+  ignore_absent_fields = true
+  disable_read         = true
+  disable_delete       = true
+
+  data_json = <<EOF
+{
+  "password": "${var.kvuser_password}",
+  "token_policies": ["kvuser", "update_userpass"],
   "token_ttl": "2h",
   "token_max_ttl": "24h"
 }

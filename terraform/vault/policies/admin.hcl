@@ -17,15 +17,18 @@ path "sys/leases/*" {
 ## ACL Policies
 
 # Create, manage ACL policies
-path "/sys/policies/acl/*" {
+path "sys/policies/acl/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
-
-# TODO deny changing self policy
 
 # List existing policies
 path "sys/policies/acl" {
   capabilities = ["list"]
+}
+
+# Deny changing own policy
+path "sys/policies/acl/admin" {
+  capabilities = ["read"]
 }
 
 ## Auth Methods
@@ -50,8 +53,20 @@ path "identity/entity/*" {
   capabilities = ["create", "update", "delete", "read"]
 }
 
+path "identity/entity/name" {
+  capabilities = ["list"]
+}
+
+path "identity/entity/id" {
+  capabilities = ["list"]
+}
+
 path "identity/entity-alias/*" {
   capabilities = ["create", "update", "delete", "read"]
+}
+
+path "identity/entity-alias/id" {
+  capabilities = ["list"]
 }
 
 ## KV Secrets Engine
