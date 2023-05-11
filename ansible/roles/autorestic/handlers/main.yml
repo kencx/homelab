@@ -1,9 +1,4 @@
 ---
-- name: reload nfs
-  systemd:
-    name: nfs-kernel-server
-    state: reloaded
-
 - name: daemon-reload backup.service
   systemd:
     name: backup.service

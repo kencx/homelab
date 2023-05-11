@@ -1,0 +1,5 @@
+---
+- name: reload nfs
+  systemd:
+    name: nfs-kernel-server
+    state: reloaded
