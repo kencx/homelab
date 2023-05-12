@@ -40,11 +40,12 @@ nav:
       - Proxmox: 'terraform/proxmox.md'
       - Vault: 'terraform/vault.md'
   - Roles:
+      - Autorestic: 'roles/autorestic.md'
       - Common: 'roles/common.md'
       - Consul: 'roles/consul.md'
       - Consul Template: 'roles/consul-template.md'
       - Issue Cert: 'roles/issue_cert.md'
-      - NAS: 'roles/nas.md'
+      - NFS: 'roles/nfs.md'
       - Nomad: 'roles/nomad.md'
       - Vault: 'roles/vault.md'
   - Backups: backups.md
