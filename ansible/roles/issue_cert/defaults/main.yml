@@ -11,6 +11,9 @@ issue_cert_path: "cert.crt"
 issue_cert_key_path: "key.pem"
 issue_cert_ca_path: "ca.crt"
 
+issue_cert_auth_role: ""
+issue_cert_auth_policies: ""
+
 issue_cert_add_template: true
 issue_cert_consul_template_config: "/etc/consul-template/consul-template.hcl"
 issue_cert_consul_template_marker: "# {mark} TLS"

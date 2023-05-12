@@ -26,7 +26,11 @@ renew the certificate key pair.
 |issue_cert_path | Certificate path | string | `cert.crt` |
 |issue_cert_key_path | Private key path | string | `key.pem` |
 |issue_cert_ca_path | CA path | string | `ca.crt` |
+|issue_cert_auth_role | Auth role to write certificate to | string | `""` |
+|issue_cert_auth_policies | Policies to add to auth role | string | `""` |
 |issue_cert_add_template | Add consul-template template | boolean | `true` |
 |issue_cert_consul_template_config | consul-template config file path | string | `/etc/consul-template/consul-template.hcl` |
 |issue_cert_consul_template_marker | consul-template template marker | string | `# {mark} TLS` |
 |issue_cert_service | Service to restart after consul-template renews cert | string | `""` |
+
+- `issue_cert_auth_*` variables are only used when `issue_cert_role = "auth"`

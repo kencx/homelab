@@ -52,6 +52,7 @@
         VAULT_ADDR: "{{ issue_cert_vault_addr }}"
         VAULT_TOKEN: "{{ ansible_token }}"
       register: issued_cert_raw
+      when: not cert.stat.exists
 
     - set_fact:
         issued_cert_json: "{{ issued_cert_raw.stdout | from_json }}"
@@ -64,6 +65,7 @@
         mode: 0600
         owner: "{{ issue_cert_owner }}"
         group: "{{ issue_cert_group }}"
+      register: cert_written
       when: issued_cert_json is defined and issued_cert_json.data is defined
 
     - name: Write private key
@@ -83,7 +85,18 @@
         owner: "{{ issue_cert_owner }}"
         group: "{{ issue_cert_group }}"
       when: issued_cert_json is defined and issued_cert_json.data is defined
+
+    - name: Write certificate to auth role
+      command: "vault write auth/{{ issue_cert_auth_role }}  certificate=@{{ issue_cert_path }} token_policies={{ issue_cert_auth_policies }}"
+      environment:
+        VAULT_TOKEN: "{{ vault_ansible_token }}"
+        VAULT_ADDR: "https://{{ vault_server_fqdn }}:8200"
+      when:
+        - issue_cert_role == "auth"
+        - cert_written is defined
+        - cert_written is changed
   when: cert is defined and not cert.stat.exists
+  no_log: true
 
 - name: Add TLS template stanza to consul-template
   blockinfile:
@@ -107,6 +120,8 @@
         perms = 0600
         user = "{{ issue_cert_owner }}"
         group = "{{ issue_cert_group }}"
+        {% if issue_cert_role != "auth" %}
         command = "date && if systemctl is-active {{ issue_cert_service }}; then service {{ issue_cert_service }} reload; fi"
+        {% endif %}
       }
   when: issue_cert_add_template
