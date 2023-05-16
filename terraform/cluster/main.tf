@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "telmate/proxmox"
-      version = ">= 2.9.6"
+      version = ">= 2.9.10"
     }
   }
 }
@@ -14,10 +14,12 @@ provider "proxmox" {
 }
 
 module "server" {
+  count  = 1
   source = "../modules/vm"
 
   hostname    = "server-1"
   vmid        = 110
+  tags        = var.tags
   target_node = var.target_node
 
   clone_template_name = var.template_name
@@ -34,34 +36,13 @@ module "server" {
   ssh_public_key  = file(var.ssh_public_key_file)
 }
 
-# resource "null_resource" "server" {
-#   triggers = {
-#     ansible_playbook = md5(file("../../ansible/server.yml"))
-#     server_ids       = "${join(",", module.server.*.ip)}"
-#   }
-#
-#   connection {
-#     type = "ssh"
-#     user = var.ssh_user
-#     host = module.server.ip
-#   }
-#
-#   provisioner "remote-exec" {
-#     inline = [
-#       "echo 'Restarting cluster'",
-#       "sudo systemctl restart nomad",
-#       "sudo systemctl restart consul",
-#       # "goss -g /tmp/goss.yml validate",
-#     ]
-#   }
-# }
-
 module "client" {
+  count  = 1
   source = "../modules/vm"
-  # count  = 1
 
   hostname    = "client-1"
   vmid        = 111
+  tags        = var.tags
   target_node = var.target_node
 
   clone_template_name = var.template_name
@@ -77,25 +58,3 @@ module "client" {
   ssh_private_key = file(var.ssh_private_key_file)
   ssh_public_key  = file(var.ssh_public_key_file)
 }
-
-# resource "null_resource" "client" {
-#   triggers = {
-#     ansible_playbook = md5(file("../../ansible/client.yml"))
-#     server_ids       = "${join(",", module.client.*.ip)}"
-#   }
-#
-#   connection {
-#     type = "ssh"
-#     user = var.ssh_user
-#     host = module.client.ip
-#   }
-#
-#   provisioner "local-exec" {
-#     command     = "ansible-playbook client.yml -u ${var.ssh_user}"
-#     working_dir = "../../ansible"
-#     environment = {
-#       ANSIBLE_STDOUT_CALLBACK   = "yaml"
-#       ANSIBLE_HOST_KEY_CHECKING = false
-#     }
-#   }
-# }
