@@ -1,19 +1,7 @@
-nfs_share_mounts:
-  - src: "{{ nfs_ip }}:/home/debian/apps/prod-apps"
-    path: "/mnt/storage"
-    state: mounted
-  - src: "{{ nfs_ip }}:/home/debian/apps/tls"
-    path: "{{ consul_template_dir }}/tls"
-    state: mounted
-
-cluster_client_ip: "{{ ansible_default_ipv4.address }}"
-
-# consul
-consul_server_ip: "{{ cluster_server_ip }}"
+---
+consul_vault_addr: "https://{{ server_ip }}:8200"
 consul_common_name: "client.dc1.consul"
-consul_ip_sans: "127.0.0.1,{{ cluster_client_ip }}"
-
-# nomad
-nomad_server_ip: "{{ cluster_server_ip }}"
+consul_ip_sans: "127.0.0.1, {{ client_ip }}"
+nomad_vault_addr: "https://{{ server_ip }}:8200"
 nomad_common_name: "client.global.nomad"
-nomad_ip_sans: "127.0.0.1,{{ cluster_client_ip }}"
+nomad_ip_sans: "127.0.0.1, {{ client_ip }}"

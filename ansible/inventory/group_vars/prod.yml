@@ -1,7 +1,7 @@
 ---
-# server_ip: "{{ hostvars[groups['dev'] | difference(groups['client']) | first]['ansible_default_ipv4']['address'] }}"
-server_ip: "10.10.10.130"
-client_ip: "10.10.10.131"
+# server_ip: "{{ hostvars[groups['prod'] | difference(groups['client']) | first]['ansible_default_ipv4']['address'] }}"
+server_ip: "10.10.10.110"
+client_ip: "10.10.10.111"
 ansible_user: "debian"
 
 # ssl

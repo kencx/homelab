@@ -2,7 +2,7 @@
 nomad_config_dir: "/etc/nomad.d"
 nomad_data_dir: "/opt/nomad/data"
 nomad_tls_dir: "{{ nomad_data_dir }}/tls"
-consul_template_config_dir: "/etc/consul-template/"
+consul_template_config_dir: "/etc/consul-template"
 
 # vault
 setup_vault_integration: true

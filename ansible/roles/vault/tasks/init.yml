@@ -175,6 +175,7 @@
       vault_ca_cert_file: "{{ vault_terraform_cert_dir }}/vault-ca.crt"
       vault_audit_path: "{{ vault_log_file }}"
       admin_password: "{{ vault_admin_password }}"
+      kvuser_password: "{{ vault_kvuser_password }}"
   register: vault_terraform_output
   no_log: true
   delegate_to: localhost

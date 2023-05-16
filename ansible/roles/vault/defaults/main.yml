@@ -12,6 +12,7 @@ vault_root_token_file: "{{ vault_data_dir }}/.root_token"
 
 vault_terraform_workspace: "default"
 vault_admin_password: "password"
+vault_kvuser_password: "password"
 
 vault_setup_agent: true
 vault_server_fqdn: "{{ ansible_default_ipv4.address }}"
