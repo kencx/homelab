@@ -36,6 +36,7 @@
             - {rule: 'allow', port: '8302', proto: 'tcp', comment: 'consul Serf WAN'}
             - {rule: 'allow', port: '8302', proto: 'udp', comment: 'consul Serf WAN'}
             - {rule: 'allow', port: '8501', proto: 'tcp', comment: 'consul HTTPS'}
+            - {rule: 'allow', port: '8503', proto: 'tcp', comment: 'consul gRPC'}
             - {rule: 'allow', port: '8600', proto: 'tcp', comment: 'consul DNS'}
             - {rule: 'allow', port: '8600', proto: 'udp', comment: 'consul DNS'}
 

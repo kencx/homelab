@@ -1,3 +1,6 @@
+!!! warning "Work in Progress"
+    This role is unfinished and untested.
+
 This role installs and configures restic and autorestic for automated backups.
 See [backups](../backups.md) for more information.
 
