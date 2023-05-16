@@ -80,7 +80,7 @@ resource "local_file" "ansible_cert" {
 resource "local_file" "ansible_key" {
   content         = vault_pki_secret_backend_cert.ansible.private_key
   filename        = "../../certs/ansible_key.pem"
-  file_permission = "0400"
+  file_permission = "0600"
 }
 
 resource "vault_cert_auth_backend_role" "ansible" {

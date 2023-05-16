@@ -1,5 +1,5 @@
 path "kvv2/data/prod/*" {
-  capabilities = ["create", "read", "update", "delete"]
+  capabilities = ["create", "read", "update", "delete", "patch"]
 }
 
 path "kvv2/data/prod" {
@@ -7,7 +7,7 @@ path "kvv2/data/prod" {
 }
 
 path "kvv2/data/dev/*" {
-  capabilities = ["create", "read", "update", "delete"]
+  capabilities = ["create", "read", "update", "delete", "patch"]
 }
 
 path "kvv2/data/dev" {
