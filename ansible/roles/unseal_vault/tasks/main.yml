@@ -1,0 +1,25 @@
+---
+- name: Wait for Vault port
+  wait_for:
+    port: "{{ unseal_vault_port }}"
+    state: started
+
+- name: Check Vault seal status
+  command: vault status -format=json
+  register: vault_status_raw
+  changed_when: false
+  failed_when: vault_status_raw.rc == 1
+
+- set_fact:
+    vault_status_json: "{{ vault_status_raw.stdout | from_json }}"
+
+- include_tasks: unseal.yml
+  when:
+    - vault_status_json is defined
+    - vault_status_json.sealed
+
+- debug:
+    msg: Vault is unsealed!
+  when:
+    - vault_status_json is defined
+    - not vault_status_json.sealed

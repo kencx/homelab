@@ -1,0 +1,67 @@
+---
+# TODO create list of keys from list of files
+- name: Get unseal key(s) from file(s)
+  command: ""
+  register: vault_unseal_key_raw
+  when:
+    - unseal_store == 'file'
+    - unseal_keys_files is defined
+    - unseal_keys_files | length > 0
+
+- name: Unseal Vault from given keys
+  command:
+    cmd: "vault operator unseal {{ item }}"
+  environment:
+    VAULT_ADDR: "{{ unseal_vault_addr }}"
+  with_items: "{{ unseal_keys }}"
+  when:
+    - unseal_keys is defined
+    - unseal_keys | length > 0
+  changed_when: false
+  failed_when: vault_unseal_operation.rc == 1
+
+# TODO copy bw_get.sh script to role
+- name: Get unseal key from Bitwarden
+  script: "bw_get.sh 'Vault Unseal Key' {{ unseal_bw_password }}"
+  register: vault_unseal_key_raw
+  when:
+    - unseal_store == 'bitwarden'
+    - unseal_bw_password is defined
+
+- set_fact:
+    vault_unseal_key_json: "{{ vault_unseal_key_raw.stdout | from_json }}"
+  when: vault_unseal_key_raw is defined and vault_unseal_key_raw.stdout is defined
+
+- name: Unseal Vault from json data
+  shell:
+    cmd: "vault operator unseal --format json {{ vault_unseal_key_json.data.data }}"
+  environment:
+    VAULT_ADDR: "{{ unseal_vault_addr }}"
+  register: vault_unseal_operation
+  when:
+    - vault_unseal_key_json is defined
+    - vault_unseal_key_json.data.data is defined
+    - vault_unseal_key_json.success
+  changed_when: false
+  failed_when: vault_unseal_operation.rc == 1
+
+- name: Check Vault seal status
+  command: vault status -format=json
+  register: post_vault_status_raw
+  changed_when: false
+  failed_when: post_vault_status_raw.rc == 1
+
+- set_fact:
+    vault_status_json: "{{ post_vault_status_raw.stdout | from_json }}"
+
+- fail:
+    msg: Vault is still sealed!
+  when:
+    - post_vault_status_json is defined
+    - post_vault_status_json.sealed
+
+- debug:
+    msg: Vault is unsealed!
+  when:
+    - post_vault_status_json is defined
+    - not post_vault_status_json.sealed

@@ -47,6 +47,7 @@ nav:
       - Issue Cert: 'roles/issue_cert.md'
       - NFS: 'roles/nfs.md'
       - Nomad: 'roles/nomad.md'
+      - Unseal Vault: 'roles/unseal_vault.md'
       - Vault: 'roles/vault.md'
   - Backups: backups.md
   - Apps:
