@@ -58,3 +58,8 @@ resource "vault_policy" "nomad_traefik" {
   name   = "nomad_traefik"
   policy = file("policies/nomad_traefik.hcl")
 }
+
+resource "vault_policy" "nomad_diun" {
+  name   = "nomad_diun"
+  policy = file("policies/nomad_diun.hcl")
+}

@@ -99,7 +99,7 @@ data "vault_auth_backend" "token" {
 
 resource "vault_token_auth_backend_role" "nomad_cluster" {
   role_name              = "nomad_cluster"
-  allowed_policies       = ["nomad_yarr", "nomad_linkding", "nomad_traefik"]
+  allowed_policies       = ["nomad_yarr", "nomad_linkding", "nomad_traefik", "nomad_diun"]
   allowed_entity_aliases = ["nomad_token"]
   token_period           = 259200 # 72h
   orphan                 = true

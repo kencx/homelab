@@ -8,12 +8,12 @@ job "diun" {
       driver = "docker"
 
       config {
-        image   = "crazymax/diun"
+        image   = "ghcr.io/crazy-max/diun:[[ .app.diun.image ]]"
         command = "serve"
 
         volumes = [
-          "/mnt/storage/diun:/data",
-          "local/diun.yml:/diun.yml",
+          "[[ .app.diun.volumes.data ]]:/data",
+          "local/diun.yml:/etc/diun/diun.yml",
           "/var/run/docker.sock:/var/run/docker.sock",
         ]
 
@@ -22,8 +22,12 @@ job "diun" {
         }
       }
 
+      vault {
+        policies = ["nomad_diun"]
+      }
+
       env {
-        TZ        = "Asia/Singapore"
+        TZ        = "[[ .common.tz ]]"
         LOG_LEVEL = "info"
         LOG_JSON  = false
       }
@@ -33,6 +37,7 @@ job "diun" {
 watch:
   workers: 10
   schedule: "0 */6 * * *"
+  jitter: 30s
   firstCheckNotif: false
 
 providers:
@@ -40,11 +45,12 @@ providers:
     watchByDefault: false
 
 notif:
-  gotify:
-    endpoint: "[[ .app.gotify.domain ]].[[ .common.domain ]]"
-    token: ""
-    priority: 1
-    timeout: "10s"
+  telegram:
+{{ with secret "kvv2/data/prod/nomad/diun" }}
+    token: {{ .Data.data.tg_bot_token }}
+    chatIDs:
+      - {{ .Data.data.tg_chat_id }}
+{{ end }}
 EOF
         destination = "${NOMAD_TASK_DIR}/diun.yml"
       }

@@ -18,6 +18,11 @@ app:
       config: "/mnt/storage/calibre_web/config"
       books: "/mnt/storage/books"
 
+  diun:
+    image: "4.24"
+    volumes:
+      data: "/mnt/storage/diun"
+
   firefly:
     domain: firefly
     image: "version-5.7.6"
