@@ -53,3 +53,8 @@ resource "vault_policy" "nomad_linkding" {
   name   = "nomad_linkding"
   policy = file("policies/nomad_linkding.hcl")
 }
+
+resource "vault_policy" "nomad_traefik" {
+  name   = "nomad_traefik"
+  policy = file("policies/nomad_traefik.hcl")
+}
