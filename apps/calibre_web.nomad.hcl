@@ -39,7 +39,7 @@ job "calibre" {
       driver = "docker"
 
       config {
-        image = "lscr.io/linuxserver/calibre-web:amd64-0.6.18"
+        image = "lscr.io/linuxserver/calibre-web:[[ .app.calibre_web.image ]]"
         ports = ["http"]
 
         volumes = [

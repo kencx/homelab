@@ -38,14 +38,24 @@ job "traefik" {
 
         "traefik.http.routers.traefik-router.tls=true",
         # Comment out the below line after first run of traefik to force the use of wildcard certs
-        # "traefik.http.routers.traefik-router.tls.certResolver=dns-dgo"
-        "traefik.http.routers.traefik-router.tls.domains[0].main=[[ .common.domain ]]"
+        # "traefik.http.routers.traefik-router.tls.certResolver=dns-dgo",
+        "traefik.http.routers.traefik-router.tls.domains[0].main=[[ .common.domain ]]",
         "traefik.http.routers.traefik-router.tls.domains[0].sans=*.[[ .common.domain ]]"
       ]
 
       check {
         type     = "tcp"
         port     = "http"
+        interval = "30s"
+        timeout  = "5s"
+
+        success_before_passing   = "3"
+        failures_before_critical = "3"
+      }
+
+      check {
+        type     = "tcp"
+        port     = "https"
         interval = "30s"
         timeout  = "5s"
 
@@ -74,8 +84,20 @@ job "traefik" {
         }
       }
 
-      env {
-        DO_AUTH_TOKEN = "[[ .app.traefik.do_token ]]"
+      vault {
+        policies = ["nomad_traefik"]
+      }
+
+      template {
+        data = <<EOF
+{{ with secret "kvv2/data/prod/nomad/traefik" }}
+CF_API_KEY="{{ .Data.data.cloudflare_api_key }}"
+CF_API_EMAIL="{{ .Data.data.ca_email }}"
+TRAEFIK_CERTIFICATESRESOLVERS_DNS_DGO_ACME_EMAIL="{{ .Data.data.ca_email }}"
+{{ end }}
+EOF
+        destination = "secrets/secrets.env"
+        env         = true
       }
 
       template {
@@ -123,12 +145,14 @@ providers:
 certificatesResolvers:
   dns-dgo:
     acme:
-      email: "[[ .app.traefik.acme.email ]]"
       storage: "acme/acme.json"
       caServer: "[[ .app.traefik.acme.caServer ]]"
       dnsChallenge:
-        provider: digitalocean
-        resolvers: "1.1.1.1:53,1.0.0.1:53"
+        provider: cloudflare
+        delayBeforeCheck: 90
+        resolvers:
+          - "1.1.1.1"
+          - "8.8.8.8"
 EOF
         destination = "${NOMAD_TASK_DIR}/traefik.yml"
       }
@@ -183,17 +207,17 @@ http:
       loadBalancer:
         servers:
           - url: "https://[[ .app.proxmox.ip ]]"
-        serversTransports: insecureTransport
+        serversTransport: insecureTransport
     nomad:
       loadBalancer:
         servers:
           - url: "https://nomad.service.consul:4646"
-        serversTransports: insecureTransport
+        serversTransport: insecureTransport
     consul:
       loadBalancer:
         servers:
           - url: "https://consul.service.consul:8501"
-        serversTransports: insecureTransport
+        serversTransport: insecureTransport
 
   serversTransports:
     insecureTransport:
@@ -216,9 +240,9 @@ EOF
         destination = "${NOMAD_TASK_DIR}/rules/rules.yml"
       }
 
-      template {
+      template client
         data = <<EOF
-{{ with secret "pki_int/issue/cluster" "common_name=traefik-client.dc1.consul" "alt_names=consul.service.consul" }}
+{{ with secret "pki_int/issue/client" "common_name=traefik-client.dc1.consul" "alt_names=consul.service.consul" }}
 {{ .Data.certificate }}
 {{ end }}
 EOF
@@ -229,7 +253,7 @@ EOF
 
       template {
         data = <<EOF
-{{ with secret "pki_int/issue/cluster" "common_name=traefik-client.dc1.consul" "alt_names=consul.service.consul" }}
+{{ with secret "pki_int/issue/client" "common_name=traefik-client.dc1.consul" "alt_names=consul.service.consul" }}
 {{ .Data.private_key }}
 {{ end }}
 EOF
@@ -239,7 +263,7 @@ EOF
       }
       template {
         data = <<EOF
-{{ with secret "pki_int/issue/cluster" "common_name=traefik-client.dc1.consul" "alt_names=consul.service.consul" }}
+{{ with secret "pki_int/issue/client" "common_name=traefik-client.dc1.consul" "alt_names=consul.service.consul" }}
 {{ .Data.issuing_ca }}
 {{ end }}
 EOF
