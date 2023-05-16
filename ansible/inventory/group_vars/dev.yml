@@ -19,9 +19,9 @@ vault_config_dir: "/etc/vault.d"
 vault_data_dir: "/opt/vault/data"
 vault_tls_dir: "/opt/vault/tls"
 vault_ca_cert_dir: "{{ ssl_remote_ca_trust_store_dir }}"
-vault_store_bw: true
+vault_store_bw: false
 vault_server_fqdn: "{{ server_ip }}"
-vault_terraform_workspace: "default"
+vault_terraform_workspace: "dev"
 vault_admin_password: "password"
 vault_kvuser_password: "password"
 
