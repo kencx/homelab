@@ -1,7 +1,7 @@
-Terraform uses the
+The
 [telmate/proxmox](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs)
-provider to communicate with the Proxmox API. The `proxmox` provider must be
-configured appropriately.
+provider is used by Terraform to communicate with the Proxmox API. The provider
+must be configured appropriately:
 
 ```tf
 provider "proxmox" {
@@ -13,51 +13,76 @@ provider "proxmox" {
 
 ## Overview
 
-There are two custom modules available `terraform/modules/{vm,lxc}` for
-provisioning a VM and LXC respectively.
+The Terraform configuration in `terraform/cluster` is used to deploy server and
+client cluster nodes. It uses a custom module (`terraform/modules/vm`) that
+clones a Proxmox VM from an existing VM template with our custom configuration.
 
-Cluster nodes are provisioned with the `vm` module. Each resource has a
-`null_resource` with a `local_exec` provisioner that calls its Ansible playbook.
-These provisioners are triggered by changes in their configured Ansible playbooks.
+The number of nodes provisioned are defined by the length of the array
+variables. The following will deploy four nodes in total: two server and two
+client nodes with the given IP addresses. All nodes will be cloned from the
+existing `base` VM template.
 
-## Deployment
-
-To start the deployment, ensure all variables are appropriately populated in
-`terraform.tfvars`.
-
-```bash
-$ cd terraform/cluster
-$ terraform init
-$ terraform plan
-$ terraform apply
+```hcl
+template_name = "base"
+server_vmid      = [110, 111]
+client_vmid      = [120, 121]
+server_ip_address = ["10.10.10.110/24", "10.10.10.111/24"]
+client_ip_address = ["10.10.10.111/24", "10.10.10.121/24"]
+ip_gateway        = "10.10.10.1"
 ```
+
+On success, the provisioned VMs are accessible via the configured SSH username
+and key pair.
 
 ## Variables
 
 ### VM
 
-| Variable             | Description                          | Type   | Default    |
-| -------------------- | ------------------------------------ | ------ | ---------- |
-| proxmox_ip           | Proxmox IP address                   | string |            |
-| proxmox_user         | Proxmox username                     | string | `root@pam` |
-| proxmox_password     | Proxmox pw                           | string |            |
-| target_node          | Proxmox node to start VM in          | string | `pve`      |
-| hostname             | Hostname of VM                       | string | `base`     |
-| vmid                 | ID of created VM and                 | number | `4000`     |
-| template_name        | Template to clone                    | string |            |
-| onboot               | Start VM on boot                     | bool   | `false`    |
-| oncreate             | Start VM on creation                 | bool   | `true`     |
-| cores                | Number of CPU cores                  | number | 1          |
-| sockets              | Number of CPU sockets                | number | 1          |
-| memory               | Memory in MB                         | number | 1024       |
-| ssh_username         | User to SSH into during provisioning | string |            |
-| ssh_private_key_file | Filepath of private SSH key          | string |            |
-| ssh_public_key_file  | Filepath of public SSH key           | string |            |
+| Variable               | Description                                    | Type         | Default    |
+| ---------------------- | ---------------------------------------------- | ------------ | ---------- |
+| proxmox_ip             | Proxmox IP address                             | string       |            |
+| proxmox_user           | Proxmox username                               | string       | `root@pam` |
+| proxmox_password       | Proxmox pw                                     | string       |            |
+| target_node            | Proxmox node to start VM in                    | string       | `pve`      |
+| tags                   | Proxmox VM tags                                | string       | `prod`     |
+| template_name          | Proxmox VM template to clone                   | string       |            |
+| onboot                 | Start VM on boot                               | bool         | `false`    |
+| oncreate               | Start VM on creation                           | bool         | `true`     |
+| server_hostname_prefix | Hostname prefix for all server nodes           | string       | `server`   |
+| server_vmid            | List of server VM IDs                          | list(number) |            |
+| server_cores           | Number of cores for all server nodes           | number       | `2`        |
+| server_sockets         | Number of sockets for all server nodes         | number       | `2`        |
+| server_memory          | Total memory for all server nodes (MB)         | number       | `2048`     |
+| server_disk_size       | Disk size in all server nodes                  | string       | `5G`       |
+| client_hostname_prefix | Hostname prefix for all client nodes           | string       | `client`   |
+| client_vmid            | List of client VM IDs                          | list(number) |            |
+| client_cores           | Number of cores for all client nodes           | number       | `2`        |
+| client_sockets         | Number of sockets for all client nodes         | number       | `2`        |
+| client_memory          | Total memory for all client nodes (MB)         | number       | `2048`     |
+| client_disk_size       | Disk size in all client nodes                  | string       | `5G`       |
+| server_ip_address      | List of server IPv4 addresses in CIDR notation | list(string) |            |
+| client_ip_address      | List of client IPv4 addresses in CIDR notation | list(string) |            |
+| ip_gateway             | IPv4 gateway address                           | string       |            |
+| disk_storage_pool      | Storage pool on which to store VM disk         | string       | `volumes`  |
+| ssh_username           | User to SSH into during provisioning           | string       |            |
+| ssh_private_key_file   | Filepath of private SSH key                    | string       |            |
+| ssh_public_key_file    | Filepath of public SSH key                     | string       |            |
+
+- `*_disk_size` must match the regex `\d+[GMK]`.
+- The VM template corresponding to `template_name` must be exist.
+- The length of `server_vmid` and `server_ip_address` must be equal. Each
+  element in the latter corresponds to the IP address of the latter. The same
+  applies for the client arrays.
+- The lists of IPv4 addresses must be in CIDR notation with subnet masks.
 
 ## Notes
 
-- The given `template_name` must be exist. This should be the same name in
-  Packer.
+### Inconsistent Disk Changes
+
+There is an [existing
+bug](https://github.com/Telmate/terraform-provider-proxmox/issues/700) that may
+cause Terraform plans to add additional disks that are not configured. The bug
+is inconsistent and appears to be random.
 
 ### Proxmox credentials and LXC bind mounts
 

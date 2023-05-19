@@ -7,7 +7,7 @@ theme:
   name: material
   features:
     - navigation.indexes
-    - navigation.expand
+    # - navigation.expand
     - search.highlight
     - toc.follow
   palette:
@@ -33,22 +33,26 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Images:
-      - Cloud Images: 'images/cloud_image.md'
-      - Packer: 'images/packer.md'
-  - Terraform:
-      - Proxmox: 'terraform/proxmox.md'
-      - Vault: 'terraform/vault.md'
-  - Roles:
-      - Autorestic: 'roles/autorestic.md'
-      - Common: 'roles/common.md'
-      - Consul: 'roles/consul.md'
-      - Consul Template: 'roles/consul-template.md'
-      - Issue Cert: 'roles/issue_cert.md'
-      - NFS: 'roles/nfs.md'
-      - Nomad: 'roles/nomad.md'
-      - Unseal Vault: 'roles/unseal_vault.md'
-      - Vault: 'roles/vault.md'
+  - Prerequisites: prerequisites.md
+  - Getting Started: 'getting_started.md'
+  - Provisioning:
+      - Overview: 'provisioning.md'
+      - Images:
+          - Cloud Images: 'images/cloud_image.md'
+          - Packer: 'images/packer.md'
+      - Terraform:
+          - Proxmox: 'terraform/proxmox.md'
+          - Vault: 'terraform/vault.md'
+      - Ansible Roles:
+          - Autorestic: 'roles/autorestic.md'
+          - Common: 'roles/common.md'
+          - Consul: 'roles/consul.md'
+          - Consul Template: 'roles/consul-template.md'
+          - Issue Cert: 'roles/issue_cert.md'
+          - NFS: 'roles/nfs.md'
+          - Nomad: 'roles/nomad.md'
+          - Unseal Vault: 'roles/unseal_vault.md'
+          - Vault: 'roles/vault.md'
   - Backups: backups.md
   - Apps:
       - index: 'apps/index.md'
@@ -59,3 +63,6 @@ nav:
       - Linkding: 'apps/linkding.md'
       - Traefik: 'apps/traefik.md'
       - yarr: 'apps/yarr.md'
+  - References:
+      - Work Log: 'references/LOG.md'
+      - Roadmap: 'references/TODO.md'

@@ -2,8 +2,8 @@
 
 This uses the
 [Vault](https://registry.terraform.io/providers/hashicorp/vault/latest/docs)
-provider to declaratively create secrets in a running Vault instance. The Vault
-provider must be configured appropriately:
+provider to declaratively manage secrets and policies in a running Vault
+instance. The Vault provider must be configured appropriately:
 
 ```tf
 provider "vault" {
@@ -36,6 +36,7 @@ Vault produces the following outputs:
 | vault_ca_cert_file | Local path to Vault CA cert file | string | `./certs/vault_ca.crt` |
 | vault_audit_path   | Vault audit file path            | string | `/vault/logs/vault.log`|
 | admin_password     | Password for admin user          | string | |
+| kvuser_password | Password for kv user | string |
 | allowed_server_domains | List of allowed_domains for PKI server role | list(string) | `["service.consul", "dc1.consul", "dc1.nomad", "global.nomad"]`|
 | allowed_client_domains | List of allowed_domains for PKI client role | list(string) | `["service.consul", "dc1.consul", "dc1.nomad", "global.nomad"]` |
 | allowed_auth_domains   | List of allowed_domains for PKI auth role | list(string) | `["global.vault"]`|

@@ -13,8 +13,8 @@ Backblaze B2 bucket.
 A custom `autorestic-backup` script is run daily with systemd timers. The script
 requires an external hard drive and a
 [Backblaze](https://www.backblaze.com/b2/cloud-storage.html) account. The script
-and systemd units are installed and configured via the Ansible [nas
-role](roles/nas.md).
+and systemd units are installed and configured via the Ansible [autorestic
+role](roles/autorestic.md).
 
 The script performs the following:
 
@@ -43,8 +43,8 @@ backup fails if any of the files are different.
 
 ## Configuration
 
-Configuration can be performed via the Ansible [nas role](roles/nas.md) or
-manually.
+Configuration can be performed via the Ansible [autorestic
+role](roles/autorestic.md) or manually.
 
 - Ensure the external hard drive is present and functional.
 - Configure the `autorestic-backup` script with the backup drive's partition.

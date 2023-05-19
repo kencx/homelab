@@ -1,4 +1,3 @@
-## Work log
 
 ### 10/05/23
 - I forgot about signal handling in the previous iteration of `nomad.service`.
