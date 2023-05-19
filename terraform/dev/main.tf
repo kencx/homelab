@@ -13,12 +13,27 @@ provider "proxmox" {
   pm_password = var.proxmox_password
 }
 
-module "dev" {
-  count  = 1
-  source = "../modules/vm"
+locals {
+  servers = {
+    for idx, val in var.server_vmid : val => {
+      index      = idx + 1,
+      ip_address = var.server_ip_address[idx],
+    }
+  }
+  clients = {
+    for idx, val in var.client_vmid : val => {
+      index      = idx + 1,
+      ip_address = var.client_ip_address[idx],
+    }
+  }
+}
 
-  hostname    = "dev"
-  vmid        = 130
+module "dev" {
+  source   = "../modules/vm"
+  for_each = local.servers
+
+  hostname    = "${var.server_hostname_prefix}-${each.value.index}"
+  vmid        = parseint(each.key, 10)
   tags        = var.tags
   target_node = var.target_node
 
@@ -26,10 +41,15 @@ module "dev" {
   onboot              = var.onboot
   oncreate            = var.oncreate
 
-  cores     = 1
-  sockets   = 1
-  memory    = 1024
-  disk_size = "10G"
+  cores   = var.server_cores
+  sockets = var.server_sockets
+  memory  = var.server_memory
+
+  disk_size         = var.server_disk_size
+  disk_storage_pool = var.disk_storage_pool
+
+  ip_address = each.value.ip_address
+  ip_gateway = var.ip_gateway
 
   ssh_user        = var.ssh_user
   ssh_private_key = file(var.ssh_private_key_file)
@@ -37,11 +57,11 @@ module "dev" {
 }
 
 module "dev-client" {
-  count  = 1
-  source = "../modules/vm"
+  source   = "../modules/vm"
+  for_each = local.clients
 
-  hostname    = "dev-client"
-  vmid        = 131
+  hostname    = "${var.client_hostname_prefix}-${each.value.index}"
+  vmid        = parseint(each.key, 10)
   tags        = var.tags
   target_node = var.target_node
 
@@ -49,10 +69,15 @@ module "dev-client" {
   onboot              = var.onboot
   oncreate            = var.oncreate
 
-  cores     = 1
-  sockets   = 1
-  memory    = 1024
-  disk_size = "15G"
+  cores   = var.client_cores
+  sockets = var.client_sockets
+  memory  = var.client_memory
+
+  disk_size         = var.client_disk_size
+  disk_storage_pool = var.disk_storage_pool
+
+  ip_address = each.value.ip_address
+  ip_gateway = var.ip_gateway
 
   ssh_user        = var.ssh_user
   ssh_private_key = file(var.ssh_private_key_file)
@@ -60,10 +85,10 @@ module "dev-client" {
 }
 
 module "dev-control" {
-  count  = 1
   source = "../modules/vm"
+  count  = 1
 
-  hostname    = "dev-control"
+  hostname    = "${var.server_hostname_prefix}-control"
   vmid        = 135
   tags        = var.tags
   target_node = var.target_node
@@ -72,10 +97,14 @@ module "dev-control" {
   onboot              = var.onboot
   oncreate            = var.oncreate
 
-  cores     = 1
-  sockets   = 1
-  memory    = 1024
-  disk_size = "10G"
+  cores             = 1
+  sockets           = 1
+  memory            = 1024
+  disk_size         = "10G"
+  disk_storage_pool = var.disk_storage_pool
+
+  ip_address = var.control_ip_address
+  ip_gateway = var.ip_gateway
 
   ssh_user        = var.ssh_user
   ssh_private_key = file(var.ssh_private_key_file)

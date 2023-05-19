@@ -8,6 +8,10 @@ terraform {
   }
 }
 
+locals {
+  ipconfig = "ip=${var.ip_address},gw=${var.ip_gateway}"
+}
+
 resource "proxmox_vm_qemu" "base" {
   name = var.hostname
   vmid = var.vmid
@@ -32,7 +36,7 @@ resource "proxmox_vm_qemu" "base" {
   disk {
     size    = var.disk_size
     type    = "scsi"
-    storage = "volumes"
+    storage = var.disk_storage_pool
   }
 
   lifecycle {
@@ -49,7 +53,7 @@ EOF
   ci_wait         = 60
   ciuser          = var.ssh_user
   sshkeys         = var.ssh_public_key
-  ipconfig0       = "ip=10.10.10.${var.vmid}/24,gw=10.10.10.1"
+  ipconfig0       = local.ipconfig
 
   connection {
     type = "ssh"

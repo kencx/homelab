@@ -59,8 +59,36 @@ variable "memory" {
 
 variable "disk_size" {
   type        = string
-  description = "VM bootdisk size"
+  description = <<EOT
+  (Optional) VM bootdisk size
+
+  Default: 10G
+  EOT
   default     = "10G"
+}
+
+variable "disk_storage_pool" {
+  type        = string
+  description = "Storage pool on which to store disk"
+  default     = "volumes"
+}
+
+variable "ip_address" {
+  type        = string
+  description = "VM IPv4 address in CIDR notation (eg. 10.10.10.2/24)"
+  validation {
+    condition     = can(cidrnetmask(var.ip_address))
+    error_message = "Must be a valid IPv4 address with subnet mask"
+  }
+}
+
+variable "ip_gateway" {
+  type        = string
+  description = "IP gateway address (eg. 10.10.10.1)"
+  validation {
+    condition     = can(cidrnetmask("${var.ip_gateway}/24"))
+    error_message = "Must be a valid IPv4 address"
+  }
 }
 
 variable "ssh_user" {
