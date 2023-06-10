@@ -1,0 +1,27 @@
+---
+- name: Install paccache
+  community.general.pacman:
+    name: pacman-contrib
+    state: present
+
+- name: Copy update-aur service and timer
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - update-aur.service
+    - update-aur.timer
+
+- name: Enable update-aur.service
+  systemd:
+    name: update-aur.service
+    enabled: true
+
+- name: Start timer
+  systemd:
+    name: update-aur.timer
+    state: started
+    enabled: true

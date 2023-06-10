@@ -44,6 +44,7 @@ nav:
           - Proxmox: 'terraform/proxmox.md'
           - Vault: 'terraform/vault.md'
       - Ansible Roles:
+          - Arch Repository: 'roles/arch_repository.md'
           - Autorestic: 'roles/autorestic.md'
           - Common: 'roles/common.md'
           - Consul: 'roles/consul.md'

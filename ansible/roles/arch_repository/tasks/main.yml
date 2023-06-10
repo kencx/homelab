@@ -1,0 +1,73 @@
+---
+- name: Check aurutils installed
+  command:
+    cmd: command -v aur
+  changed_when: false
+  failed_when: false
+  ignore_errors: true
+  register: aurutils_install
+
+- import_tasks: install_aurutils.yml
+  become: true
+  when:
+    - aurutils_install.stdout is defined
+    - aurutils_install.stdout == "/usr/bin/aur"
+
+- name: Create repository user
+  become: true
+  user:
+    name: "{{ arch_repository_user }}"
+    groups: wheel
+    append: true
+
+- name: Add sudoers for repository user
+  become: true
+  template:
+    src: aur_sudoers.j2
+    dest: "/etc/sudoers.d/50_arch_repo"
+    owner: root
+    group: root
+    mode: 0440
+
+- import_tasks: repository.yml
+  become: true
+
+- name: Copy chroot conf files
+  become: true
+  template:
+    src: "{{ item }}.conf.j2"
+    dest: "/etc/{{ item }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - makepkg-chroot
+    - pacman-chroot
+
+- name: Copy aur wrapper script
+  become: true
+  template:
+    src: "aur-wrapper.j2"
+    dest: "/usr/bin/aur-wrapper"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Sync AUR packages
+  become: true
+  become_user: "{{ arch_repository_user }}"
+  command:
+    cmd: "aur-wrapper add {{ item }}"
+  with_items: "{{ arch_repository_packages }}"
+  when: arch_repository_sync_packages
+
+- name: Clean manually installed aurutils package
+  file:
+    path: "{{ arch_repository_aurutils_temp_dir }}"
+    state: absent
+  when:
+    - aurutils_install.stdout is defined
+    - aurutils_install.stdout == "/usr/bin/aur"
+
+- import_tasks: setup_updates.yml
+  become: true

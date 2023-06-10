@@ -1,0 +1,12 @@
+---
+arch_repository_user: "aur"
+arch_repository_root_dir: "/var/cache/pacman"
+arch_repository_name: "custom"
+arch_repository_dir: "{{ arch_repository_root_dir }}/{{ arch_repository_name }}"
+arch_repository_sig_level: "Optional TrustAll"
+arch_repository_url: "file://{{ arch_repository_dir }}"
+
+arch_repository_aurutils_temp_dir: "/tmp/aurutils"
+arch_repository_sync_packages: false
+arch_repository_packages:
+  - aurutils

@@ -1,0 +1,20 @@
+---
+- name: Install dependencies
+  pacman:
+    name: base-devel
+    state: present
+
+- name: Fetch aurutils package from AUR
+  git:
+    repo: https://aur.archlinux.org/aurutils.git
+    dest: "{{ arch_repository_aurutils_temp_dir }}"
+
+- name: Build aurutils package manually
+  command:
+    cmd: makepkg -sci
+    chdir: "{{ arch_repository_aurutils_temp_dir }}"
+
+- name: Install aurutils
+  pacman:
+    name: aurutils
+    state: present
