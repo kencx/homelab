@@ -16,7 +16,7 @@ app:
     image: "amd64-0.6.19"
     volumes:
       config: "/mnt/storage/calibre_web/config"
-      books: "/mnt/storage/books"
+      books: "/mnt/books"
 
   diun:
     image: "4.24"
@@ -43,13 +43,13 @@ app:
       data: "/mnt/storage/linkding"
 
   mariadb:
-    version: "10.9.3"
+    image: "10.9.3"
     volumes:
       data: ""
 
   miniflux:
     domain: miniflux
-    version: "2.0.36"
+    image: "2.0.36"
 
   minio:
     domain: minio
@@ -61,7 +61,7 @@ app:
 
   paperless:
     domain: paper
-    version: "1.7.1"
+    image: "1.7.1"
     volumes:
       data: "/mnt/storage/paperless/data"
       consume: "/mnt/paper"
@@ -72,7 +72,7 @@ app:
     ip: ""
 
   postgres:
-    version: "14-alpine3.16"
+    image: "14-alpine3.16"
     volumes:
       data: "/mnt/storage/postgres/data"
 
@@ -82,11 +82,11 @@ app:
 
   string:
     domain: string
-    version: ""
+    image: "v1.34.4"
 
   traefik:
     domain: traefik
-    version: "2.6.1"
+    image: "2.10.1"
     provider:
       address: "consul.service.consul:8501"
     acme:
@@ -99,6 +99,6 @@ app:
 
   yarr:
     domain: yarr
-    image: "ghcr.io/kencx/yarr:latest"
+    image: "latest"
     volumes:
       data: "/mnt/storage/yarr/data"

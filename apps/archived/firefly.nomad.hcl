@@ -39,7 +39,7 @@ job "firefly" {
       driver = "docker"
 
       config {
-        image = "fireflyiii/core:version-5.7.6"
+        image = "fireflyiii/core:[[ .app.firefly.image ]]"
         ports = ["http"]
 
         volumes = [

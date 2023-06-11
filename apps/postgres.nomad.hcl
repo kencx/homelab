@@ -31,7 +31,7 @@ job "postgres" {
       driver = "docker"
 
       config {
-        image = "postgres:14-alpine3.16"
+        image = "postgres:[[ .app.postgres.image ]]"
         ports = ["db"]
 
         volumes = [

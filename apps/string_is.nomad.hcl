@@ -39,7 +39,7 @@ job "string" {
       driver = "docker"
 
       config {
-        image = "daveperrett/string-is:v1.34.4"
+        image = "daveperrett/string-is:[[ .app.string.image ]]"
         ports = ["http"]
       }
 

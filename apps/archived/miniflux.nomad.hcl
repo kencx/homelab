@@ -39,7 +39,7 @@ job "miniflux" {
       driver = "docker"
 
       config {
-        image = "miniflux/miniflux:2.0.36"
+        image = "miniflux/miniflux:[[ .app.miniflux.image ]]"
         ports = ["http"]
       }
 

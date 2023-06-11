@@ -64,6 +64,7 @@ job "minio" {
 
     task "minio" {
       driver = "docker"
+      user   = "1000"
 
       config {
         image = "quay.io/minio/minio:[[ .app.minio.image ]]"
@@ -86,7 +87,7 @@ job "minio" {
       env {
         MINIO_BROWSER_LOGIN_ANIMATION = "off"
         MINIO_BROWSER_REDIRECT_URL    = "https://[[ .app.minio-console.domain ]].[[ .common.domain ]]"
-        # MINIO_SERVER_URL =  [[ .app.minio.domain ]]. [[ .common.domain ]]
+        MINIO_SERVER_URL              = "https://[[ .app.minio.domain ]]. [[ .common.domain ]]"
       }
 
       template {

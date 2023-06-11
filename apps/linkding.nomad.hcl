@@ -43,7 +43,7 @@ job "linkding" {
       driver = "docker"
 
       config {
-        image = "sissbruecker/linkding:1.15.1"
+        image = "sissbruecker/linkding:[[ .app.linkding.image ]]"
         ports = ["http"]
 
         volumes = [

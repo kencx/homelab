@@ -22,7 +22,7 @@ job "mariadb" {
       user   = "1000"
 
       config {
-        image = "mariadb"
+        image = "mariadb:[[ .app.mariadb.image ]]"
 
         volumes = [
           "[[ .app.firefly.volumes.db ]]:/var/lib/mysql",

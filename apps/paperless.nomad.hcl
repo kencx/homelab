@@ -51,7 +51,7 @@ job "paperless" {
       driver = "docker"
 
       config {
-        image              = "ghcr.io/paperless-ngx/paperless-ngx:1.7.1"
+        image              = "ghcr.io/paperless-ngx/paperless-ngx:[[ .app.paperless.image ]]"
         image_pull_timeout = "10m"
         ports              = ["http"]
 

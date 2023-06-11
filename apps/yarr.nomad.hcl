@@ -39,7 +39,7 @@ job "yarr" {
       driver = "docker"
 
       config {
-        image = ""
+        image = "ghcr.io/kencx/yarr:[[ .app.yarr.image ]]"
         ports = ["http"]
 
         volumes = [
