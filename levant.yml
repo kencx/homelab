@@ -51,6 +51,14 @@ app:
     domain: miniflux
     version: "2.0.36"
 
+  minio:
+    domain: minio
+    image: "RELEASE.2023-06-09T07-32-12Z"
+    volumes: "/mnt/storage/minio/data"
+
+  minio-console:
+    domain: minio-console
+
   paperless:
     domain: paper
     version: "1.7.1"
