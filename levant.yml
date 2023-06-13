@@ -59,6 +59,11 @@ app:
   minio-console:
     domain: minio-console
 
+  openbooks:
+    image: 4.5.0
+    volumes:
+      data: /mnt/storage/openbooks/data
+
   paperless:
     domain: paper
     image: "1.7.1"
