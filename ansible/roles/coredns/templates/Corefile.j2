@@ -1,0 +1,25 @@
+.:{{ coredns_dns_port }} {
+  acl {
+    allow net 127.0.0.1 ::1/128 192.168.86.0/24 10.10.10.0/24
+    block
+  }
+  forward . tls://1.1.1.1 tls://1.0.0.1 {
+    tls_servername cloudflare-dns.com
+    health_check 60s
+  }
+  cache
+  errors
+}
+
+consul:{{ coredns_dns_port }} {
+  forward . 10.10.10.110:8600
+  log
+  errors
+}
+
+kencv.xyz:{{ coredns_dns_port } {
+  root /etc/coredns/zones
+  file kencv.xyz
+  log
+  errors
+}

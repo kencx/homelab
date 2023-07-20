@@ -49,6 +49,7 @@ nav:
           - Common: 'roles/common.md'
           - Consul: 'roles/consul.md'
           - Consul Template: 'roles/consul-template.md'
+          - Coredns: 'roles/coredns.md'
           - Issue Cert: 'roles/issue_cert.md'
           - NFS: 'roles/nfs.md'
           - Nomad: 'roles/nomad.md'

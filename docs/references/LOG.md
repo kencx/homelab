@@ -1,3 +1,6 @@
+### 21/07/23
+
+- Added `coredns` role for Raspberry Pi.
 
 ### 10/05/23
 - I forgot about signal handling in the previous iteration of `nomad.service`.

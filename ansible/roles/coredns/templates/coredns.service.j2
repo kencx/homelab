@@ -1,0 +1,27 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=CoreDNS
+Documentation=https://coredns.io
+Wants=network-online.target
+After=network-online.target
+
+StartLimitInterval=60
+StartLimitBurst=3
+
+[Service]
+User={{ coredns_user }}
+Group={{ coredns_group }}
+DynamicUser=true
+ExecStart=/usr/local/bin/coredns -conf /etc/coredns/Corefile -dns.port "{{ coredns_dns_port }}"
+ExecReload=/bin/kill -SIGUSR1 $MAINPID
+Restart=on-failure
+RestartSec=5
+
+LimitNOFILE=65536
+LimitNPROC=512
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

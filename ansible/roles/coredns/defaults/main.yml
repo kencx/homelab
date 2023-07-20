@@ -1,0 +1,8 @@
+---
+coredns_version: 1.10.1
+coredns_url: https://github.com/coredns/coredns/releases/download/v{{ coredns_version }}/coredns_{{ coredns_version }}_{{ ansible_system|lower }}_{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm' }}.tgz
+coredns_checksum_url: "{{ coredns_url | trim }}.sha256"
+
+coredns_dns_port: 5300
+coredns_user: coredns
+coredns_group: coredns
