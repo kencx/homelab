@@ -1,10 +1,16 @@
-.PHONY: pre-commit docs
+.PHONY: venv pre-commit docs
+
+venv: .venv
+	@python3 -m venv .venv
+
+pre-commit.install: requirements.txt venv
+	source .venv/bin/activate && pip install -r $< && pre-commit install
 
 pre-commit:
 	pre-commit run --all-files
 
 galaxy.install: requirements.yml
-	ansible-galaxy install -f -r requirements.yml
+	ansible-galaxy install -f -r $<
 
 # packer
 packer.validate:
@@ -14,10 +20,10 @@ packer.base:
 	cd packer/base && packer build -var-file="auto.pkrvars.hcl" .
 
 # ansible
-ansible.play:
+ansible.play: ansible/inventory/hosts.yml
 	cd ansible && ansible-playbook -i inventory/hosts.yml $(c).yml --user=debian
 
-ansible.dev.play:
+ansible.dev.play: ansible/inventory/hosts.yml
 	cd ansible && ansible-playbook -i inventory/hosts.yml $(c).yml --user=debian --limit=dev
 
 # molecule
@@ -28,8 +34,8 @@ mol.$(mol):
 mol.list:
 	cd ansible && molecule list
 
-docs.install: docs/requirements.txt
-	source .venv/bin/activate && pip install -r docs/requirements.txt
+docs.install: docs/requirements.txt venv
+	source .venv/bin/activate && pip install -r $<
 
 docs:
 	source .venv/bin/activate && mkdocs serve
