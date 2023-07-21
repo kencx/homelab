@@ -1,0 +1,6 @@
+---
+- name: restart blocky
+  systemd:
+    name: blocky
+    state: restarted
+    daemon_reload: true

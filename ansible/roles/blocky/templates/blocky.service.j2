@@ -1,0 +1,27 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=blocky
+Documentation=https://0xerr0r.github.io/blocky
+Wants=network-online.target
+After=network-online.target
+
+StartLimitInterval=60
+StartLimitBurst=3
+
+[Service]
+User={{ blocky_user }}
+Group={{ blocky_group }}
+DynamicUser=true
+ExecStart=/usr/local/bin/blocky serve --config /etc/blocky/config.yml
+ExecReload=/bin/kill -SIGUSR1 $MAINPID
+Restart=on-failure
+RestartSec=5
+
+LimitNOFILE=65536
+LimitNPROC=512
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

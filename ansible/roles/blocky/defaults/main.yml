@@ -1,0 +1,14 @@
+---
+blocky_version: 0.21
+__blocky_arch:
+  armv7l: armv7
+  x86_64: x86_64
+__blocky_tar: blocky_v{{ blocky_version }}_{{ ansible_system }}_{{ __blocky_arch[ansible_architecture] }}.tar.gz
+
+__blocky_url_prefix: https://github.com/0xERR0R/blocky/releases/download/v{{ blocky_version }}/
+blocky_url: "{{ __blocky_url_prefix }}{{ __blocky_tar }}"
+blocky_checksum_url: "{{ __blocky_url_prefix | trim }}blocky_checksums.txt"
+
+blocky_dns_port: 53
+blocky_user: blocky
+blocky_group: blocky

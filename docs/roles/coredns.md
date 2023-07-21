@@ -1,7 +1,7 @@
 This role installs, configures and start [coredns](https://coredns.io/). Coredns
 will be used for local DNS resolution and DNS forwarding over TLS.
 
-It can be paired with an adblocker (pihole, blocky, grimd etc.) as its upstream
+It can be paired with an adblocker ([blocky](./blocky.md)) as its upstream
 DNS server.
 
 ## Variables

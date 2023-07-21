@@ -46,6 +46,7 @@ nav:
       - Ansible Roles:
           - Arch Repository: 'roles/arch_repository.md'
           - Autorestic: 'roles/autorestic.md'
+          - Blocky: 'roles/blocky.md'
           - Common: 'roles/common.md'
           - Consul: 'roles/consul.md'
           - Consul Template: 'roles/consul-template.md'

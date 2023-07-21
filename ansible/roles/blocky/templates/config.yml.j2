@@ -1,0 +1,46 @@
+---
+upstream:
+  default:
+    - 127.0.0.1:5300
+
+upstreamTimeout: 60s
+startVerifyUpstream: true
+connectIPVersion: dual
+
+blocking:
+  blackLists:
+    ads:
+      - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+      - https://dbl.oisd.nl
+      - https://v.firebog.net/hosts/AdguardDNS.txt
+      - https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts
+    distractions:
+      - |
+        netflix.com
+        disneyplus.com
+
+  clientGroupsBlock:
+    default:
+      - ads
+      - distractions
+  blockType: zeroIp
+  refreshPeriod: 4h
+
+caching:
+  maxItemsCount: 0
+
+clientLookup:
+  upstream: 192.168.86.1
+  clients:
+    arch:
+      - 192.168.86.82
+
+ports:
+  dns: 53
+  http: 4000
+
+log:
+  level: info
+  format: text
+  timestamp: true
+  privacy: false

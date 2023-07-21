@@ -15,6 +15,7 @@
     src: "/tmp/coredns-{{ coredns_version }}.tgz"
     dest: /usr/local/bin
     remote_src: true
+    creates: /usr/local/bin/coredns
     owner: root
     group: root
     mode: 0755
