@@ -16,6 +16,7 @@ inventory/*
 *.tfstate
 *.tfstate.*
 *.tfvars
+tf_ansible_*
 
 # packer
 auto.pkrvars.hcl

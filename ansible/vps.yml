@@ -1,0 +1,62 @@
+---
+- hosts: vps
+  # first run must be root, subsequent runs must be user
+  remote_user: root
+  # remote_user: "{{ vps_username }}"
+  become: true
+  vars:
+    ssh_key: "{{ lookup('file', vps_ssh_public_key_path) }}"
+  vars_files:
+    - "../terraform/vps/tf_ansible_vars.yml"
+
+  pre_tasks:
+    - name: Create user
+      user:
+        name: "{{ vps_username }}"
+        shell: /bin/bash
+        groups: sudo
+        append: true
+        create_home: true
+        password: "{{ vps_password | password_hash('sha512') }}"
+        update_password: on_create
+        state: present
+
+    - name: Add SSH key to new user's authorized_keys
+      authorized_key:
+        user: "{{ vps_username }}"
+        key: "{{ ssh_key }}"
+        path: "/home/{{ vps_username }}/.ssh/authorized_keys"
+        state: present
+
+    - name: Set timezone
+      community.general.timezone:
+        name: "{{ vps_timezone }}"
+
+    - name: Update apt packages
+      apt:
+        update_cache: true
+        cache_valid_time: 86400
+        upgrade: true
+
+    - name: Update and install packages
+      apt:
+        name: "{{ vps_packages }}"
+        state: present
+
+  roles:
+    - name: Security hardening
+      role: kencx.ansible.security
+      vars:
+        - ssh_disable_root_login: true
+        - ufw_rules:
+            - {rule: 'allow', port: '22', proto: 'tcp', comment: 'ssh'}
+            - {rule: 'allow', port: '80', proto: 'tcp', comment: 'http'}
+            - {rule: 'allow', port: '443', proto: 'tcp', comment: 'https'}
+
+    - name: Install Docker
+      role: geerlingguy.docker
+      vars:
+        # install docker compose plugin instead of docker-compose binary
+        - docker_install_compose_plugin: true
+        - docker_install_compose: false
+        - docker_users: ["{{ vps_username }}"]
