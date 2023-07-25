@@ -107,9 +107,6 @@ job "paperless" {
 
     network {
       mode = "bridge"
-      port "redis" {
-        to = "6379"
-      }
     }
 
     service {
@@ -118,9 +115,7 @@ job "paperless" {
       port     = "6379"
 
       connect {
-        sidecar_service {
-          disable_default_tcp_check = true
-        }
+        sidecar_service {}
       }
     }
 
