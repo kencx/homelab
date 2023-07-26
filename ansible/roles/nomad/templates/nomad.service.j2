@@ -15,10 +15,10 @@ ExecReload=/bin/kill -HUP $MAINPID
 Type=forking
 ExecStart={{ nomad_data_dir }}/nomad-startup.sh
 {% else %}
-ExecStart=/usr/bin/nomad agent -config /etc/nomad.d
+ExecStart=/usr/bin/nomad agent -config {{ nomad_config_dir }}
 {% endif %}
 {% else %}
-ExecStart=/usr/bin/nomad agent -config /etc/nomad.d
+ExecStart=/usr/bin/nomad agent -config {{ nomad_config_dir }}
 {% endif %}
 KillMode=process
 KillSignal=SIGINT
