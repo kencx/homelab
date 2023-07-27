@@ -5,11 +5,20 @@ terraform {
       version = ">= 4.6.0"
     }
   }
+  backend "s3" {
+    region = "main"
+    bucket = "terraform-state"
+    key    = "cloudflare/terraform.tfstate"
+
+    skip_credentials_validation = true
+    skip_region_validation      = true
+    skip_metadata_api_check     = true
+    force_path_style            = true
+  }
 }
 
 provider "cloudflare" {
-  email   = var.cloudflare_email
-  api_key = var.cloudflare_api_key
+  api_token = var.cloudflare_api_token
 }
 
 resource "cloudflare_account" "main" {
@@ -36,19 +45,18 @@ resource "cloudflare_record" "ken-cheo-dev" {
   proxied = true
 }
 
-
 resource "cloudflare_zone" "sxkcd-lol" {
   account_id = cloudflare_account.main.id
   zone       = "sxkcd.lol"
 }
 
-resource "cloudflare_record" "main-sxkcd" {
-  zone_id = cloudflare_zone.sxkcd-lol.id
-  name    = "sxkcd.lol"
-  value   = var.vps_ip_address
-  type    = "A"
-  proxied = true
-}
+# resource "cloudflare_record" "main-sxkcd" {
+#   zone_id = cloudflare_zone.sxkcd-lol.id
+#   name    = "sxkcd.lol"
+#   value   = var.vps_ip_address
+#   type    = "A"
+#   proxied = true
+# }
 
 resource "cloudflare_record" "www-sxkcd" {
   zone_id = cloudflare_zone.sxkcd-lol.id
