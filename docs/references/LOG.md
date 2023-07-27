@@ -1,6 +1,15 @@
+### 27/07/23
+
+- Added Postgres database credentials rotation with Vault database static roles.
+
+### 22/07/23
+
+- Automate base configuration of VPS with Ansible
+
 ### 21/07/23
 
 - Added `coredns` role for Raspberry Pi.
+- Added `blocky` role for Raspberry Pi.
 
 ### 10/05/23
 - I forgot about signal handling in the previous iteration of `nomad.service`.
