@@ -5,6 +5,16 @@ terraform {
       version = ">= 1.15.0"
     }
   }
+  backend "s3" {
+    region = "main"
+    bucket = "terraform-state"
+    key    = "minio/terraform.tfstate"
+
+    skip_credentials_validation = true
+    skip_region_validation      = true
+    skip_metadata_api_check     = true
+    force_path_style            = true
+  }
 }
 
 provider "minio" {
@@ -22,4 +32,16 @@ resource "minio_s3_bucket" "aur" {
 resource "minio_s3_bucket" "books" {
   bucket = "books"
   acl    = "public"
+}
+
+resource "minio_s3_bucket" "tf-state" {
+  bucket = "terraform-state"
+  acl    = "public"
+}
+
+resource "minio_s3_bucket_versioning" "tf-state-version" {
+  bucket = minio_s3_bucket.tf-state.id
+  versioning_configuration {
+    status = "Enabled"
+  }
 }

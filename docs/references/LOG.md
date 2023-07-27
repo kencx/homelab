@@ -4,15 +4,14 @@
   Ansible play.
 
 ### 27/07/23
-
 - Added Postgres database credentials rotation with Vault database static roles.
+- Begin storing Minio Terraform state in Minio S3 bucket. It is still difficult
+  to safely pass the Minio credentials to Terraform in any easy manner.
 
 ### 22/07/23
-
 - Automate base configuration of VPS with Ansible
 
 ### 21/07/23
-
 - Added `coredns` role for Raspberry Pi.
 - Added `blocky` role for Raspberry Pi.
 

@@ -34,6 +34,7 @@ mol.$(mol):
 mol.list:
 	cd ansible && molecule list
 
+# docs
 docs.install: docs/requirements.txt venv
 	source .venv/bin/activate && pip install -r $<
 

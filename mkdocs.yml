@@ -41,8 +41,6 @@ nav:
           - Cloud Images: 'images/cloud_image.md'
           - Packer: 'images/packer.md'
       - Terraform:
-          - Proxmox: 'terraform/proxmox.md'
-          - Vault: 'terraform/vault.md'
           - Postgres: 'terraform/postgres.md'
   - Ansible Roles:
       - Arch Repository: 'roles/arch_repository.md'
