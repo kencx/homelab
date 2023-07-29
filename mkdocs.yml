@@ -42,6 +42,9 @@ nav:
           - Packer: 'images/packer.md'
       - Terraform:
           - Postgres: 'terraform/postgres.md'
+          - Proxmox: 'terraform/proxmox.md'
+          - State: 'terraform/state.md'
+          - Vault: 'terraform/vault.md'
   - Ansible Roles:
       - Arch Repository: 'roles/arch_repository.md'
       - Autorestic: 'roles/autorestic.md'

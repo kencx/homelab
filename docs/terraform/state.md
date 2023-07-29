@@ -10,7 +10,7 @@ terraform {
   backend "s3" {
     region = "main"
     bucket = "terraform-state"
-    key    = "minio/terraform.tfstate"
+    key    = "path/to/terraform.tfstate"
 
     skip_credentials_validation = true
     skip_region_validation      = true
