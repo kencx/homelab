@@ -60,13 +60,12 @@ nav:
       - Vault: 'roles/vault.md'
   - Backups: backups.md
   - Apps:
-      - index: 'apps/index.md'
+      - Adding New Application: 'apps/add_new.md'
       - Actual: 'apps/actual.md'
       - Calibre Web: 'apps/calibre_web.md'
       - Gotify: 'apps/gotify.md'
       - Diun: 'apps/diun.md'
       - Linkding: 'apps/linkding.md'
-      - Traefik: 'apps/traefik.md'
       - yarr: 'apps/yarr.md'
   - References:
       - Known Issues: 'references/issues.md'
