@@ -1,3 +1,8 @@
+### 29/07/23
+
+- Add `import-cloud-image` script. This could be used with or converted into an
+  Ansible play.
+
 ### 27/07/23
 
 - Added Postgres database credentials rotation with Vault database static roles.
