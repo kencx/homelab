@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+set -e
+
+help() {
+    echo "Usage: $0 [--debug|--force] [URL] [FILENAME]"
+    exit 1
+}
+
+FORCE=false
+DEBUG=false
+
+while [ $# -gt 0 ]; do
+    case $1 in
+    -f | --force) FORCE=true ;;
+    -d | --debug) DEBUG=true ;;
+    -h | --help) help ;;
+    *) break ;;
+    esac
+    shift
+done
+
+if [[ $# -lt 2 ]]; then
+    help
+fi
+
+URL="$1"
+IMG_DIR="/var/lib/vz/images"
+FILENAME="$2"
+IMG_PATH="$IMG_DIR/$FILENAME"
+
+VMID=9001
+TEMPLATE_NAME=${FILENAME%.*}
+DESCRIPTION="$(
+    cat <<EOF
+This template is managed by the "import-cloud-image" script.
+
+Source cloud image: "$IMG_PATH"
+
+Created on: $(date)
+
+To use with Terraform and cloud-init, qemu-guest-agent must be installed in the template.
+EOF
+)"
+MEMORY=512
+CORES=1
+SOCKETS=1
+NET_BRIDGE="vmbr1"
+DISK_SIZE="4G"
+DISK_STORE="volumes"
+
+install -m 0755 -d "$IMG_DIR"
+if [[ -e $IMG_PATH ]]; then
+    echo "$IMG_PATH" already exists. Skip downloading...
+else
+    wget "$URL" -O "$IMG_PATH"
+fi
+
+if qm list | awk '{print $1}' | grep -q -w "$VMID"; then
+    if $FORCE; then
+        if $DEBUG; then
+            printf "qm destroy %s" "$VMID"
+        else
+            qm destroy "$VMID"
+        fi
+    else
+        echo "$VMID already exists. To overwrite, pass \"--force\"."
+        exit 0
+    fi
+fi
+
+args=(
+    --name "$TEMPLATE_NAME"
+    --description "$DESCRIPTION"
+    --net0 "virtio,bridge=$NET_BRIDGE"
+    --serial0 socket
+    --vga serial0
+    --scsihw virtio-scsi-pci
+    --scsi0 "$DISK_STORE:0,import-from=$IMG"
+    --bootdisk scsi0
+    --boot "order=scsi0"
+    --ide1 "$DISK_STORE:cloudinit"
+    --ostype l26
+    --cores "$CORES"
+    --sockets "$SOCKETS"
+    --memory "$MEMORY"
+    --agent 1
+)
+
+if $DEBUG; then
+    printf "qm create args:\n"
+    printf "%s\n" "${args[@]}"
+else
+    qm create "$VMID" "${args[@]}"
+    qm resize "$VMID" scsi0 "$DISK_SIZE"
+    qm template "$VMID"
+fi

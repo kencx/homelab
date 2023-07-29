@@ -36,7 +36,7 @@ nav:
   - Prerequisites: prerequisites.md
   - Getting Started: 'getting_started.md'
   - Provisioning:
-      - Overview: 'provisioning.md'
+      # - Overview: 'provisioning.md'
       - Images:
           - Cloud Images: 'images/cloud_image.md'
           - Packer: 'images/packer.md'
@@ -44,19 +44,19 @@ nav:
           - Proxmox: 'terraform/proxmox.md'
           - Vault: 'terraform/vault.md'
           - Postgres: 'terraform/postgres.md'
-      - Ansible Roles:
-          - Arch Repository: 'roles/arch_repository.md'
-          - Autorestic: 'roles/autorestic.md'
-          - Blocky: 'roles/blocky.md'
-          - Common: 'roles/common.md'
-          - Consul: 'roles/consul.md'
-          - Consul Template: 'roles/consul-template.md'
-          - Coredns: 'roles/coredns.md'
-          - Issue Cert: 'roles/issue_cert.md'
-          - NFS: 'roles/nfs.md'
-          - Nomad: 'roles/nomad.md'
-          - Unseal Vault: 'roles/unseal_vault.md'
-          - Vault: 'roles/vault.md'
+  - Ansible Roles:
+      - Arch Repository: 'roles/arch_repository.md'
+      - Autorestic: 'roles/autorestic.md'
+      - Blocky: 'roles/blocky.md'
+      - Common: 'roles/common.md'
+      - Consul: 'roles/consul.md'
+      - Consul Template: 'roles/consul-template.md'
+      - Coredns: 'roles/coredns.md'
+      - Issue Cert: 'roles/issue_cert.md'
+      - NFS: 'roles/nfs.md'
+      - Nomad: 'roles/nomad.md'
+      - Unseal Vault: 'roles/unseal_vault.md'
+      - Vault: 'roles/vault.md'
   - Backups: backups.md
   - Apps:
       - index: 'apps/index.md'
@@ -68,5 +68,6 @@ nav:
       - Traefik: 'apps/traefik.md'
       - yarr: 'apps/yarr.md'
   - References:
+      - Known Issues: 'references/issues.md'
       - Work Log: 'references/LOG.md'
       - Roadmap: 'references/TODO.md'

@@ -1,50 +1,70 @@
-## Import Cloud Image
 
-1. Download the latest [Debian](https://cloud.debian.org/images/cloud/) cloud image
+Unlike ISOs and LXC templates, Proxmox's API lacks support for uploading cloud
+images directly from a given URL (see
+[here](https://bugzilla.proxmox.com/show_bug.cgi?id=4141) and
+[here](https://forum.proxmox.com/threads/new-vm-from-cloud-init-image-via-api.111091/)).
+Instead, they must be manually downloaded and converted into a VM template for
+use.
+
+We can also choose to create our own custom cloud image from scratch
+with an [ISO](./packer.md#proxmox-iso) and install `cloud-init`.
+
+## Manual Upload
+
+1. Download any cloud image:
 
         $ wget https://cloud.debian.org/images/cloud/bullseye/20230124-1270/debian11-generic-amd64-20230124-1270.qcow2
 
-    >Alternatively, we can create our own custom cloud image from scratch. Simply
-    >ensure `cloud-init` is installed.
+2. Create a Proxmox VM from the downloaded image:
 
-2. Create a Proxmox VM from the above cloud image:
+        $ qm create 9000 \
+            --name "debian-11-amd64" \
+            --net0 "virtio,bridge=vmbr0" \
+            --serial0 socket \
+            --vga serial0 \
+            --scsihw virtio-scsi-pci \
+            --scsi0 "local:0,import-from=/path/to/image" \
+            --bootdisk scsi0 \
+            --boot "order=scsi0" \
+            --ide1 "local:cloudinit" \
+            --ostype l26 \
+            --cores 1 \
+            --sockets 1 \
+            --memory 512 \
+            --agent 1
 
-        $ qm create 9000 -name 'debian-cloudinit' -memory 1024 -net0 virtio,bridge=vmbr0 -cores 1 -sockets 1
+3. Resize the new VM (if necessary):
 
-        # Import disk image to Proxmox storage
-        $ qm importdisk 9000 [path/to/image] local-lvm [-format qcow2/raw]
+        $ qm resize 9000 scsi0 5G
 
-        # Attach the disk via SCSI
-        $ qm set 9000 -scsihw virtio-scsi-pci -scsi0 local-lvm:vm-9000-disk-0
-
-        # Set bootdisk to the imported disk
-        $ qm set 9000 -boot c -bootdisk scsi0
-
-        # Enable Qemu agent
-        $ qm set 9000 -agent 1
-
-        # Allow hotplugging of network, USB and disks
-        $ qm set 9000 -hotplug disk,network,usb
-
-        # Add a single vCPU (for now)
-        $ qm set 9000 -vcpus 1
-
-        # Add a serial output and video ouput
-        $ qm set 9000 -serial0 socket -vga serial0
-
-        # Resize the primary boot disk (otherwise it will be around 2G by default)
-        $ qm resize 9000 scsi0 +3G
-
-3. Attach an additional CD-ROM for cloud-init support:
-
-        $ qm set 9000 -ide2 local-lvm:cloudinit
-
-4. Finally, convert the VM into a template:
+4. Convert the VM into a template:
 
         $ qm template 9000
 
-The result is a template of the cloud image that other VMs can build on. It
-should appear in the list of templates in the Proxmox GUI.
+## Script
+
+A full script of the steps above can be found at
+[bin/import-cloud-image](https://github.com/kencx/homelab/blob/master/bin/import-cloud-image).
+
+```bash
+$ import-cloud-image --help
+Usage: import-cloud-image [--debug|--force] [URL] [FILENAME]
+```
+
+## Usage
+
+The new template can be cloned and used directly by
+[Terraform](../terraform/proxmox.md).
+
+However, if we are provisioning VMs with Terraform, `qemu-guest-agent` must be
+installed in the template. As such, it is recommended to create a further
+bootstrapped template with [Packer and Ansible](./packer.md).
+
+!!! warning
+    If `qemu-guest-agent` is not installed or `agent=1` is not set, Terraform
+    will
+    [timeout](https://github.com/Telmate/terraform-provider-proxmox/issues/325)
+    when trying to clone and provision the VM.
 
 ## References
 - [Proxmox Wiki - cloud-init Support](https://pve.proxmox.com/wiki/Cloud-Init_Support)

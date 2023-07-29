@@ -15,12 +15,16 @@ provider "proxmox" {
 
 The Terraform configuration in `terraform/cluster` is used to deploy server and
 client cluster nodes. It uses a custom module (`terraform/modules/vm`) that
-clones a Proxmox VM from an existing VM template with our custom configuration.
+clones an existing VM template and bootstraps it with cloud-init.
+
+!!! note
+    The VM template must have cloud-init installed. See
+    [Packer](../images/packer.md) for how to create a compatible template.
 
 The number of nodes provisioned are defined by the length of the array
 variables. The following will deploy four nodes in total: two server and two
 client nodes with the given IP addresses. All nodes will be cloned from the
-existing `base` VM template.
+given VM template.
 
 ```hcl
 template_name = "base"
