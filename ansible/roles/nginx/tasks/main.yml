@@ -1,0 +1,52 @@
+---
+- name: Install nginx (Debian)
+  apt:
+    name: nginx
+    update_cache: true
+    state: present
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Install nginx (Redhat)
+  yum:
+    name: nginx
+    update_cache: true
+    state: present
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Create nginx directories
+  file:
+    path: "{{ item }}"
+    mode: 0755
+    owner: root
+    group: root
+    state: directory
+  with_items:
+    - "{{ nginx_dir }}"
+    - "{{ nginx_dir }}/conf.d"
+    - "{{ nginx_log_dir }}"
+
+- name: Copy nginx service file
+  template:
+    src: nginx.service.j2
+    dest: "/etc/systemd/system/nginx.service"
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - reload nginx
+
+- name: Copy nginx config file
+  template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_dir }}/nginx.conf"
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - reload nginx
+
+- name: Start nginx
+  systemd:
+    name: nginx
+    state: started
+    enabled: true

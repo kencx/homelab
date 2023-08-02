@@ -18,12 +18,12 @@ terraform {
 }
 
 provider "hcloud" {
-  token = var.hcloud_token
+  token = var.vps_hcloud_token
 }
 
 resource "hcloud_ssh_key" "main" {
   name       = "web"
-  public_key = file(var.ssh_public_key_path)
+  public_key = file(var.vps_ssh_public_key_path)
 }
 
 resource "hcloud_server" "main" {
@@ -38,10 +38,11 @@ resource "hcloud_server" "main" {
 
 resource "local_file" "tf_ansible_vars_file" {
   content         = <<-EOF
-vps_ssh_public_key_path: ${var.ssh_public_key_path}
+vps_ssh_public_key_path: ${var.vps_ssh_public_key_path}
 vps_username: ${var.vps_username}
 vps_password: ${var.vps_password}
 vps_timezone: ${var.vps_timezone}
+vps_certbot_email: ${var.vps_certbot_email}
 ${yamlencode({ vps_packages = var.vps_packages })}
 EOF
   filename        = "${path.module}/tf_ansible_vars.yml"
@@ -51,7 +52,7 @@ EOF
 resource "local_file" "tf_ansible_inventory_file" {
   content         = <<-EOF
 [vps]
-${hcloud_server.main.ipv4_address} ansible_ssh_private_key_file=${var.ssh_private_key_path}
+${hcloud_server.main.ipv4_address} ansible_ssh_private_key_file=${var.vps_ssh_private_key_path}
 EOF
   filename        = "${path.module}/tf_ansible_inventory"
   file_permission = "0644"

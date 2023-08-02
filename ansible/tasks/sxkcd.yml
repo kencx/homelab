@@ -1,0 +1,87 @@
+---
+- name: Ensure mandatory variables are set
+  assert:
+    that:
+      - server_name is defined
+      - proxy_pass is defined
+
+- name: Install docker and docker-compose pip
+  pip:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - docker
+    - docker-compose
+
+- name: Create sxkcd directories
+  file:
+    path: "{{ item }}"
+    mode: 0775
+    owner: "kenc"
+    group: "kenc"
+    state: directory
+  with_items:
+    - /home/kenc/sxkcd
+    - /home/kenc/sxkcd/data
+    - /home/kenc/sxkcd/redis
+
+- name: Copy sxkcd nginx config
+  template:
+    src: "./sxkcd.conf"
+    dest: "{{ nginx_dir }}/conf.d/sxkcd.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+# - name: Download xkcd comics
+# ["./sxkcd", "download", "-f", "/data/comics.json"]
+
+- name: Start sxkcd and redis
+  community.docker.docker_compose:
+    project_name: sxkcd
+    state: present
+    pull: true
+    definition:
+      version: '3.6'
+      services:
+        redis:
+          image: redis/redis-stack-server:latest
+          container_name: redis
+          hostname: redis
+          environment:
+            REDIS_ARGS: --save 20 1 --appendonly yes
+          restart: unless-stopped
+          volumes:
+            - "/home/kenc/sxkcd/redis:/data"
+          healthcheck:
+            test: ["CMD-SHELL", "redis-cli", "ping", "|", "grep", "pong"]
+            interval: 10s
+            timeout: 3s
+            retries: 5
+          networks:
+            - sxkcd
+
+        app:
+          container_name: app
+          hostname: app
+          image: ghcr.io/kencx/sxkcd:v0.1.2
+          command: ["--reindex", "-f", "/data/comics.json"]
+          restart: unless-stopped
+          ports:
+            - "6380:6380"
+          volumes:
+            - "/home/kenc/sxkcd/data:/data"
+          depends_on:
+            redis:
+              condition: service_healthy
+          networks:
+            - sxkcd
+
+      networks:
+        sxkcd:
+          name: sxkcd
+
+- name: Reload nginx
+  systemd:
+    name: nginx
+    state: reloaded

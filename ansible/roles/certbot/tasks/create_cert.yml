@@ -1,0 +1,14 @@
+---
+- name: Create webroot directories
+  file:
+    path: "{{ item.webroot | default(certbot_webroot) }}"
+
+- name: Check if certificates exists
+  stat:
+    path: "{{ certbot_dir }}/live/{{ item.domains | first }}/cert.pem"
+  register: letsencrypt_cert
+
+- name: Generate certificates if not exists
+  command:
+    cmd: "{{ certbot_create_command }}"
+  when: not letsencrypt_cert.stat.exists

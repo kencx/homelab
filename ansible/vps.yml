@@ -60,3 +60,27 @@
         - docker_install_compose_plugin: true
         - docker_install_compose: false
         - docker_users: ["{{ vps_username }}"]
+
+    - name: Setup nginx
+      role: nginx
+
+    - name: Generate Let's Encrypt certificates
+      role: certbot
+      vars:
+        certbot_admin_email: "{{ vps_certbot_email }}"
+        certbot_certs:
+          - domains:
+              - xkcd.cheo.dev
+
+  tasks:
+    - name: Set default variables
+      set_fact:
+        nginx_dir: "{{ nginx_dir | default('/etc/nginx') }}"
+        certbot_dir: "{{ certbot_dir | default('/etc/letsencrypt') }}"
+        certbot_webroot: "{{ certbot_webroot | default('/var/www/letsencrypt') }}"
+
+    - name: Configure sxkcd server
+      import_tasks: tasks/sxkcd.yml
+      vars:
+        server_name: xkcd.cheo.dev
+        proxy_pass: http://localhost:6380/

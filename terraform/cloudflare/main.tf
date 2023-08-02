@@ -45,6 +45,14 @@ resource "cloudflare_record" "ken-cheo-dev" {
   proxied = true
 }
 
+resource "cloudflare_record" "xkcd-cheo-dev" {
+  zone_id = cloudflare_zone.cheo-dev.id
+  name    = "xkcd"
+  value   = var.vps_ip_address
+  type    = "A"
+  proxied = true
+}
+
 resource "cloudflare_zone" "sxkcd-lol" {
   account_id = cloudflare_account.main.id
   zone       = "sxkcd.lol"
