@@ -82,5 +82,7 @@
     - name: Configure sxkcd server
       import_tasks: tasks/sxkcd.yml
       vars:
+        sxkcd_user: "{{ vps_username }}"
+        sxkcd_image: "ghcr.io/kencx/sxkcd:v0.1.2"
         server_name: xkcd.cheo.dev
         proxy_pass: http://localhost:6380/

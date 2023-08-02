@@ -17,13 +17,13 @@
   file:
     path: "{{ item }}"
     mode: 0775
-    owner: "kenc"
-    group: "kenc"
+    owner: "{{ sxkcd_user }}"
+    group: "{{ sxkcd_user }}"
     state: directory
   with_items:
-    - /home/kenc/sxkcd
-    - /home/kenc/sxkcd/data
-    - /home/kenc/sxkcd/redis
+    - /home/{{ sxkcd_user }}/sxkcd
+    - /home/{{ sxkcd_user }}/sxkcd/data
+    - /home/{{ sxkcd_user }}/sxkcd/redis
 
 - name: Copy sxkcd nginx config
   template:
@@ -52,7 +52,7 @@
             REDIS_ARGS: --save 20 1 --appendonly yes
           restart: unless-stopped
           volumes:
-            - "/home/kenc/sxkcd/redis:/data"
+            - "/home/{{ sxkcd_user }}/sxkcd/redis:/data"
           healthcheck:
             test: ["CMD-SHELL", "redis-cli", "ping", "|", "grep", "pong"]
             interval: 10s
@@ -64,13 +64,13 @@
         app:
           container_name: app
           hostname: app
-          image: ghcr.io/kencx/sxkcd:v0.1.2
+          image: "{{ sxkcd_image }}"
           command: ["--reindex", "-f", "/data/comics.json"]
           restart: unless-stopped
           ports:
             - "6380:6380"
           volumes:
-            - "/home/kenc/sxkcd/data:/data"
+            - "/home/{{ sxkcd_user }}/sxkcd/data:/data"
           depends_on:
             redis:
               condition: service_healthy
