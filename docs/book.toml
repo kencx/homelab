@@ -1,0 +1,14 @@
+[book]
+title = "Homelab Documentation"
+authors = ["kencx"]
+language = "en"
+multilingual = false
+src = "src"
+
+[output.html]
+git-repository-url = "https://github.com/kencx/homelab"
+no-section-label = true
+
+[output.html.fold]
+enable = true
+level = 1

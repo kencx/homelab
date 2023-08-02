@@ -1,6 +1,6 @@
 .PHONY: venv pre-commit docs
 
-venv: .venv
+venv:
 	@python3 -m venv .venv
 
 pre-commit.install: requirements.txt venv
@@ -34,9 +34,5 @@ mol.$(mol):
 mol.list:
 	cd ansible && molecule list
 
-# docs
-docs.install: docs/requirements.txt venv
-	source .venv/bin/activate && pip install -r $<
-
 docs:
-	source .venv/bin/activate && mkdocs serve
+	mdbook serve docs

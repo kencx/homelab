@@ -4,7 +4,6 @@ cloud-config
 certs/*
 !certs/.gitkeep
 *.crt
-**/site/*
 
 # ansible
 inventory/*
@@ -27,3 +26,7 @@ auto.pkrvars.hcl
 
 # nomad
 input.vars
+
+# docs
+**/site/*
+**/book/*
