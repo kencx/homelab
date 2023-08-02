@@ -1,6 +1,6 @@
 # Summary
 
-[Home](../../README.md)
+[Home](index.md)
 [Prerequisites](./prerequisites.md)
 [Getting Started](./getting_started.md)
 
