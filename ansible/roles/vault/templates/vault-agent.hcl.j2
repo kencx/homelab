@@ -9,6 +9,7 @@ auto_auth {
   method "cert" {
     name = "{{ ansible_fqdn }}"
     mount_path = "auth/agent"
+    reload = true
   }
 
   sink "file" {

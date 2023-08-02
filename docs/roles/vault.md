@@ -2,7 +2,7 @@ This role deploys a new Vault instance and performs the required initialization.
 If ran on a client node, it provisions a Vault agent instance instead.
 
 ## Prerequisites
-- Vault installed
+- Vault >1.14.0 installed
 - Terraform installed on Ansible host
 - A private key and signed certificate for TLS encryption. If from a self-signed CA,
   the certificate chain must be trusted.
