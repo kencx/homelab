@@ -32,12 +32,21 @@ template_name = "base"
 server_vmid      = [110, 111]
 client_vmid      = [120, 121]
 server_ip_address = ["10.10.10.110/24", "10.10.10.111/24"]
-client_ip_address = ["10.10.10.111/24", "10.10.10.121/24"]
+client_ip_address = ["10.10.10.120/24", "10.10.10.121/24"]
 ip_gateway        = "10.10.10.1"
 ```
 
 On success, the provisioned VMs are accessible via the configured SSH username
 and key pair.
+
+## Ansible Inventory
+Terraform will also generate an Ansible inventory file `tf_ansible_inventory` in
+the same directory. Ansible can read this inventory file automatically by
+appending the following in the `ansible.cfg`:
+
+```ini
+inventory=../terraform/cluster/tf_ansible_inventory,/path/to/other/inventory/files
+```
 
 ## Variables
 

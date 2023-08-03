@@ -90,36 +90,26 @@ Server node: VMID 110 at 10.10.10.110
 Client node: VMID 111 at 10.10.10.111
 ```
 
+An Ansible inventory file `tf_ansible_inventory` should be generated in the same
+directory with the given VM IPs in the `server` and `client` groups.
+
 For more information, refer to the [Terraform configuration for
 Proxmox](terraform/proxmox.md).
 
 ## Configuration with Ansible
 
 1. Navigate to `ansible`.
-2. Populate the inventory file in `inventory/hosts.yml`:
+2. Ensure that the Terraform-generated Ansible inventory file is being read:
 
-```yml
-all:
-    children:
-    cluster:
-        children:
-        server:
-            hosts:
-            10.10.10.110:
-        client:
-            hosts:
-            10.10.10.111:
-        prod:
-            hosts:
-            10.10.10.110:
-            10.10.10.111:
+```bash
+$ ansible-inventory --graph
 ```
 
 3. Populate and check the `group_vars` file in
    `inventory/group_vars/{prod,server,client}.yml`
 
 ```bash
-$ ansible-inventory --graph
+$ ansible-inventory --graph --vars
 ```
 
 4. Run the playbook:

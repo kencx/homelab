@@ -83,3 +83,27 @@ module "client" {
   ssh_private_key = file(var.ssh_private_key_file)
   ssh_public_key  = file(var.ssh_public_key_file)
 }
+
+resource "local_file" "tf_ansible_inventory_file" {
+  content         = <<-EOF
+[server]
+%{for ip in var.server_ip_address~}
+${split("/", ip)[0]}
+%{endfor~}
+
+[client]
+%{for ip in var.client_ip_address~}
+${split("/", ip)[0]}
+%{endfor~}
+
+[prod]
+%{for ip in var.server_ip_address~}
+${split("/", ip)[0]}
+%{endfor~}
+%{for ip in var.client_ip_address~}
+${split("/", ip)[0]}
+%{endfor~}
+EOF
+  filename        = "${path.module}/tf_ansible_inventory"
+  file_permission = "0644"
+}
