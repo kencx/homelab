@@ -13,12 +13,14 @@ job "diun" {
 
         volumes = [
           "[[ .app.diun.volumes.data ]]:/data",
-          "local/diun.yml:/etc/diun/diun.yml",
+          "secrets/diun.yml:/etc/diun/diun.yml",
           "/var/run/docker.sock:/var/run/docker.sock",
         ]
 
         labels = {
-          "diun.enable" = "true"
+          "diun.enable"     = "true"
+          "diun.watch_repo" = "true"
+          "diun.max_tags"   = 3
         }
       }
 
@@ -36,7 +38,7 @@ job "diun" {
         data        = <<EOF
 watch:
   workers: 10
-  schedule: "0 */6 * * *"
+  schedule: "0 0 * * 5"
   jitter: 30s
   firstCheckNotif: false
 
@@ -52,7 +54,7 @@ notif:
       - {{ .Data.data.tg_chat_id }}
 {{ end }}
 EOF
-        destination = "${NOMAD_TASK_DIR}/diun.yml"
+        destination = "${NOMAD_SECRETS_DIR}/diun.yml"
       }
 
       resources {

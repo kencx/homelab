@@ -46,9 +46,11 @@ job "yarr" {
           "[[ .app.yarr.volumes.data ]]:/data",
         ]
 
-        /* labels = { */
-        /*   "diun.enable" = "true" */
-        /* } */
+        # labels = {
+        #   "diun.enable"     = "true"
+        #   "diun.watch_repo" = "true"
+        #   "diun.max_tags"   = 3
+        # }
       }
 
       vault {

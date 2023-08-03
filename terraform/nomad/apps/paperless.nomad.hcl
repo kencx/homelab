@@ -62,7 +62,9 @@ job "paperless" {
         ]
 
         labels = {
-          "diun.enable" = "true"
+          "diun.enable"     = "true"
+          "diun.watch_repo" = "true"
+          "diun.max_tags"   = 3
         }
       }
 

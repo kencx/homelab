@@ -80,7 +80,9 @@ job "traefik" {
         ]
 
         labels = {
-          "diun.enable" = "false"
+          "diun.enable"     = "true"
+          "diun.watch_repo" = "true"
+          "diun.max_tags"   = 3
         }
       }
 

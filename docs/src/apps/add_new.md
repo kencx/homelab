@@ -99,3 +99,38 @@ EOF
     env         = true
 }
 ```
+
+## Diun
+
+[Diun](diun.md) allows monitoring a Docker image for new
+updates. To opt in to watching a task's Docker image, include the `diun.enable`
+label:
+
+```hcl
+config {
+  labels = {
+    "diun.enable" = "true"
+  }
+}
+```
+
+By default, this will only watch the current tag of the image. If the tag is
+`latest`, Diun will send a notification when that tag's checksum changes.
+
+To allow Diun to watch other tags, include additional labels:
+
+```hcl
+config {
+  labels = {
+    "diun.enable"     = "true"
+    "diun.watch_repo" = "true"
+    "diun.max_tags"   = 3
+  }
+}
+```
+
+This will let Diun watch all tags in the Docker repo. It is highly recommended
+to set a maximum number of tags that Diun should watch, otherwise Diun will
+watch ALL tags, including older ones.
+
+See [Diun](./diun.md) for more information on configuring Diun.
