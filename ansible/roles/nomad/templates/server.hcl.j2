@@ -5,4 +5,12 @@ server {
 
 ui {
   enabled = true
+
+  vault {
+    ui_url = "https://{{ nomad_server_ip }}:8200/ui"
+  }
+
+  consul {
+    ui_url = "https://{{ nomad_server_ip }}:8501/ui"
+  }
 }

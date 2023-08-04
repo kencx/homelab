@@ -71,6 +71,15 @@
 # initialization, which can be dangerous. Any changes should be planned and applied
 # outside of the role, either manually or in a CI pipeline.
 
+- name: Assert that bw_password variable is defined
+  assert:
+    that: bw_password is defined
+    fail_msg: bw_password is not defined.
+  when:
+    - vault_store_bw
+    - vault_status_json is defined
+    - not vault_status_json.initialized
+
 - name: Vault Initialization
   import_tasks: init.yml
   when:

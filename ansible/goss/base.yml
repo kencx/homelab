@@ -22,6 +22,8 @@ package:
     installed: true
   vault:
     installed: true
+  consul-template:
+    installed: true
   nfs-common:
     installed: true
   jq:

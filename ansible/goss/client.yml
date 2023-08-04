@@ -16,7 +16,7 @@ service:
   consul:
     enabled: true
     running: true
-  consul_template:
+  consul-template:
     enabled: true
     running: true
 

@@ -27,7 +27,7 @@ For encryption, the role creates consul-template templates for:
 | consul_template_config_dir | consul-template configuration file | string | `/etc/consul-template` |
 | nomad_register_consul | Register Nomad as a Consul service | bool | `true` |
 | nomad_vault_integration | Sets up Vault integration in server node | bool | `true` |
-| nomad_bootstrap_expect | (server only) Bootstrap expect | number | `1` |
+| nomad_bootstrap_expect | (server only) The expected number of servers in a cluster | number | `1` |
 | nomad_server_ip | (client only) Server's IP address | string | - |
 | nomad_vault_addr | Vault server API address to use | string | `https://localhost:8200` |
 | nomad_common_name | Nomad node certificate common_name | string | `server.global.nomad` |

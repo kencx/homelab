@@ -17,6 +17,7 @@ common_packages:
   - unzip
   - ca-certificates
   - qemu-guest-agent
+  - bind9-utils
 common_dotfiles: []
   # - url: https://raw.githubusercontent.com/foo/repo/master/vimrc
   #   dest: /home/{{ common_user }}/.vimrc

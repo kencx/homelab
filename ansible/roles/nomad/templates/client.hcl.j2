@@ -8,5 +8,8 @@ plugin "docker" {
     volumes {
       enabled = true
     }
+    gc {
+      image_delay = "10m"
+    }
   }
 }

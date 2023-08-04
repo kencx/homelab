@@ -10,6 +10,7 @@ auto_auth {
     name = "{{ ansible_fqdn }}"
     mount_path = "auth/agent"
     reload = true
+    # exit_on_error = true
   }
 
   sink "file" {
@@ -20,6 +21,7 @@ auto_auth {
   }
 }
 
+# renew vault-agent's own auth cert
 template {
   contents    = <<EOF
 {{ '{{' }} with pkiCert "pki_int/issue/auth" "common_name=agent-{{ ansible_fqdn }}@global.vault" "ttl=30d" {{ '}}' }}

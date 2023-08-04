@@ -3,6 +3,11 @@ Description=Nomad
 Wants=network-online.target
 After=network-online.target
 
+{% if nomad_consul_register %}
+Wants=consul.service
+After=consul.service
+{% endif %}
+
 [Service]
 {% if 'server' in group_names %}
 User=nomad

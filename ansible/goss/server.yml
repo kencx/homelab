@@ -22,7 +22,10 @@ service:
   vault:
     enabled: true
     running: true
-  consul_template:
+  vault-agent:
+    enabled: true
+    running: true
+  consul-template:
     enabled: true
     running: true
 

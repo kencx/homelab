@@ -20,7 +20,7 @@ api_addr     = {% raw %}"https://{{ GetInterfaceIP \"eth0\" }}:8200"
 cluster_addr = {% raw %}"https://{{ GetInterfaceIP \"eth0\" }}:8201"
 {% endraw %}
 
-ui           = true
+ui = true
 
 {% if vault_register_consul %}
 service_registration "consul" {

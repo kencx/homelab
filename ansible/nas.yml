@@ -1,0 +1,6 @@
+---
+- hosts: nas
+  roles:
+    - name: Export NFS shares on NFS server
+      role: nfs
+    - role: autorestic

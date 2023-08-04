@@ -16,11 +16,18 @@ tls {
 }
 
 {% if nomad_vault_integration %}
-# vault token set as env variable
+# vault token is set as env variable on server nodes only
 vault {
   enabled = true
   address = "{{ nomad_vault_addr }}"
   create_from_role = "nomad_cluster"
+}
+{% endif %}
+
+{% if nomad_consul_register %}
+consul {
+  address      = "127.0.0.1:8500"
+  grpc_address = "127.0.0.1:8502"
 }
 {% endif %}
 
@@ -31,10 +38,3 @@ telemetry {
   publish_allocation_metrics = true
   publish_node_metrics=true
 }
-
-{% if nomad_consul_register %}
-consul {
-  address      = "127.0.0.1:8500"
-  grpc_address = "127.0.0.1:8502"
-}
-{% endif %}

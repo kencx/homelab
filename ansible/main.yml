@@ -1,12 +1,7 @@
 ---
-- hosts: nas
-  roles:
-    - name: Export NFS shares on NFS server
-      role: nfs
-    - role: autorestic
-
 - hosts: server, !dev
   become: true
+  tags: server
   roles:
     - name: Create root, intermediate CA for Vault
       role: kencx.ansible.ssl
@@ -28,9 +23,11 @@
 
 - hosts: client, !dev
   become: true
+  tags: client
   roles:
     - name: Mount NFS shares on client
       role: kencx.ansible.nfs
+      tags: nfs
 
     - role: vault
     - role: consul-template
