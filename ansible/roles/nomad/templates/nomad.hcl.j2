@@ -31,3 +31,10 @@ telemetry {
   publish_allocation_metrics = true
   publish_node_metrics=true
 }
+
+{% if nomad_consul_register %}
+consul {
+  address      = "127.0.0.1:8500"
+  grpc_address = "127.0.0.1:8502"
+}
+{% endif %}

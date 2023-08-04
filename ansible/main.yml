@@ -12,23 +12,11 @@
       role: kencx.ansible.ssl
       become: true
       run_once: true
+
     - role: vault
     - role: consul-template
     - role: consul
     - role: nomad
-
-    - name: Issue Nomad client cert for Consul
-      role: issue_cert
-      vars:
-        issue_cert_common_name: "nomad-client.dc1.consul"
-        issue_cert_vault_addr: "https://{{ server_ip }}:8200"
-        issue_cert_owner: "nomad"
-        issue_cert_group: "nomad"
-        issue_cert_path: "{{ nomad_tls_dir }}/consul-cert.crt"
-        issue_cert_key_path: "{{ nomad_tls_dir }}/consul-key.pem"
-        issue_cert_ca_path: "{{ nomad_tls_dir }}/consul-ca.crt"
-        issue_cert_consul_template_marker: "# {mark} Nomad Consul TLS"
-        issue_cert_service: "nomad"
 
   tasks:
     - name: Goss smoke test
@@ -37,30 +25,6 @@
       vars:
         goss_dir: "./goss"
         goss_file: "server.yml"
-
-    - name: Add Consul Integration in Nomad config
-      blockinfile:
-        path: "{{ nomad_config_dir }}/nomad.hcl"
-        marker: "# {mark} Consul Integration"
-        block: |
-          consul {
-            address      = "{{ server_ip }}:8501"
-            grpc_address = "{{ server_ip }}:8503"
-            ssl          = true
-            ca_file      = "{{ nomad_tls_dir }}/consul-ca.crt"
-            cert_file    = "{{ nomad_tls_dir }}/consul-cert.crt"
-            key_file     = "{{ nomad_tls_dir }}/consul-key.pem"
-          }
-
-    - name: Reload consul-template
-      systemd:
-        name: consul-template
-        state: reloaded
-
-    - name: Restart Nomad
-      systemd:
-        name: nomad
-        state: restarted
 
 - hosts: client, !dev
   become: true
@@ -73,19 +37,6 @@
     - role: consul
     - role: nomad
 
-    - name: Issue Nomad client cert for Consul
-      role: issue_cert
-      vars:
-        issue_cert_common_name: "nomad-client.dc1.consul"
-        issue_cert_vault_addr: "https://{{ server_ip }}:8200"
-        issue_cert_owner: "nomad"
-        issue_cert_group: "nomad"
-        issue_cert_path: "{{ nomad_tls_dir }}/consul-cert.crt"
-        issue_cert_key_path: "{{ nomad_tls_dir }}/consul-key.pem"
-        issue_cert_ca_path: "{{ nomad_tls_dir }}/consul-ca.crt"
-        issue_cert_consul_template_marker: "# {mark} Nomad Consul TLS"
-        issue_cert_service: "nomad"
-
   tasks:
     - name: Goss smoke test
       import_role:
@@ -93,28 +44,3 @@
       vars:
         goss_dir: "./goss"
         goss_file: "client.yml"
-
-    - name: Add Consul Integration in Nomad config
-      blockinfile:
-        path: "{{ nomad_config_dir }}/nomad.hcl"
-        marker: "# {mark} Consul Integration"
-        block: |
-          consul {
-            address      = "127.0.0.1:8501"
-            grpc_address = "127.0.0.1:8503"
-            ssl          = true
-            verify_ssl   = false
-            ca_file      = "{{ nomad_tls_dir }}/consul-ca.crt"
-            cert_file    = "{{ nomad_tls_dir }}/consul-cert.crt"
-            key_file     = "{{ nomad_tls_dir }}/consul-key.pem"
-          }
-
-    - name: Reload consul-template
-      systemd:
-        name: consul-template
-        state: reloaded
-
-    - name: Restart Nomad
-      systemd:
-        name: nomad
-        state: restarted
