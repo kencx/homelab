@@ -59,6 +59,7 @@ agent's auth role.
 | vault_root_token_file | File path for root token^ | string | `${vault_data_dir}/.root_token` |
 | vault_terraform_workspace | Terraform workspace | string | `default` |
 | vault_admin_password | Password for admin user | string | `password` |
+| vault_register_consul | Register Vault as a Consul service | bool | `true` |
 | vault_setup_agent | Setup Vault agent on server node | bool | `true` |
 | vault_server_fqdn | Existing Vault server's FQDN | string | `${ansible_default_ipv4.address}` |
 

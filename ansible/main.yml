@@ -30,19 +30,6 @@
         issue_cert_consul_template_marker: "# {mark} Nomad Consul TLS"
         issue_cert_service: "nomad"
 
-    - name: Issue Vault client cert for Consul
-      role: issue_cert
-      vars:
-        issue_cert_common_name: "vault-client.dc1.consul"
-        issue_cert_vault_addr: "https://{{ server_ip }}:8200"
-        issue_cert_owner: "vault"
-        issue_cert_group: "vault"
-        issue_cert_path: "{{ vault_tls_dir }}/consul-cert.crt"
-        issue_cert_key_path: "{{ vault_tls_dir }}/consul-key.pem"
-        issue_cert_ca_path: "{{ vault_tls_dir }}/consul-ca.crt"
-        issue_cert_consul_template_marker: "# {mark} Vault Consul TLS"
-        issue_cert_service: "vault"
-
   tasks:
     - name: Goss smoke test
       import_role:
@@ -65,19 +52,6 @@
             key_file     = "{{ nomad_tls_dir }}/consul-key.pem"
           }
 
-    - name: Add Consul service registration in Vault config
-      blockinfile:
-        path: "{{ vault_config_dir }}/vault.hcl"
-        marker: "# {mark} Consul Service Registration"
-        block: |
-          service_registration "consul" {
-            address       = "{{ server_ip }}:8501"
-            scheme        = "https"
-            tls_ca_file   = "{{ vault_tls_dir }}/consul-ca.crt"
-            tls_cert_file = "{{ vault_tls_dir }}/consul-cert.crt"
-            tls_key_file  = "{{ vault_tls_dir }}/consul-key.pem"
-          }
-
     - name: Reload consul-template
       systemd:
         name: consul-template
@@ -87,18 +61,6 @@
       systemd:
         name: nomad
         state: restarted
-
-    - name: Restart Vault
-      systemd:
-        name: vault
-        state: restarted
-      register: vault_restarted
-
-    # TODO
-    - name: Unseal Vault
-      include_role:
-        name: unseal_vault
-      when: vault_restarted is changed
 
 - hosts: client, !dev
   become: true

@@ -14,5 +14,7 @@ vault_terraform_workspace: "default"
 vault_admin_password: "password"
 vault_kvuser_password: "password"
 
+vault_register_consul: true
+
 vault_setup_agent: true
 vault_server_fqdn: "{{ ansible_default_ipv4.address }}"

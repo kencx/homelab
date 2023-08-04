@@ -22,6 +22,12 @@ cluster_addr = {% raw %}"https://{{ GetInterfaceIP \"eth0\" }}:8201"
 
 ui           = true
 
+{% if vault_register_consul %}
+service_registration "consul" {
+  address = "127.0.0.1:8500"
+}
+{% endif %}
+
 telemetry {
   disable_hostname = true
   prometheus_retention_time = "12h"

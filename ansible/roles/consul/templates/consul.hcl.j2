@@ -5,10 +5,15 @@ bind_addr   = {% raw %}"{{ GetInterfaceIP \"eth0\" }}"
 client_addr = "0.0.0.0"
 
 ports {
-  http     = -1
+  http     = 8500
   https    = 8501
   grpc     = 8502
   grpc_tls = 8503
+}
+
+# bind http port to localhost only
+addresses {
+  http = "127.0.0.1"
 }
 
 tls {
