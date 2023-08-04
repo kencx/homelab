@@ -65,21 +65,11 @@
     regexp: "^SystemMaxUse="
     line: "SystemMaxUse=100M"
 
-- name: Checkout dotfiles repository locally
-  become: false
-  git:
-    repo: "{{ common_dotfiles_url }}"
-    dest: /tmp/dotfiles
-    force: true
-    recursive: false
-    track_submodules: false
-  delegate_to: localhost
-
-- name: Copy dotfiles to remote
-  copy:
-    src: /tmp/dotfiles/remote/bash/.bash_aliases
-    dest: /home/{{ common_user }}/.bash_aliases
+- name: Add dotfiles to remote
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    mode: 0644
     owner: "{{ common_user }}"
     group: "{{ common_user }}"
-    mode: 0644
-    remote_src: false
+  with_items: "{{ common_dotfiles }}"

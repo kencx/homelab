@@ -17,7 +17,9 @@ common_packages:
   - unzip
   - ca-certificates
   - qemu-guest-agent
-common_dotfiles_url: ""
+common_dotfiles: []
+  # - url: https://raw.githubusercontent.com/foo/repo/master/vimrc
+  #   dest: /home/{{ common_user }}/.vimrc
 
 common_nomad_version: "1.6.1-1"
 common_consul_version: "1.15.4-1"

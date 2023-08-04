@@ -25,15 +25,21 @@ as:
 | common_vault_version | Vault version to install | string | `1.14.0-1` |
 | common_consul_template_version | Consul template version to install | string | `0.32.0-1` |
 | common_reset_nomad | Clear Nomad data directory | boolean | `true` |
-| common_dotfiles_url | Dotfiles Git repository URL | string | `""` |
+| common_dotfiles | List of dotfiles to be added, and their destinations | list | `[]` |
 
 ## Notes
 
-This role clears any existing `/opt/nomad/data` directories to a blank slate. To disable this
+- This role clears any existing `/opt/nomad/data` directories to a blank slate. To disable this
 behaviour, set `common_reset_nomad: false`.
-
-This role only supports Ubuntu/Debian amd64 systems with `apt`.
-
-The Hashicorp apt server [only supports amd64
+- This role only supports Ubuntu/Debian amd64 systems with `apt`.
+- The Hashicorp apt server [only supports amd64
 packages](https://github.com/hashicorp/terraform/issues/27378). For arm64
 systems, download the individual zip files instead.
+- `common_dotfiles` is used to add dotfiles from a Github repository to the host.
+For example:
+
+```yml
+common_dotfiles:
+  - url: https://raw.githubusercontent.com/foo/repo/master/.vimrc
+    dest: /home/foo/.vimrc
+```

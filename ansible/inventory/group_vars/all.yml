@@ -1,0 +1,6 @@
+---
+common_dotfiles:
+  - url: https://raw.githubusercontent.com/kencx/dotfiles/master/remote/vim/.vim/vimrc
+    dest: "/home/{{ common_user }}/.vimrc"
+  - url: https://raw.githubusercontent.com/kencx/dotfiles/master/dots/bash/.bash_aliases
+    dest: "/home/{{ common_user }}/.bash_aliases"
