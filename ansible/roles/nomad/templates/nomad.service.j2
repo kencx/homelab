@@ -11,7 +11,7 @@ Group=nomad
 
 ExecReload=/bin/kill -HUP $MAINPID
 {% if 'server' in group_names %}
-{% if setup_vault_integration %}
+{% if nomad_vault_integration %}
 Type=forking
 ExecStart={{ nomad_data_dir }}/nomad-startup.sh
 {% else %}

@@ -5,7 +5,7 @@ nomad_tls_dir: "{{ nomad_data_dir }}/tls"
 consul_template_config_dir: "/etc/consul-template"
 
 # vault
-setup_vault_integration: true
+nomad_vault_integration: true
 
 # consul
 nomad_consul_register: true

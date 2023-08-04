@@ -66,7 +66,7 @@
 
 - name: Setup Vault integration
   import_tasks: vault_integration.yml
-  when: "'server' in group_names and setup_vault_integration"
+  when: "'server' in group_names and nomad_vault_integration"
 
 - name: Copy service file
   template:

@@ -15,7 +15,7 @@ tls {
   verify_https_client = false
 }
 
-{% if setup_vault_integration %}
+{% if nomad_vault_integration %}
 # vault token set as env variable
 vault {
   enabled = true
