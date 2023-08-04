@@ -16,6 +16,7 @@ resource "proxmox_vm_qemu" "base" {
   name = var.hostname
   vmid = var.vmid
   tags = var.tags
+  desc = var.description
 
   target_node = var.target_node
 

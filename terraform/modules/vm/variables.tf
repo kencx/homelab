@@ -22,6 +22,12 @@ variable "tags" {
   default     = ""
 }
 
+variable "description" {
+  type        = string
+  description = "VM description"
+  default     = "This VM is managed by Terraform."
+}
+
 variable "clone_template_name" {
   type        = string
   description = "VM Template name to clone"
