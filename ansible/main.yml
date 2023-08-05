@@ -2,6 +2,11 @@
 - hosts: server, !dev
   become: true
   tags: server
+  pre_tasks:
+    - name: Wait for cloud-init
+      command: cloud-init status --wait
+      changed_when: false
+
   roles:
     - name: Create root, intermediate CA for Vault
       role: kencx.ansible.ssl
@@ -24,6 +29,11 @@
 - hosts: client, !dev
   become: true
   tags: client
+  pre_tasks:
+    - name: Wait for cloud-init
+      command: cloud-init status --wait
+      changed_when: false
+
   roles:
     - name: Mount NFS shares on client
       role: kencx.ansible.nfs

@@ -122,6 +122,12 @@
     daemon_reload: true
   register: consul_started
 
+# Wait for Consul to start before flushing handlers.
+- name: Wait for Consul port
+  wait_for:
+    port: 8501
+    state: started
+
 # Apply all service and config changes
 - name: Run handlers now
   meta: flush_handlers

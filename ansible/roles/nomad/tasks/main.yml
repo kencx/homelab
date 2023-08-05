@@ -116,10 +116,13 @@
     daemon_reload: true
   register: nomad_started
 
-# TODO Nomad enters killed state sometimes
-# On the first run, Nomad is started by Ansible, but consul-template quickly
-# reloads Nomad at the same time. This can cause Nomad to enter a killed state that
-# requires it to be restarted manually.
+# Wait for Nomad to start before flushing handlers. If Nomad is reloaded by
+# consul-template to quickly after starting, it can enter a killed state that requires
+# it to be restarted manually.
+- name: Wait for Nomad port
+  wait_for:
+    port: 4646
+    state: started
 
 # Apply all service and config changes
 - name: Restart Nomad if there are changes

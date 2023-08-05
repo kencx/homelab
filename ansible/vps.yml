@@ -10,6 +10,10 @@
     - "../terraform/vps/tf_ansible_vars.yml"
 
   pre_tasks:
+    - name: Wait for cloud-init
+      command: cloud-init status --wait
+      changed_when: false
+
     - name: Create user
       user:
         name: "{{ vps_username }}"
