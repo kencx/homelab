@@ -73,13 +73,13 @@ resource "vault_pki_secret_backend_cert" "ansible" {
 
 resource "local_file" "ansible_cert" {
   content         = vault_pki_secret_backend_cert.ansible.certificate
-  filename        = "../../certs/ansible.crt"
+  filename        = var.ansible_public_key_path
   file_permission = "0600"
 }
 
 resource "local_file" "ansible_key" {
   content         = vault_pki_secret_backend_cert.ansible.private_key
-  filename        = "../../certs/ansible_key.pem"
+  filename        = var.ansible_private_key_path
   file_permission = "0600"
 }
 

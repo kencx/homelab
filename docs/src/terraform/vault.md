@@ -41,9 +41,14 @@ Vault produces the following outputs:
 | allowed_client_domains | List of allowed_domains for PKI client role | list(string) | `["service.consul", "dc1.consul", "dc1.nomad", "global.nomad"]` |
 | allowed_auth_domains   | List of allowed_domains for PKI auth role | list(string) | `["global.vault"]`|
 | allowed_vault_domains  | List of allowed_domains for PKI vault role | list(string) | `["vault.service.consul", "global.vault"]`|
+| ansible_public_key_path | Local path to store Ansible public key for auth | string | `../../certs/ansible.crt` |
+| ansible_private_key_path | Local path to store Ansible private key for auth | string | `../../certs/ansible_key.pem` |
 
 ## Notes
 
 - The resources for Postgres database secrets engine are configured separately
   in [Postgres](./postgres.md). This is because the Postgres database might not
   be up when Vault is being initialized.
+- It is not recommended to change the `ansible_*_key_path` variables. Changing
+  them will heavily affect the Ansible roles when they attempt to login to Vault
+  with the auth certs.

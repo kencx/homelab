@@ -57,3 +57,17 @@ variable "allowed_vault_domains" {
   description = "List of allowed_domains for PKI vault role"
   default     = ["vault.service.consul", "global.vault"]
 }
+
+# Changing these will affect the Ansible roles when they attempt to login to Vault with
+# Ansible
+variable "ansible_public_key_path" {
+  type        = string
+  description = "Local path to store Ansible public key for authentication"
+  default     = "../../certs/ansible.crt"
+}
+
+variable "ansible_private_key_path" {
+  type        = string
+  description = "Local path to store Ansible private key for authentication"
+  default     = "../../certs/ansible_key.pem"
+}
