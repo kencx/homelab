@@ -71,6 +71,8 @@
 # initialization, which can be dangerous. Any changes should be planned and applied
 # outside of the role, either manually or in a CI pipeline.
 
+# TODO check that bw is setup
+
 - name: Assert that bw_password variable is defined
   assert:
     that: bw_password is defined

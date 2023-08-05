@@ -10,25 +10,36 @@
   no_log: true
   when: vault_init_raw is defined and vault_init_raw.stdout is defined
 
-# The initialization of Vault outputs the root token and unseal key(s). We can choose to
-# store these on the filesystem at the set paths or in Bitwarden. If stored on the
-# filesystem, root is required for read access to both files. This is only recommended
-# for testing and development purposes. If stored on Bitwarden, the bw_password variable
-# must be defined and will be used to login to your Bitwarden account.
+# The initialization of Vault outputs the root token and unseal key(s).
+# We can choose to output these secrets to the local Ansible host, store them in
+# Bitwarden or both.
 
-- name: Store unseal keys on filesystem
+# Storing the secrets on the local filesystem is only recommended as a temporary
+# measure (to verify the secrets), or for testing and development. Ensure the local
+# secrets are stored in the safe location or deleted afterwards.
+
+# If we are using Bitwarden, the Bitwarden CLI tool must be installed and configured.
+# The bw_password variable must also be defined and will be used to login to your
+# Bitwarden account.
+
+- name: Store unseal keys and root token on local filesystem
+  become: false
   copy:
-    content: "{{ vault_init_json.unseal_keys_hex[0] }}"
-    dest: "{{ vault_unseal_key_file }}"
-    owner: root
-    group: root
+    content: |
+      Unseal keys: {{ vault_init_json.unseal_keys_hex }}
+      Root token: {{ vault_init_json.root_token }}
+    dest: "{{ vault_secrets_file }}"
     mode: 0400
-  no_log: true
+  # no_log: true
+  delegate_to: localhost
   when:
     - vault_store_bw == false
     - vault_init_json is defined
     - vault_init_json.unseal_keys_hex is defined
+    - vault_init_json.root_token is defined
 
+# TODO make bw scripts more robust
+# TODO store list of unseal keys by using secure note
 - name: Store unseal keys in Bitwarden
   script: "bw_store.sh 'Vault Unseal Key' {{ vault_init_json.unseal_keys_hex[0] }} {{ bw_password }}"
   when:
@@ -41,19 +52,6 @@
 
 # - debug:
 #     var: bw_vault_unseal_key.stdout
-
-- name: Store root token on filesystem
-  copy:
-    content: "{{ vault_init_json.root_token }}"
-    dest: "{{ vault_root_token_file }}"
-    owner: root
-    group: root
-    mode: 0400
-  no_log: true
-  when:
-    - vault_store_bw == false
-    - vault_init_json is defined
-    - vault_init_json.root_token is defined
 
 - name: Store root token in Bitwarden
   script: "bw_store.sh 'Vault Root Token' {{ vault_init_json.root_token }} {{ bw_password }}"

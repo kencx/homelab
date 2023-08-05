@@ -7,6 +7,7 @@ certs/*
 !certs/.gitkeep
 *.crt
 secrets.*
+vault.txt
 
 # ansible
 **/test.yml

@@ -54,13 +54,38 @@ agent's auth role.
 | vault_tls_dir | TLS files directory | string | `/opt/vault/tls` |
 | vault_ca_cert_dir | Vault's CA certificate directory | string | `/usr/share/ca-certificates/vault` |
 | vault_log_file | Audit log file | string | `${vault_log_dir}/vault.log` |
+| vault_store_local | Copy Vault init secrets to local file | bool | `true` |
+| vault_secrets_file | File path for Vault init secrets | string | `vault.txt` |
 | vault_store_bw | Store root token in Bitwarden | bool | `false` |
-| vault_unseal_key_file | File path for unseal key^ | string | `${vault_data_dir}/.unseal_key` |
-| vault_root_token_file | File path for root token^ | string | `${vault_data_dir}/.root_token` |
 | vault_terraform_workspace | Terraform workspace | string | `default` |
 | vault_admin_password | Password for admin user | string | `password` |
 | vault_register_consul | Register Vault as a Consul service | bool | `true` |
 | vault_setup_agent | Setup Vault agent on server node | bool | `true` |
 | vault_server_fqdn | Existing Vault server's FQDN | string | `${ansible_default_ipv4.address}` |
 
->^ Only applicable if `vault_store_bw: false`
+## Notes
+
+### Vault Initialization Secrets
+
+This role offers two methods of storing the secrets generated (root token and
+unseal key(s)) during the initial Vault initialization:
+
+- On the Ansible host system
+- In Bitwarden
+- Both
+
+Storing the secrets on the local filesystem is only recommended as a temporary
+measure (to verify the secrets), or for testing and development. The file should
+be deleted afterwards or moved to a safer location.
+
+>**Warning**: The Bitwarden storage functionality is not very robust and not
+>recommended at the moment. Use it with caution.
+
+Storing the secrets in Bitwarden requires the following prerequisites:
+- Bitwarden CLI tool must be installed and configured
+- User is logged into Bitwarden
+- `bw_password` variable must be defined and passed to Ansible safely
+
+The `bw_get.sh` and `bw_store.sh` helper scripts are used to create or update
+the secrets. Take care that the scripts will overwrite any existing secrets (of
+the same name).
