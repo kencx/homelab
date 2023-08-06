@@ -1,6 +1,6 @@
 job "traefik" {
-  datacenters = ["dc1"]
-  type = "service"
+  datacenters = ${datacenters}
+  type        = "service"
 
   group "traefik" {
     count = 1
@@ -13,14 +13,14 @@ job "traefik" {
         static = "443"
       }
       port "dashboard" {
-        static = "8080"
+        static = ${traefik_dashboard_port}
       }
     }
 
     service {
       provider = "consul"
-      name = "${NOMAD_JOB_NAME}"
-      port = "https"
+      name     = NOMAD_JOB_NAME
+      port     = "https"
 
       tags = [
         "traefik.enable=true",
@@ -33,14 +33,14 @@ job "traefik" {
 
         # https router
         "traefik.http.routers.traefik-router.entrypoints=https",
-        "traefik.http.routers.traefik-router.rule=Host(`[[ .app.traefik.domain ]].[[ .common.domain ]]`)",
+        "traefik.http.routers.traefik-router.rule=Host(`${traefik_subdomain}.${domain}`)",
         "traefik.http.routers.traefik-router.service=api@internal",
 
         "traefik.http.routers.traefik-router.tls=true",
         # Comment out the below line after first run of traefik to force the use of wildcard certs
         # "traefik.http.routers.traefik-router.tls.certResolver=dns-dgo",
-        "traefik.http.routers.traefik-router.tls.domains[0].main=[[ .common.domain ]]",
-        "traefik.http.routers.traefik-router.tls.domains[0].sans=*.[[ .common.domain ]]"
+        "traefik.http.routers.traefik-router.tls.domains[0].main=${domain}",
+        "traefik.http.routers.traefik-router.tls.domains[0].sans=*.${domain}"
       ]
 
       check {
@@ -68,15 +68,16 @@ job "traefik" {
       driver = "docker"
 
       config {
-        image = "traefik:[[ .app.traefik.image ]]"
-        ports = ["http", "https", "dashboard"]
+        image        = "traefik:${traefik_image_version}"
+        ports        = ["http", "https", "dashboard"]
         network_mode = "host"
 
         volumes = [
           "local/traefik.yml:/traefik.yml",
           "local/rules:/rules",
           "secrets/tls:/tls",
-          "[[ .app.traefik.volumes.acme ]]:/acme",
+          "${traefik_volumes_acme}:/acme",
+          "${traefik_volumes_logs}:/logs/traefik.log"
         ]
 
         labels = {
@@ -91,7 +92,7 @@ job "traefik" {
       }
 
       template {
-        data = <<EOF
+        data        = <<EOF
 {{ with secret "kvv2/data/prod/nomad/traefik" }}
 CF_API_KEY="{{ .Data.data.cloudflare_api_key }}"
 CF_API_EMAIL="{{ .Data.data.ca_email }}"
@@ -103,7 +104,7 @@ EOF
       }
 
       template {
-        data = <<EOF
+        data        = <<EOF
 global:
   checkNewVersion: true
   sendAnonymousUsage: false
@@ -117,10 +118,10 @@ ping: {}
 log:
   level: "INFO"
 
-# accessLog:
-#   filePath: "/traefik.log"
-#   filters:
-#     statusCodes: "400-499"
+accessLog:
+  filePath: "/logs/access.log"
+  filters:
+    statusCodes: "400-499"
 
 entrypoints:
   http:
@@ -132,7 +133,7 @@ providers:
   consulCatalog:
     endpoint:
       scheme: "https"
-      address: "[[ .app.traefik.provider.address ]]"
+      address: "${traefik_consul_provider_address}"
       tls:
         # create cert for traefik to consul TLS
         # must be renewed
@@ -148,7 +149,7 @@ certificatesResolvers:
   dns-dgo:
     acme:
       storage: "acme/acme.json"
-      caServer: "[[ .app.traefik.acme.caServer ]]"
+      caServer: "${traefik_acme_ca_server}"
       dnsChallenge:
         provider: cloudflare
         delayBeforeCheck: 90
@@ -156,36 +157,26 @@ certificatesResolvers:
           - "1.1.1.1"
           - "8.8.8.8"
 EOF
-        destination = "${NOMAD_TASK_DIR}/traefik.yml"
+        destination = "$${NOMAD_TASK_DIR}/traefik.yml"
       }
 
       template {
-        data = <<EOF
+        data        = <<EOF
 http:
   routers:
     proxmox-https:
       entryPoints:
         - https
-      rule: "Host(`[[ .app.proxmox.domain ]].[[ .common.domain ]]`)"
+      rule: "Host(`${proxmox_domain}.${domain}`)"
       tls: {}
       middlewares:
         - default-headers
       service: proxmox
 
-    pihole:
-      entryPoints:
-        - https
-      rule: "Host(`[[ .app.pihole.domain ]].[[ .common.domain ]]`)"
-      tls: {}
-      middlewares:
-        - default-headers
-        - addprefix-pihole
-      service: pihole
-
     nomad:
       entryPoints:
         - https
-      rule: "Host(`nomad.[[ .common.domain ]]`)"
+      rule: "Host(`nomad.${domain}`)"
       tls: {}
       middlewares:
         - default-headers
@@ -194,21 +185,17 @@ http:
     consul:
       entryPoints:
         - https
-      rule: "Host(`consul.[[ .common.domain ]]`)"
+      rule: "Host(`consul.${domain}`)"
       tls: {}
       middlewares:
         - default-headers
       service: consul
 
   services:
-    pihole:
-      loadBalancer:
-        servers:
-          - url: "https://[[ .app.pihole.ip ]]"
     proxmox:
       loadBalancer:
         servers:
-          - url: "https://[[ .app.proxmox.ip ]]"
+          - url: "${proxmox_address}"
         serversTransport: insecureTransport
     nomad:
       loadBalancer:
@@ -226,10 +213,6 @@ http:
       insecureSkipVerify: true
 
   middlewares:
-    addprefix-pihole:
-      addPrefix:
-        prefix: "/admin"
-
     default-headers:
       headers:
         frameDeny: true
@@ -239,38 +222,38 @@ http:
         stsIncludeSubdomains: true
         stsPreload: true
 EOF
-        destination = "${NOMAD_TASK_DIR}/rules/rules.yml"
+        destination = "$${NOMAD_TASK_DIR}/rules/rules.yml"
       }
 
-      template client
-        data = <<EOF
+      template {
+        data        = <<EOF
 {{ with secret "pki_int/issue/client" "common_name=traefik-client.dc1.consul" "alt_names=consul.service.consul" }}
 {{ .Data.certificate }}
 {{ end }}
 EOF
-        destination = "${NOMAD_SECRETS_DIR}/tls/traefik-client.dc1.consul-cert.crt"
-        perms = "0600"
+        destination = "$${NOMAD_SECRETS_DIR}/tls/traefik-client.dc1.consul-cert.crt"
+        perms       = "0600"
         change_mode = "restart"
       }
 
       template {
-        data = <<EOF
+        data        = <<EOF
 {{ with secret "pki_int/issue/client" "common_name=traefik-client.dc1.consul" "alt_names=consul.service.consul" }}
 {{ .Data.private_key }}
 {{ end }}
 EOF
-        destination = "${NOMAD_SECRETS_DIR}/tls/traefik-client.dc1.consul-key.pem"
-        perms = "0400"
+        destination = "$${NOMAD_SECRETS_DIR}/tls/traefik-client.dc1.consul-key.pem"
+        perms       = "0400"
         change_mode = "restart"
       }
       template {
-        data = <<EOF
+        data        = <<EOF
 {{ with secret "pki_int/issue/client" "common_name=traefik-client.dc1.consul" "alt_names=consul.service.consul" }}
 {{ .Data.issuing_ca }}
 {{ end }}
 EOF
-        destination = "${NOMAD_SECRETS_DIR}/tls/traefik-client.dc1.consul-ca.crt"
-        perms = "0640"
+        destination = "$${NOMAD_SECRETS_DIR}/tls/traefik-client.dc1.consul-ca.crt"
+        perms       = "0640"
         change_mode = "restart"
       }
 

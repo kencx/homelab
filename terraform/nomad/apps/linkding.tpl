@@ -1,9 +1,5 @@
-variable "domain_name" {
-  type = string
-}
-
 job "linkding" {
-  datacenters = ["dc1"]
+  datacenters = ${datacenters}
 
   group "linkding" {
     count = 1
@@ -24,7 +20,7 @@ job "linkding" {
         "traefik.enable=true",
         "traefik.http.routers.linkding-proxy.entrypoints=https",
         "traefik.http.routers.linkding-proxy.tls=true",
-        "traefik.http.routers.linkding-proxy.rule=Host(`[[ .app.linkding.domain ]].[[ .common.domain ]]`)",
+        "traefik.http.routers.linkding-proxy.rule=Host(`${linkding_subdomain}.${domain}`)",
       ]
 
       check {
@@ -43,11 +39,11 @@ job "linkding" {
       driver = "docker"
 
       config {
-        image = "sissbruecker/linkding:[[ .app.linkding.image ]]"
+        image = "sissbruecker/linkding:${linkding_image_version}"
         ports = ["http"]
 
         volumes = [
-          "[[ .app.linkding.volumes.data ]]:/etc/linkding/data",
+          "${linkding_volumes_data}:/etc/linkding/data",
         ]
 
         labels = {

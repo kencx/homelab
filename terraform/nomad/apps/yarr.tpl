@@ -1,13 +1,13 @@
-job "name" {
-  datacenters = ["dc1"]
+job "yarr" {
+  datacenters = ${datacenters}
 
-  group "name" {
+  group "yarr" {
     count = 1
 
     network {
       mode = "bridge"
       port "http" {
-        to = "9999"
+        to = "7070"
       }
     }
 
@@ -18,9 +18,9 @@ job "name" {
 
       tags = [
         "traefik.enable=true",
-        "traefik.http.routers.name-proxy.entrypoints=https",
-        "traefik.http.routers.name-proxy.tls=true",
-        "traefik.http.routers.name-proxy.rule=Host(`[[ .app.name.domain ]].[[ .common.domain ]]`)",
+        "traefik.http.routers.yarr-proxy.entrypoints=https",
+        "traefik.http.routers.yarr-proxy.tls=true",
+        "traefik.http.routers.yarr-proxy.rule=Host(`${yarr_subdomain}.${domain}`)",
       ]
 
       check {
@@ -35,28 +35,33 @@ job "name" {
       }
     }
 
-    task "name" {
+    task "yarr" {
       driver = "docker"
 
       config {
-        image = ""
+        image = "ghcr.io/kencx/yarr:${yarr_image_version}"
         ports = ["http"]
 
         volumes = [
-          "[[ .app.name.volumes.data ]]:/data",
+          "${yarr_volumes_data}:/data",
         ]
 
-        labels = {
-          "diun.enable" = "true"
-        }
+        # labels = {
+        #   "diun.enable"     = "true"
+        #   "diun.watch_repo" = "true"
+        #   "diun.max_tags"   = 3
+        # }
       }
 
-      env {
+      vault {
+        policies = ["nomad_yarr"]
       }
 
       template {
         data        = <<EOF
-YARR_AUTH="user:pass"
+{{ with secret "kvv2/data/prod/nomad/yarr" }}
+YARR_AUTH="{{ .Data.data.username }}":"{{ .Data.data.password }}"
+{{ end }}
 EOF
         destination = "secrets/auth.env"
         env         = true

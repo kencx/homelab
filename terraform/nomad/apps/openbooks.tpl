@@ -1,5 +1,5 @@
 job "openbooks" {
-  datacenters = ["dc1"]
+  datacenters = ${datacenters}
 
   group "openbooks" {
     count = 1
@@ -20,32 +20,22 @@ job "openbooks" {
         "traefik.enable=true",
         "traefik.http.routers.openbooks-proxy.entrypoints=https",
         "traefik.http.routers.openbooks-proxy.tls=true",
-        "traefik.http.routers.openbooks-proxy.rule=Host(`[[ .app.openbooks.domain ]].[[ .common.domain ]]`)",
+        "traefik.http.routers.openbooks-proxy.rule=Host(`${openbooks_subdomain}.${domain}`)",
       ]
-
-      # healthcheck seems to cause openbooks to stop working
-      # check {
-      #   type     = "tcp"
-      #   port     = "http"
-      #   interval = "30s"
-      #   timeout  = "5s"
-      #
-      #   success_before_passing   = "3"
-      #   failures_before_critical = "3"
-      # }
     }
 
     task "openbooks" {
       driver = "docker"
 
       config {
-        image = "evanbuss/openbooks:[[ .app.openbooks.image ]]"
+        image = "evanbuss/openbooks:${openbooks_image_version}"
         ports = ["http"]
-        args  = ["--persist", "--name", "changeme"]
+        args  = ["--persist", "--name", "foo"]
 
-        # download to browser only
+        # Download to browser only. Uncomment if we want to save downloads to
+        # filesystem.
         # volumes = [
-        #   "[[ .app.openbooks.volumes.data ]]:/books",
+        #   "${openbooks_volumes_books}:/books",
         # ]
       }
 

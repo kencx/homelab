@@ -1,13 +1,13 @@
-job "uptime" {
-  datacenters = ["dc1"]
+job "calibre" {
+  datacenters = ${datacenters}
 
-  group "uptime" {
+  group "calibre" {
     count = 1
 
     network {
       mode = "bridge"
       port "http" {
-        to = "3001"
+        to = "8083"
       }
     }
 
@@ -18,9 +18,9 @@ job "uptime" {
 
       tags = [
         "traefik.enable=true",
-        "traefik.http.routers.uptime-proxy.entrypoints=https",
-        "traefik.http.routers.uptime-proxy.tls=true",
-        "traefik.http.routers.uptime-proxy.rule=Host(`[[ .app.uptime-kuma.domain ]].[ .common.domain ]`)",
+        "traefik.http.routers.calibre-proxy.entrypoints=https",
+        "traefik.http.routers.calibre-proxy.tls=true",
+        "traefik.http.routers.calibre-proxy.rule=Host(`${calibre_web_subdomain}.${domain}`)",
       ]
 
       check {
@@ -35,26 +35,34 @@ job "uptime" {
       }
     }
 
-    task "uptime" {
+    task "calibre" {
       driver = "docker"
 
       config {
-        image = "louislam/uptime-kuma:1"
+        image = "lscr.io/linuxserver/calibre-web:${calibre_web_image_version}"
         ports = ["http"]
 
         volumes = [
-          "[[ .app.uptime-kuma.volumes.data ]]:/app/data",
+          "${calibre_web_volumes_config}:/config",
+          "${calibre_web_volumes_books}:/books",
         ]
+
+        labels = {
+          "diun.enable"     = "true"
+          "diun.watch_repo" = "true"
+          "diun.max_tags"   = 3
+        }
       }
 
       env {
         PUID = 1000
         PGID = 1000
+        TZ   = "Asia/Singapore"
       }
 
       resources {
         cpu    = 35
-        memory = 200
+        memory = 512
       }
     }
   }

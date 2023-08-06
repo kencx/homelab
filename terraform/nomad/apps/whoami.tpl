@@ -1,8 +1,8 @@
 job "whoami" {
-  datacenters = ["dc1"]
+  datacenters = ${datacenters}
 
   group "whoami" {
-    count = 2
+    count = ${whoami_count}
 
     network {
       mode = "bridge"
@@ -18,7 +18,7 @@ job "whoami" {
         "traefik.enable=true",
         "traefik.http.routers.whoami-proxy.entrypoints=https",
         "traefik.http.routers.whoami-proxy.tls=true",
-        "traefik.http.routers.whoami-proxy.rule=Host(`[[ .app.whoami.domain ]].[[ .common.domain ]]`)",
+        "traefik.http.routers.whoami-proxy.rule=Host(`${whoami_subdomain}.${domain}`)",
       ]
 
       check {
@@ -39,7 +39,7 @@ job "whoami" {
       config {
         image = "traefik/whoami"
         ports = ["http"]
-        args  = ["--port", "${NOMAD_PORT_http}"]
+        args  = ["--port", "$${NOMAD_PORT_http}"]
       }
 
       resources {

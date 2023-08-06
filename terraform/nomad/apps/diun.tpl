@@ -1,5 +1,5 @@
 job "diun" {
-  datacenters = ["dc1"]
+  datacenters = ${datacenters}
 
   group "diun" {
     count = 1
@@ -8,11 +8,11 @@ job "diun" {
       driver = "docker"
 
       config {
-        image   = "ghcr.io/crazy-max/diun:4.24"
+        image   = "ghcr.io/crazy-max/diun:${diun_image_version}"
         command = "serve"
 
         volumes = [
-          "/mnt/storage/diun:/data",
+          "${diun_volumes_data}:/data",
           "secrets/diun.yml:/etc/diun/diun.yml",
           "/var/run/docker.sock:/var/run/docker.sock",
         ]
@@ -29,7 +29,7 @@ job "diun" {
       }
 
       env {
-        TZ        = "Asia/Singapore"
+        TZ        = "${timezone}"
         LOG_LEVEL = "info"
         LOG_JSON  = false
       }
@@ -38,7 +38,7 @@ job "diun" {
         data        = <<EOF
 watch:
   workers: 10
-  schedule: "0 0 * * 5"
+  schedule: "${diun_watch_schedule}"
   jitter: 30s
   firstCheckNotif: false
 
@@ -54,7 +54,7 @@ notif:
       - {{ .Data.data.tg_chat_id }}
 {{ end }}
 EOF
-        destination = "${NOMAD_SECRETS_DIR}/diun.yml"
+        destination = "$${NOMAD_SECRETS_DIR}/diun.yml"
       }
 
       resources {

@@ -1,5 +1,5 @@
 job "postgres" {
-  datacenters = ["dc1"]
+  datacenters = ${datacenters}
 
   group "postgres" {
     count = 1
@@ -17,6 +17,7 @@ job "postgres" {
       port     = "db"
 
       check {
+        name     = "TCP check"
         type     = "tcp"
         port     = "db"
         interval = "30s"
@@ -25,17 +26,27 @@ job "postgres" {
         success_before_passing   = "3"
         failures_before_critical = "3"
       }
+
+      check {
+        name     = "Postgres check"
+        type     = "script"
+        command  = "pg_isready"
+        args     = ["-U", "postgres"]
+        task     = "postgres"
+        interval = "30s"
+        timeout  = "10s"
+      }
     }
 
     task "postgres" {
       driver = "docker"
 
       config {
-        image = "postgres:[[ .app.postgres.image ]]"
+        image = "postgres:${postgres_image_version}"
         ports = ["db"]
 
         volumes = [
-          "[[ .app.postgres.volumes.data ]]:/var/lib/postgresql/data",
+          "${postgres_volumes_data}:/var/lib/postgresql/data",
         ]
 
         labels = {
@@ -47,6 +58,7 @@ job "postgres" {
 
       env {
         POSTGRES_USER     = "postgres"
+        # Temporary root password on startup. This will be reset and managed by Vault.
         POSTGRES_PASSWORD = "postgres"
       }
 

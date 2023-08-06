@@ -1,5 +1,5 @@
 job "minio" {
-  datacenters = ["dc1"]
+  datacenters = ${datacenters}
 
   group "minio" {
     count = 1
@@ -16,14 +16,14 @@ job "minio" {
 
     service {
       provider = "consul"
-      name     = "${JOB}-api"
+      name     = "$${JOB}-api"
       port     = "api"
 
       tags = [
         "traefik.enable=true",
         "traefik.http.routers.minio-proxy.entrypoints=https",
         "traefik.http.routers.minio-proxy.tls=true",
-        "traefik.http.routers.minio-proxy.rule=Host(`[[ .app.minio.domain ]].[[ .common.domain ]]`)",
+        "traefik.http.routers.minio-proxy.rule=Host(`${minio_subdomain}.${domain}`)",
       ]
 
       check {
@@ -40,14 +40,14 @@ job "minio" {
 
     service {
       provider = "consul"
-      name     = "${JOB}-console"
+      name     = "$${JOB}-console"
       port     = "http"
 
       tags = [
         "traefik.enable=true",
         "traefik.http.routers.minio-console.entrypoints=https",
         "traefik.http.routers.minio-console.tls=true",
-        "traefik.http.routers.minio-console.rule=Host(`[[ .app.minio-console.domain ]].[[ .common.domain ]]`)",
+        "traefik.http.routers.minio-console.rule=Host(`${minio_console_subdomain}.${domain}`)",
       ]
 
       check {
@@ -67,12 +67,12 @@ job "minio" {
       user   = "1000"
 
       config {
-        image = "quay.io/minio/minio:[[ .app.minio.image ]]"
+        image = "quay.io/minio/minio:${minio_image_version}"
         ports = ["api", "http"]
         args  = ["server", "/data", "--console-address", ":9001"]
 
         volumes = [
-          "[[ .app.minio.volumes.data ]]:/data",
+          "${minio_volumes_data}:/data",
         ]
 
         labels = {
@@ -88,8 +88,10 @@ job "minio" {
 
       env {
         MINIO_BROWSER_LOGIN_ANIMATION = "off"
-        MINIO_BROWSER_REDIRECT_URL    = "https://[[ .app.minio-console.domain ]].[[ .common.domain ]]"
-        MINIO_SERVER_URL              = "https://[[ .app.minio.domain ]]. [[ .common.domain ]]"
+        MINIO_BROWSER_REDIRECT_URL    = "https://${minio_console_subdomain}.${domain}"
+
+        # Docker cannot resolve this address if given
+        # MINIO_SERVER_URL              = "https://${minio_subdomain}.${domain}"
       }
 
       template {

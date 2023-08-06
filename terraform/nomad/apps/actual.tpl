@@ -1,13 +1,13 @@
-job "calibre" {
-  datacenters = ["dc1"]
+job "actual" {
+  datacenters = ${datacenters}
 
-  group "calibre" {
+  group "actual" {
     count = 1
 
     network {
       mode = "bridge"
       port "http" {
-        to = "8083"
+        to = "5006"
       }
     }
 
@@ -18,14 +18,14 @@ job "calibre" {
 
       tags = [
         "traefik.enable=true",
-        "traefik.http.routers.calibre-proxy.entrypoints=https",
-        "traefik.http.routers.calibre-proxy.tls=true",
-        "traefik.http.routers.calibre-proxy.rule=Host(`[[ .app.calibre_web.domain ]].[[ .common.domain ]]`)",
+        "traefik.http.routers.actual-proxy.entrypoints=https",
+        "traefik.http.routers.actual-proxy.tls=true",
+        "traefik.http.routers.actual-proxy.rule=Host(`${actual_subdomain}.${domain}`)",
       ]
 
       check {
         type     = "http"
-        path     = "/"
+        path     = "/health"
         port     = "http"
         interval = "30s"
         timeout  = "5s"
@@ -35,16 +35,16 @@ job "calibre" {
       }
     }
 
-    task "calibre" {
+    task "actual" {
       driver = "docker"
 
       config {
-        image = "lscr.io/linuxserver/calibre-web:[[ .app.calibre_web.image ]]"
+        image = "ghcr.io/actualbudget/actual-server:${actual_image_version}"
         ports = ["http"]
 
         volumes = [
-          "[[ .app.calibre_web.volumes.config ]]:/config",
-          "[[ .app.calibre_web.volumes.books ]]:/books",
+          "${actual_volumes_server}:/app/server-files",
+          "${actual_volumes_user}:/app/user-files",
         ]
 
         labels = {
@@ -55,14 +55,14 @@ job "calibre" {
       }
 
       env {
-        PUID = 1000
-        PGID = 1000
-        TZ   = "Asia/Singapore"
+        userFilesPath   = "./user-files"
+        serverFilesPath = "./server-files"
+        externalPort    = 5006
       }
 
       resources {
-        cpu    = 35
-        memory = 512
+        cpu    = 25
+        memory = 100
       }
     }
   }

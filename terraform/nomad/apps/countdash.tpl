@@ -1,6 +1,9 @@
 job "countdash" {
-  datacenters = ["dc1"]
+  datacenters = ${datacenters}
+
   group "api" {
+    count = ${countdash_count}
+
     network {
       mode = "bridge"
     }
@@ -26,7 +29,7 @@ job "countdash" {
     network {
       mode = "bridge"
       port "http" {
-        static = 9002
+        static = ${countdash_port}
         to     = 9002
       }
     }
@@ -50,7 +53,7 @@ job "countdash" {
     task "dashboard" {
       driver = "docker"
       env {
-        COUNTING_SERVICE_URL = "http://${NOMAD_UPSTREAM_ADDR_count_api}"
+        COUNTING_SERVICE_URL = "http://$${NOMAD_UPSTREAM_ADDR_count_api}"
       }
       config {
         image = "hashicorpnomad/counter-dashboard:v1"
