@@ -11,7 +11,7 @@
   become: true
   when:
     - aurutils_install.stdout is defined
-    - aurutils_install.stdout == "/usr/bin/aur"
+    - aurutils_install.stdout != "/usr/bin/aur"
 
 - name: Create repository user
   become: true
@@ -22,12 +22,16 @@
 
 - name: Add sudoers for repository user
   become: true
-  template:
-    src: aur_sudoers.j2
+  copy:
+    content: |
+      %wheel ALL=(ALL) NOPASSWD: /usr/bin/arch-nspawn
+      %wheel ALL=(ALL) NOPASSWD: /usr/bin/aur
+      %wheel ALL=(ALL) NOPASSWD:SETENV: /usr/bin/makechrootpkg
     dest: "/etc/sudoers.d/50_arch_repo"
     owner: root
     group: root
     mode: 0440
+    validate: /usr/sbin/visudo -csf %s
 
 - import_tasks: repository.yml
   become: true
@@ -45,19 +49,14 @@
     - pacman-chroot
 
 - name: Copy aur wrapper script
+  import_tasks: aura.yml
   become: true
-  template:
-    src: "aur-wrapper.j2"
-    dest: "/usr/bin/aur-wrapper"
-    owner: root
-    group: root
-    mode: 0755
 
 - name: Sync AUR packages
   become: true
   become_user: "{{ arch_repository_user }}"
   command:
-    cmd: "aur-wrapper add {{ item }}"
+    cmd: "aura add {{ item }}"
   with_items: "{{ arch_repository_packages }}"
   when: arch_repository_sync_packages
 
@@ -69,5 +68,6 @@
     - aurutils_install.stdout is defined
     - aurutils_install.stdout == "/usr/bin/aur"
 
-- import_tasks: setup_updates.yml
+- name: Setup updates
+  import_tasks: updates.yml
   become: true

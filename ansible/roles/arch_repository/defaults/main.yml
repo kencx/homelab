@@ -7,6 +7,8 @@ arch_repository_sig_level: "Optional TrustAll"
 arch_repository_url: "file://{{ arch_repository_dir }}"
 
 arch_repository_aurutils_temp_dir: "/tmp/aurutils"
+arch_repository_aura_temp_dir: "/tmp/aura"
+arch_repository_aura_dir: "/usr/bin/aura"
 arch_repository_sync_packages: false
 arch_repository_packages:
   - aurutils

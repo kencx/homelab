@@ -1,0 +1,16 @@
+---
+- name: Clone aura git repository
+  git:
+    repo: "https://github.com/kencx/aura.git"
+    dest: "{{ arch_repository_aura_tmp_dir }}"
+    clone: true
+    update: true
+    force: false
+
+- name: Copy aura script to destination
+  copy:
+    src: "{{ arch_repository_aura_tmp_dir }}/aura"
+    dest: "{{ arch_repository_aura_dir }}"
+    owner: root
+    group: root
+    mode: 0755

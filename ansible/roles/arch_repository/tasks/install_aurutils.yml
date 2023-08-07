@@ -8,6 +8,9 @@
   git:
     repo: https://aur.archlinux.org/aurutils.git
     dest: "{{ arch_repository_aurutils_temp_dir }}"
+    clone: true
+    update: true
+    force: false
 
 - name: Build aurutils package manually
   command:

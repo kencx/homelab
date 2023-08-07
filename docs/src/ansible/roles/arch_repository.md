@@ -13,17 +13,17 @@ The role installs an `aurutils` wrapper script that is used to interact with the
 repository easily:
 
 ```bash
-$ aur-wrapper add [package]
-$ aur-wrapper remove [package]
-$ aur-wrapper list
-$ aur-wrapper sync
+$ aura add [package]
+$ aura remove [package]
+$ aura list
+$ aura sync
 ```
 
 >**Note**: The script should be run as the `{{ arch_repository_user }}` stated
 >in the role. It should **not** be run as root.
 
 The role also installs the systemd service `update-aur.service` triggered hourly
-by `update-aur.timer`. This service runs `aur-wrapper sync` periodically to
+by `update-aur.timer`. This service runs `aura sync` periodically to
 check for package updates.
 
 ## Hosting Remotely
@@ -46,5 +46,7 @@ Clients can then access the repository by adding the server's URL to their
 | arch_repository_sig_level | Repository signature level | string | `Optional TrustAll` |
 | arch_repository_url | Repository URL | string |`file://${arch_repository_dir }` |
 | arch_repository_aurutils_temp_dir | Directory to install aurutils temporarily | string | `/tmp/aurutils` |
+| arch_repository_aura_temp_dir | Directory to install aura temporarily | string | `/tmp/aura` |
+| arch_repository_aura_dir | Directory to install aura | string | `/usr/bin/aura` |
 | arch_repository_sync_packages | Sync given AUR packages | bool | `false` |
 | arch_repository_packages | List of AUR packages to sync | list(string) | `[aurutils]` |
