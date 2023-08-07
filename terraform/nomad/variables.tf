@@ -142,16 +142,6 @@ variable "calibre_web_volumes_books" {
   description = "Books volume for calibre web"
 }
 
-variable "postgres_image_version" {
-  type        = string
-  description = "Docker image version for postgres"
-}
-
-variable "postgres_volumes_data" {
-  type        = string
-  description = "Data volume for postgres"
-}
-
 variable "paperless_image_version" {
   type        = string
   description = "Docker image version for paperless-ngx"
@@ -170,4 +160,24 @@ variable "paperless_volumes_consume" {
 variable "paperless_volumes_media" {
   type        = string
   description = "Media volume for paperless-ngx"
+}
+
+variable "postgres_image_version" {
+  type        = string
+  description = "Docker image version for postgres"
+}
+
+variable "postgres_volumes_data" {
+  type        = string
+  description = "Data volume for postgres"
+}
+
+variable "registry_image_version" {
+  type        = string
+  description = "Docker image version for registry"
+}
+
+variable "registry_volumes_data" {
+  type        = string
+  description = "Data volume for registry"
 }

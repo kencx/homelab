@@ -189,3 +189,15 @@ resource "nomad_job" "postgres" {
       postgres_volumes_data  = var.postgres_volumes_data
   })
 }
+
+resource "nomad_job" "registry" {
+  jobspec = templatefile("${local.apps}/registry.tpl",
+    {
+      datacenters        = local.datacenters
+      registry_subdomain = "registry"
+      domain             = local.domain
+
+      registry_image_version = var.registry_image_version
+      registry_volumes_data  = var.registry_volumes_data
+  })
+}

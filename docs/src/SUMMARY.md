@@ -49,7 +49,7 @@
 - [Applications](apps/index.md)
     - [Adding New Application](apps/add_new.md)
     - [Diun](apps/diun.md)
-    <!-- - [Docker Registry]() -->
+    - [Registry](apps/registry.md)
 
 - [Backups](backups.md)
 
