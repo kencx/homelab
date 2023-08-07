@@ -1,1 +1,11 @@
+cfgv==3.3.1
+distlib==0.3.7
+filelock==3.12.2
+identify==2.5.26
+lark==1.1.7
+nodeenv==1.8.0
+platformdirs==3.10.0
 pre-commit==3.3.3
+python-hcl2==4.3.2
+PyYAML==6.0.1
+virtualenv==20.24.2

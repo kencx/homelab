@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+
+import hcl2
+import os.path as path
+
+PACKER_BASE_DIR = "packer"
+PACKER_VARS_DECLARATION_FILE = "variables.pkr.hcl"
+PACKER_VARS_FILE = "auto.pkrvars.hcl"
+PACKER_DIRS = ["base-clone"]
+
+TF_BASE_DIR = "terraform"
+TF_VARS_DECLARATION_FILE = "variables.tf"
+TF_VARS_FILE = "terraform.tfvars"
+TF_DIRS = ["nomad"]
+
+
+def vars_to_tfvars(file, tfvars, overwrite=False, quiet=False):
+    """Reads HCL2 variable declaration file and generates relevant vars file with default
+    values.
+    """
+
+    vars = read_vars_file(file)
+    res = {}
+
+    for var in vars:
+        for k, v in var.items():
+            res[k] = v.get("default") or ""
+
+    if path.exists(tfvars) and not overwrite:
+        if not quiet:
+            print(f"{tfvars} already exists! Pass --overwrite to overwrite.")
+    else:
+        write_tfvars(res, tfvars)
+
+
+def read_vars_file(file):
+    with open(file, "r") as f:
+        data = hcl2.load(f)
+
+    vars = data.get("variable")
+    if vars is None:
+        print("No variables defined")
+        exit(0)
+
+    return vars
+
+
+def write_tfvars(data, filename):
+    with open(filename, "w") as f:
+        for k, v in data.items():
+            f.write(f'{k} = "{v}"\n')
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Generate HCL2 variable files")
+    parser.add_argument(
+        "-o", "--overwrite", action="store_true", help="overwrite existing file"
+    )
+    parser.add_argument("-q", "--quiet", action="store_true", help="Quiet output")
+
+    args = parser.parse_args()
+
+    for p in PACKER_DIRS:
+        dir = path.join(PACKER_BASE_DIR, p)
+        vars_to_tfvars(
+            path.join(dir, PACKER_VARS_DECLARATION_FILE),
+            path.join(dir, PACKER_VARS_FILE),
+            args.overwrite,
+            args.quiet,
+        )
+
+    for t in TF_DIRS:
+        dir = path.join(TF_BASE_DIR, t)
+        vars_to_tfvars(
+            path.join(dir, TF_VARS_DECLARATION_FILE),
+            path.join(dir, TF_VARS_FILE),
+            args.overwrite,
+            args.quiet,
+        )

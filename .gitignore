@@ -21,7 +21,7 @@ vault.txt
 tf_ansible_*
 
 # packer
-auto.pkrvars.hcl
+*.pkrvars.hcl
 **/builds/*
 
 # vagrant

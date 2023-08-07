@@ -10,6 +10,9 @@ This documents provides an overview for provisioning and installing the cluster.
 
 See [Prerequisites](prerequisites.md) for the full requirements.
 
+>**Note**: Use the `bin/generate-vars` script to quickly generate variable files
+>in `packer` and `terraform` subdirectories.
+
 ## Creating a VM template
 
 There are two methods to create a VM template:
