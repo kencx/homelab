@@ -45,6 +45,15 @@
     - role: nomad
 
   tasks:
+    - name: Allow HTTP, HTTPS ports on ufw
+      become: true
+      ufw:
+        rule: "allow"
+        port: "{{ item }}"
+      with_items:
+        - 80
+        - 443
+
     - name: Goss smoke test
       import_role:
         name: kencx.ansible.goss
