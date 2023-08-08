@@ -30,10 +30,12 @@ caching:
   maxItemsCount: 0
 
 clientLookup:
-  upstream: 192.168.86.1
+  upstream: {{ blocky_client_upstream }}
   clients:
-    arch:
-      - 192.168.86.82
+  {% for client in blocky_clients %}
+    {{ client.name }}:
+      - {{ client.ip }}
+  {% endfor %}
 
 ports:
   dns: 53
@@ -44,3 +46,7 @@ log:
   format: text
   timestamp: true
   privacy: false
+
+prometheus:
+  enable: true
+  path: /metrics

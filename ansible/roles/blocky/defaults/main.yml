@@ -12,3 +12,6 @@ blocky_checksum_url: "{{ __blocky_url_prefix | trim }}blocky_checksums.txt"
 blocky_dns_port: 53
 blocky_user: blocky
 blocky_group: blocky
+
+blocky_client_upstream: ""
+blocky_clients: []
