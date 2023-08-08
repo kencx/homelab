@@ -1,6 +1,22 @@
 ---
 - hosts: pi
   become: true
+  pre_tasks:
+    - name: Update apt packages
+      apt:
+        update_cache: true
+        cache_valid_time: 86400
+        upgrade: true
+
+    - name: Install packages
+      apt:
+        name:
+          - jq
+          - git
+          - lm-sensors
+          - ncdu
+          - vim
+        state: present
 
   roles:
     - name: Security hardening
@@ -11,6 +27,7 @@
             - {rule: 'allow', port: '22', proto: 'tcp', comment: 'ssh'}
             - {rule: 'allow', port: '53', proto: 'tcp', comment: 'dns'}
             - {rule: 'allow', port: '53', proto: 'udp', comment: 'dns'}
+            - {rule: 'allow', port: '4000', proto: 'tcp', comment: 'blocky http'}
             - {rule: 'allow', port: '4000', proto: 'udp', comment: 'blocky http'}
     - role: coredns
     - role: blocky
