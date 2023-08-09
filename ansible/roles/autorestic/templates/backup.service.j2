@@ -2,7 +2,6 @@
 Description=Runs autorestic backup
 ConditionPathExists={{ nas_backup_mount_dir }}
 Requires=network.target
-OnFailure=backup-failure.service
 
 [Service]
 Type=oneshot
