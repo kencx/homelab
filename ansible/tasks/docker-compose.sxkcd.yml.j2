@@ -1,0 +1,39 @@
+---
+version: '3.6'
+services:
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: redis
+    hostname: redis
+    environment:
+      REDIS_ARGS: --save 20 1 --appendonly yes
+    restart: unless-stopped
+    volumes:
+      - "/home/{{ sxkcd_user }}/sxkcd/redis:/data"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli", "ping", "|", "grep", "pong"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - sxkcd
+
+  app:
+    container_name: app
+    hostname: app
+    image: "{{ sxkcd_image }}"
+    command: ["--reindex", "-f", "/data/comics.json"]
+    restart: unless-stopped
+    ports:
+      - "6380:6380"
+    volumes:
+      - "/home/{{ sxkcd_user }}/sxkcd/data:/data"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - sxkcd
+
+networks:
+  sxkcd:
+    name: sxkcd
