@@ -1,6 +1,19 @@
 vault {
   address = "https://{{ vault_server_fqdn }}:8200"
   vault_agent_token_file = "{{ vault_agent_token_file_path }}"
+
+  client_user_agent = "consul-template"
+
   unwrap_token = false
   renew_token = false
+
+  retry {
+    enabled     = true
+    attempts    = 3
+    backoff     = "1m"
+    max_backoff = "16m"
+  }
 }
+
+template_error_fatal = true
+err_on_failed_lookup = true

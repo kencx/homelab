@@ -3,14 +3,24 @@ vault {
   ca_cert     = "{{ vault_ca_cert_dir }}/ca.crt"
   client_cert = "{{ vault_tls_dir }}/agent.crt"
   client_key  = "{{ vault_tls_dir }}/agent_key.pem"
+
+  retry {
+    num_retries = 3
+  }
 }
 
 auto_auth {
   method "cert" {
     name = "{{ ansible_fqdn }}"
     mount_path = "auth/agent"
-    reload = true
-    # exit_on_error = true
+    exit_on_err = true
+
+    config = {
+      ca_cert     = "{{ vault_ca_cert_dir }}/ca.crt"
+      client_cert = "{{ vault_tls_dir }}/agent.crt"
+      client_key  = "{{ vault_tls_dir }}/agent_key.pem"
+      reload = true
+    }
   }
 
   sink "file" {
@@ -19,6 +29,12 @@ auto_auth {
       mode = 0400
     }
   }
+}
+
+cache {}
+
+template_config {
+  exit_on_retry_failure = true
 }
 
 # renew vault-agent's own auth cert
@@ -43,4 +59,6 @@ EOF
   user  = "vault"
   group = "vault"
   perms = 0600
+
+  error_on_missing_key = true
 }

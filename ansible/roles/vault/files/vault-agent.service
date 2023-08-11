@@ -2,8 +2,8 @@
 Description=Vault Agent
 Wants=network-online.target
 After=network-online.target
-StartLimitInterval = 60
-StartLimitBurst = 3
+StartLimitInterval=90
+StartLimitBurst=3
 
 [Service]
 User=vault
@@ -16,7 +16,7 @@ KillSignal=SIGINT
 LimitNOFILE=65536
 LimitNPROC=infinity
 Restart=on-failure
-RestartSec=2
+RestartSec=30
 
 ProtectSystem=full
 PrivateTmp=yes

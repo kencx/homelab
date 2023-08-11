@@ -2,6 +2,8 @@
 Description=Consul-template
 Wants=network-online.target
 After=network-online.target
+StartLimitInterval=180
+StartLimitBurst=3
 
 [Service]
 #User=consul-template
@@ -12,9 +14,6 @@ KillMode=process
 KillSignal=SIGINT
 Restart=on-failure
 RestartSec=60
-
-StartLimitBurst=3
-StartLimitInterval=60
 
 [Install]
 WantedBy=multi-user.target
