@@ -93,13 +93,22 @@
         certbot_dir: "{{ certbot_dir | default('/etc/letsencrypt') }}"
         certbot_webroot: "{{ certbot_webroot | default('/var/www/letsencrypt') }}"
 
+    - name: Create hooks script directory
+      file:
+        path: "/home/{{ vps_username }}/bin"
+        state: directory
+        mode: 0755
+        owner: "{{ vps_username }}"
+        group: "{{ vps_username }}"
+
     - name: Configure sxkcd server
       import_tasks: tasks/sxkcd.yml
       vars:
         sxkcd_user: "{{ vps_username }}"
-        sxkcd_image: "ghcr.io/kencx/sxkcd:v0.1.3"
+        sxkcd_image: "ghcr.io/kencx/sxkcd:${SXKCD_TAG:-v0.1.3}"
         sxkcd_server_name: xkcd.cheo.dev
         sxkcd_proxy_pass: http://localhost:6380/
+        sxkcd_webhook_secret: foo
 
     - name: Configure blog
       import_tasks: tasks/blog.yml
@@ -108,3 +117,4 @@
         blog_server_name: ken.cheo.dev
         blog_repo: "https://github.com/kencx/source"
         blog_dir: "/home/{{ blog_user }}/source"
+        blog_webhook_secret: foo

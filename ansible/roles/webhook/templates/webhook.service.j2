@@ -4,7 +4,7 @@ Wants=network-online.target nginx.service
 After=network-online.target nginx.service
 
 [Service]
-ExecStart=/usr/local/bin/webhook -port {{ webhook_port }} -hooks {{ webhook_hooks_dir }}/hooks.yml -verbose -hotreload
+ExecStart=/usr/local/bin/webhook -ip 127.0.0.1 -port {{ webhook_port }} -hooks {{ webhook_hooks_dir }}/hooks.yml -verbose -hotreload
 Restart=on-failure
 RestartSec=5
 

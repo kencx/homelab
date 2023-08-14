@@ -2,9 +2,12 @@
 - name: Ensure mandatory variables are set
   assert:
     that:
-      - server_name is defined
+      - blog_server_name is defined
       - blog_repo is defined
       - blog_dir is defined
+      - certbot_webroot
+      - certbot_dir
+      - nginx_dir
 
 - name: Create static files directory
   file:
@@ -18,18 +21,68 @@
   git:
     repo: "{{ blog_repo }}"
     dest: "{{ blog_dir }}"
-    owner: "{{ blog_user }}"
-    group: "{{ blog_user }}"
-    mode: 0775
+    clone: true
+    force: true
+    update: true
 
 - name: Build blog
   command:
     cmd: "./build.sh /var/www/html/blog"
     chdir: "{{ blog_dir }}/bin"
+    creates: "/var/www/html/blog"
 
 - name: Copy blog nginx config
-  template:
-    src: "blog.conf.j2"
+  copy:
+    content: |
+      server {
+        listen 80;
+        listen [::]:80;
+
+        server_name {{ blog_server_name }};
+
+        location /.well-known/acme-challenge/ {
+            root {{ certbot_webroot }};
+        }
+
+        return 301 https://$server_name$request_uri;
+      }
+
+      server {
+        listen 443 ssl http2;
+        listen [::]:443 ssl http2;
+
+        server_name {{ blog_server_name }};
+
+        ssl_certificate {{ certbot_dir }}/live/{{ blog_server_name }}/fullchain.pem;
+        ssl_certificate_key {{ certbot_dir }}/live/{{ blog_server_name }}/privkey.pem;
+
+        include snippets/tls.conf;
+        include snippets/security.conf;
+
+        root /var/www/html/blog;
+        index index.html;
+        error_page 404 /404.html;
+
+        location / {
+          try_files $uri $uri/ =404;
+        }
+
+        location ~ \.(jpg|jpeg|gif|png)$ {
+            add_header Cache-Control "public, s-maxage=7776000, max-age=86400";
+        }
+
+        location ~ \.(css|js)$ {
+            add_header Cache-Control "public, max-age=86400";
+        }
+
+        location /fonts/ {
+            add_header Cache-Control "public, s-maxage=7776000, max-age=86400";
+        }
+
+        location = /favicon.svg {
+            log_not_found off;
+        }
+      }
     dest: "{{ nginx_dir }}/conf.d/blog.conf"
     owner: root
     group: root
@@ -40,4 +93,44 @@
     name: nginx
     state: reloaded
 
-# - name: Add redeploy hook
+- name: Add publish script
+  copy:
+    content: |
+      #!/usr/bin/env bash
+
+      set -e
+
+      cd {{ blog_dir }}
+      git pull --ff-only
+      ./bin/build.sh /var/www/html/blog
+    dest: /home/{{ blog_user }}/bin/publish_blog.sh
+    owner: kenc
+    group: kenc
+    mode: 0744
+
+- name: Add redeploy hook
+  blockinfile:
+    path: /etc/webhook/hooks/hooks.yml
+    block: |
+      - id: publish_blog
+        execute-command: "./publish_blog.sh"
+        command-working-directory: "/home/{{ blog_user }}/bin"
+        trigger-rule:
+          and:
+            - match:
+                type: "payload-hmac-sha256"
+                secret: "{{ blog_webhook_secret }}"
+                parameter:
+                  source: "header"
+                  name: "X-Hub-Signature-256"
+            - match:
+                type: "value"
+                value: "refs/heads/master"
+                parameter:
+                  source: "payload"
+                  name: "ref"
+
+- name: Restart webhook
+  systemd:
+    name: webhook
+    state: restarted

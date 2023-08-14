@@ -26,8 +26,38 @@
     - /home/{{ sxkcd_user }}/sxkcd/redis
 
 - name: Copy sxkcd nginx config
-  template:
-    src: "sxkcd.conf.j2"
+  copy:
+    content: |
+      server {
+        listen 80;
+        listen [::]:80;
+
+        server_name {{ sxkcd_server_name }};
+
+        location /.well-known/acme-challenge/ {
+            root {{ certbot_webroot }};
+        }
+
+        return 301 https://$server_name$request_uri;
+      }
+
+      server {
+        listen 443 ssl http2;
+        listen [::]:443 ssl http2;
+
+        server_name {{ sxkcd_server_name }};
+
+        ssl_certificate {{ certbot_dir }}/live/{{ sxkcd_server_name }}/fullchain.pem;
+        ssl_certificate_key {{ certbot_dir }}/live/{{ sxkcd_server_name }}/privkey.pem;
+
+        include snippets/tls.conf;
+        include snippets/security.conf;
+
+        location / {
+            limit_except GET HEAD { deny all; }
+            proxy_pass {{ sxkcd_proxy_pass }};
+        }
+      }
     dest: "{{ nginx_dir }}/conf.d/sxkcd.conf"
     owner: root
     group: root
@@ -37,8 +67,47 @@
 # ["./sxkcd", "download", "-f", "/data/comics.json"]
 
 - name: Copy docker-compose.yml
-  template:
-    src: "docker-compose.sxkcd.yml.j2"
+  copy:
+    content: |
+      version: '3.6'
+      services:
+        redis:
+          image: redis/redis-stack-server:latest
+          container_name: redis
+          hostname: redis
+          environment:
+            REDIS_ARGS: --save 20 1 --appendonly yes
+          restart: unless-stopped
+          volumes:
+            - "/home/{{ sxkcd_user }}/sxkcd/redis:/data"
+          healthcheck:
+            test: ["CMD-SHELL", "redis-cli", "ping", "|", "grep", "pong"]
+            interval: 10s
+            timeout: 3s
+            retries: 5
+          networks:
+            - sxkcd
+
+        app:
+          container_name: app
+          hostname: app
+          image: "{{ sxkcd_image }}"
+          # uncomment on first run
+          # command: [-f", "/data/comics.json"]
+          restart: unless-stopped
+          ports:
+            - "6380:6380"
+          volumes:
+            - "/home/{{ sxkcd_user }}/sxkcd/data:/data"
+          depends_on:
+            redis:
+              condition: service_healthy
+          networks:
+            - sxkcd
+
+      networks:
+        sxkcd:
+        name: sxkcd
     dest: "/home/{{ sxkcd_user }}/sxkcd/docker-compose.yml"
     owner: "{{ sxkcd_user }}"
     group: "{{ sxkcd_user }}"
@@ -56,4 +125,43 @@
     name: nginx
     state: reloaded
 
-# - name: Add redeploy hook
+- name: Add deploy script
+  copy:
+    content: |
+      #!/usr/bin/env bash
+
+      set -e
+
+      cd /home/{{ sxkcd_user }}/sxkcd
+      export SXKCD_TAG="$1"
+      docker compose pull
+      docker compose up -d --force-recreate
+
+    dest: /home/{{ sxkcd_user }}/bin/redeploy_sxkcd.sh
+    owner: kenc
+    group: kenc
+    mode: 0744
+
+- name: Add redeploy hook
+  blockinfile:
+    path: /etc/webhook/hooks/hooks.yml
+    block: |
+      - id: redeploy_sxkcd
+        execute-command: ". ./redeploy_sxkcd.sh"
+        command-working-directory: "/home/{{ sxkcd_user }}/bin"
+        pass-arguments-to-command:
+          - source: "payload"
+            name: "registry_package.package_version.tag_name"
+        trigger-rule:
+          and:
+            - match:
+                type: "payload-hmac-sha256"
+                secret: "{{ sxkcd_webhook_secret }}"
+                parameter:
+                  source: "header"
+                  name: "X-Hub-Signature-256"
+
+- name: Restart webhook
+  systemd:
+    name: webhook
+    state: restarted

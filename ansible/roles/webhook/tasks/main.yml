@@ -18,13 +18,15 @@
     mode: 0644
   notify: restart webhook
 
-- name: Copy hooks file
-  template:
-    src: "hooks.yml.j2"
-    dest: "{{ webhook_hooks_dir }}/hooks.yml"
+- name: Create empty hooks file
+  file:
+    path: "{{ webhook_hooks_dir }}/hooks.yml"
     owner: root
     group: root
     mode: 0644
+    state: touch
+    modification_time: preserve
+    access_time: preserve
   notify: reload webhook
 
 - name: Start and enable webhook
