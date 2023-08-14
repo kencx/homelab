@@ -27,7 +27,7 @@
 
 - name: Copy sxkcd nginx config
   template:
-    src: "./sxkcd.conf"
+    src: "sxkcd.conf.j2"
     dest: "{{ nginx_dir }}/conf.d/sxkcd.conf"
     owner: root
     group: root
@@ -55,3 +55,5 @@
   systemd:
     name: nginx
     state: reloaded
+
+# - name: Add redeploy hook

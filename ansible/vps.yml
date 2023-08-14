@@ -75,6 +75,16 @@
         certbot_certs:
           - domains:
               - xkcd.cheo.dev
+          - domains:
+              - ken.cheo.dev
+          - domains:
+              - api.cheo.dev
+
+    - name: Setup webhook
+      role: webhook
+      vars:
+        webhook_nginx_setup: true
+        webhook_nginx_server_name: "api.cheo.dev"
 
   tasks:
     - name: Set default variables
@@ -88,5 +98,13 @@
       vars:
         sxkcd_user: "{{ vps_username }}"
         sxkcd_image: "ghcr.io/kencx/sxkcd:v0.1.3"
-        server_name: xkcd.cheo.dev
-        proxy_pass: http://localhost:6380/
+        sxkcd_server_name: xkcd.cheo.dev
+        sxkcd_proxy_pass: http://localhost:6380/
+
+    - name: Configure blog
+      import_tasks: tasks/blog.yml
+      vars:
+        blog_user: "{{ vps_username }}"
+        blog_server_name: ken.cheo.dev
+        blog_repo: "https://github.com/kencx/source"
+        blog_dir: "/home/{{ blog_user }}/source"

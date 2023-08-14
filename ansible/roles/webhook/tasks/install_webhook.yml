@@ -1,0 +1,23 @@
+---
+- name: Check webhook releases
+  uri:
+    url: https://api.github.com/repos/adnanh/webhook/releases/tags/{{ webhook_version }}
+    return_content: true
+  register: webhook_release
+
+- name: "Install webhook {{ webhook_release.json.tag_name }}"
+  unarchive:
+    src: "{{ item.browser_download_url }}"
+    dest: /usr/local/bin
+    remote_src: true
+    owner: root
+    group: root
+    mode: 0755
+    creates: /usr/local/bin/webhook
+    keep_newer: true
+    extra_opts:
+      - --strip=1
+      - --no-anchored
+      - webhook
+  loop: "{{ webhook_release.json.assets }}"
+  when: "'linux-amd64.tar.gz' in item.name"

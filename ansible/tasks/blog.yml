@@ -1,0 +1,43 @@
+---
+- name: Ensure mandatory variables are set
+  assert:
+    that:
+      - server_name is defined
+      - blog_repo is defined
+      - blog_dir is defined
+
+- name: Create static files directory
+  file:
+    path: "/var/www/html"
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+
+- name: Clone blog source repository
+  git:
+    repo: "{{ blog_repo }}"
+    dest: "{{ blog_dir }}"
+    owner: "{{ blog_user }}"
+    group: "{{ blog_user }}"
+    mode: 0775
+
+- name: Build blog
+  command:
+    cmd: "./build.sh /var/www/html/blog"
+    chdir: "{{ blog_dir }}/bin"
+
+- name: Copy blog nginx config
+  template:
+    src: "blog.conf.j2"
+    dest: "{{ nginx_dir }}/conf.d/blog.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Reload nginx
+  systemd:
+    name: nginx
+    state: reloaded
+
+# - name: Add redeploy hook

@@ -23,6 +23,7 @@
   with_items:
     - "{{ nginx_dir }}"
     - "{{ nginx_dir }}/conf.d"
+    - "{{ nginx_dir }}/snippets"
     - "{{ nginx_log_dir }}"
 
 - name: Copy nginx service file
@@ -44,6 +45,17 @@
     group: root
   notify:
     - reload nginx
+
+- name: Copy additonal nginx config files
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ nginx_dir }}/snippets/{{ item }}"
+    mode: 0644
+    owner: root
+    group: root
+  with_items:
+    - "tls.conf"
+    - "security.conf"
 
 - name: Start nginx
   systemd:

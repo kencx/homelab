@@ -1,3 +1,4 @@
 ---
 nginx_dir: "/etc/nginx"
 nginx_log_dir: "/var/log/nginx"
+nginx_certbot_webroot: "/var/www/letsencrypt"
