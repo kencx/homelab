@@ -2,12 +2,10 @@
 # A single unseal key is sufficient for our purposes
 - name: Initialize Vault
   command: vault operator init -key-shares=1 -key-threshold=1 -format=json
-  no_log: true
   register: vault_init_raw
 
 - set_fact:
     vault_init_json: "{{ vault_init_raw.stdout | from_json }}"
-  no_log: true
   when: vault_init_raw is defined and vault_init_raw.stdout is defined
 
 # The initialization of Vault outputs the root token and unseal key(s).
@@ -30,7 +28,6 @@
       Root token: {{ vault_init_json.root_token }}
     dest: "{{ vault_secrets_file }}"
     mode: 0400
-  # no_log: true
   delegate_to: localhost
   when:
     - vault_store_bw == false
@@ -46,7 +43,6 @@
     - vault_store_bw == true
     - vault_init_json is defined
     - vault_init_json.unseal_keys_hex is defined
-  no_log: true
   register: bw_vault_unseal_key
   failed_when: bw_vault_unseal_key.stdout == "bw get failed"
 
@@ -59,7 +55,6 @@
     - vault_store_bw == true
     - vault_init_json is defined
     - vault_init_json.root_token is defined
-  no_log: true
   register: bw_vault_root_token
   failed_when: bw_vault_root_token.stdout == "bw get failed"
 
@@ -70,27 +65,14 @@
   shell:
     cmd: "vault operator unseal --format json {{ vault_init_json.unseal_keys_hex[0] }}"
   register: vault_unseal_raw
-  no_log: true
   when:
     - vault_status_json is defined
     - vault_status_json.sealed
   changed_when: false
   failed_when: vault_unseal_raw.rc == 1
 
-# - set_fact:
-#     vault_unseal_json: "{{ vault_unseal_raw.stdout | from_json }}"
-#   when:
-#     - vault_unseal_raw is defined
-#     - vault_unseal_raw.stdout is defined
-#     - vault_unseal_raw.rc == 0
-
-# - debug:
-#     var: vault_unseal_json
-#   when: vault_unseal_raw is defined and vault_unseal_raw.stdout is defined
-
 - set_fact:
     vault_root_token: "{{ vault_init_json.root_token }}"
-  no_log: true
   when:
     - vault_init_json is defined
     - vault_init_json.root_token is defined
@@ -98,21 +80,9 @@
 - name: Login with root token
   shell:
     cmd: vault login --format json {{ vault_root_token }}
-  no_log: true
   register: vault_login_raw
   changed_when: false
   failed_when: vault_login_raw.rc != 0
-
-# - set_fact:
-#     vault_login_json: "{{ vault_login_raw.stdout | from_json }}"
-#   when:
-#     - vault_login_raw is defined
-#     - vault_login_raw.stdout is defined
-#     - vault_login_raw.rc == 0
-
-# - debug:
-#     var: vault_login_json
-#   when: vault_login_raw is defined and vault_login_raw.stdout is defined
 
 - name: Check Vault post-login status
   command: vault status -format=json

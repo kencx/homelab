@@ -10,7 +10,7 @@ User=vault
 Group=vault
 
 ExecReload=/bin/kill -HUP $MAINPID
-ExecStart=/usr/bin/vault agent -config=/etc/vault.d/vault-agent.hcl
+ExecStart=/usr/bin/vault agent -config={{ vault_config_dir }}/vault-agent.hcl
 KillMode=process
 KillSignal=SIGINT
 LimitNOFILE=65536

@@ -17,8 +17,8 @@ performs first-time initialization and stores the root token and unseal key.
 Only a single unseal key is supported at the moment. The secrets can be stored
 in the filesystem or on Bitwarden.
 
->**Note**: If storing in Bitwarden, the Bitwarden CLI must be installed and
->`bw_password` variable must be provided.
+>**Note**: If storing in Bitwarden, the Bitwarden CLI must be installed,
+>configured and the `bw_password` variable must be provided.
 
 It then proceeds to login with the root token and setup the PKI secrets engine
 and various authentication roles with the Terraform provider. A full list of
@@ -53,6 +53,7 @@ agent's auth role.
 | vault_log_dir | Restricted logs directory | string | `/opt/vault/logs` |
 | vault_tls_dir | TLS files directory | string | `/opt/vault/tls` |
 | vault_ca_cert_dir | Vault's CA certificate directory | string | `/usr/share/ca-certificates/vault` |
+| vault_server | Setup Vault server | bool | true |
 | vault_log_file | Audit log file | string | `${vault_log_dir}/vault.log` |
 | vault_store_local | Copy Vault init secrets to local file | bool | `true` |
 | vault_secrets_file | File path for Vault init secrets | string | `vault.txt` |
@@ -60,10 +61,16 @@ agent's auth role.
 | vault_terraform_workspace | Terraform workspace | string | `default` |
 | vault_admin_password | Password for admin user | string | `password` |
 | vault_register_consul | Register Vault as a Consul service | bool | `true` |
-| vault_setup_agent | Setup Vault agent on server node | bool | `true` |
+| vault_setup_agent | Setup Vault agent | bool | `true` |
 | vault_server_fqdn | Existing Vault server's FQDN | string | `${ansible_default_ipv4.address}` |
 
 ## Notes
+
+- `vault_server` and `vault_setup_agent` are not mutually exclusive. A host
+  can have both instances running at the same time. However, there must already
+  be an existing server instance if `vault_server` is `false`.
+- `vault_server_fqdn` is used to communicate with an existing Vault server that
+  is listening on port 8200 when setting up Vault agent.
 
 ### Vault Initialization Secrets
 

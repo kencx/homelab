@@ -11,14 +11,14 @@ Group=vault
 
 Type=notify
 ExecReload=/bin/kill -HUP $MAINPID
-ExecStart=/usr/bin/vault server -config /etc/vault.d
+ExecStart=/usr/bin/vault server -config {{ vault_config_dir }}
 ExecStop=/usr/bin/vault operator step-down
 KillMode=process
 KillSignal=SIGINT
 LimitNOFILE=65536
 LimitNPROC=infinity
 Restart=on-failure
-RestartSec=2
+RestartSec=10
 
 ProtectSystem=full
 PrivateTmp=yes

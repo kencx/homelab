@@ -1,7 +1,7 @@
 ---
 - name: Copy Vault service file
-  copy:
-    src: "vault.service"
+  template:
+    src: "vault.service.j2"
     dest: "/etc/systemd/system/vault.service"
     mode: 0644
     owner: root
@@ -64,7 +64,7 @@
 #   - Store root token and unseal key
 #   - Login with root token
 #   - First time provisioning of Vault resources with Terraform provider
-#     with root token
+#     using root token
 #
 # After Vault has been initialized, this role will not apply any changes made in
 # terraform/vault. This prevents changes from being applied with the root token after
@@ -73,12 +73,23 @@
 
 # TODO check that bw is setup
 
+- name: Assert that vault_secrets_file is defined
+  assert:
+    that:
+      - vault_secrets_file is defined
+      - vault_secrets_file | length != 0
+    fail_msg: vault_secrets_file is not defined or is empty.
+  when:
+    - vault_store_local | bool
+    - vault_status_json is defined
+    - not vault_status_json.initialized
+
 - name: Assert that bw_password variable is defined
   assert:
     that: bw_password is defined
     fail_msg: bw_password is not defined.
   when:
-    - vault_store_bw
+    - vault_store_bw | bool
     - vault_status_json is defined
     - not vault_status_json.initialized
 

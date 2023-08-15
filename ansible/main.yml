@@ -40,6 +40,8 @@
       tags: nfs
 
     - role: vault
+      vars:
+        vault_server: false
     - role: consul-template
     - role: consul
     - role: nomad

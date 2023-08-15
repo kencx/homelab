@@ -6,6 +6,8 @@ vault_tls_dir: "/opt/vault/tls"
 vault_ca_cert_dir: "/usr/share/ca-certificates/vault"
 vault_log_file: "{{ vault_log_dir }}/vault.log"
 
+vault_server: true
+
 vault_store_local: true
 vault_secrets_file: "{{ playbook_dir }}/vault.txt"
 vault_store_bw: false

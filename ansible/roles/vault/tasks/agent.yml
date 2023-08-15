@@ -2,6 +2,17 @@
 - set_fact:
     local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
 
+- name: Check if {{ local_cert_dir }} exists
+  block:
+    - stat:
+        path: "{{ local_cert_dir }}"
+
+    - assert:
+        that:
+          - local_cert_dir.stat.isdir is defined
+          - local_cert_dir.stat.isdir
+        fail_msg: "{{ local_cert_dir }} does not exist"
+
 - name: Check if Vault CA cert exists on client
   stat:
     path: "{{ vault_ca_cert_dir }}/ca.crt"
@@ -44,8 +55,8 @@
   failed_when: vault_server_status.rc != 0
 
 - name: Copy service file
-  copy:
-    src: "vault-agent.service"
+  template:
+    src: "vault-agent.service.j2"
     dest: "/etc/systemd/system/vault-agent.service"
     mode: 0644
     owner: root
