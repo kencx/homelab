@@ -9,13 +9,13 @@ After=consul.service
 {% endif %}
 
 [Service]
-{% if 'server' in group_names %}
+{% if nomad_server %}
 User=nomad
 Group=nomad
 {% endif %}
 
 ExecReload=/bin/kill -HUP $MAINPID
-{% if 'server' in group_names %}
+{% if nomad_server %}
 {% if nomad_vault_integration %}
 Type=forking
 ExecStart={{ nomad_data_dir }}/nomad-startup.sh

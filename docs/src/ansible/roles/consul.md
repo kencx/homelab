@@ -13,8 +13,8 @@ depending on the host's group name.
 For encryption, the role creates consul-template templates for:
 
 - Consul's gossip key. A new key is added with `consul keygen` if it does not
-  already exist.
-- Consul TLS certs from Vault PKI.
+  already exist
+- Consul TLS certs from Vault PKI
 
 ## Variables
 

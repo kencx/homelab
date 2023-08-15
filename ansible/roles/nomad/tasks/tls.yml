@@ -6,7 +6,7 @@
   changed_when: false
 
 - set_fact:
-    cert_role: "{{ 'server' if ('server' in group_names) else 'client' }}"
+    cert_role: "{{ 'server' if nomad_server else 'client' }}"
 
 # TODO Generate client certs for CLI, UI
 - name: Create CA, certificate and private key for Nomad TLS

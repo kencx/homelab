@@ -1,5 +1,5 @@
 ---
-- name: Create directory
+- name: Create CNI plugins directory
   file:
     path: "/opt/cni/bin"
     mode: 0775
@@ -7,14 +7,42 @@
     group: root
     state: directory
 
-- name: CNI bridge plugin exists
-  stat:
-    path: "/opt/cni/bin/bridge"
-  register: cni_bridge
+- name: Lookup latest version of CNI plugins
+  set_fact:
+    cni_plugin_version: "{{ (lookup('url', 'https://api.github.com/repos/containernetworking/plugins/releases/latest', split_lines=False) | from_json).get('tag_name') | replace('v', '') }}"
+  when: "cni_plugin_version == 'latest'"
 
-- name: Unarchive CNI plugins
+- name: Check CNI plugins release metadata
+  uri:
+    url: "https://api.github.com/repos/containernetworking/plugins/releases/tags/v{{ cni_plugin_version }}"
+    return_content: true
+  register: cni_plugin_release
+
+- name: Get checksum
+  set_fact:
+    cni_plugin_checksum: "{{ lookup('url', item.browser_download_url).split(' ') | first }}"
+  run_once: true
+  loop: "{{ cni_plugin_release.json.assets }}"
+  when: "cni_plugin_tar ~ '.sha256' in item.name"
+  # no_log: true
+
+- name: Download CNI plugins
+  get_url:
+    url: "{{ item.browser_download_url }}"
+    dest: "/tmp/cni-plugins-{{ cni_plugin_version }}.tgz"
+    checksum: "sha256:{{ cni_plugin_checksum }}"
+  loop: "{{ cni_plugin_release.json.assets }}"
+  when: "cni_plugin_tar in item.name"
+  no_log: true
+
+- name: Install CNI plugins
   unarchive:
-    src: "https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz"
-    dest: "/opt/cni/bin"
+    src: "/tmp/cni-plugins-{{ cni_plugin_version }}.tgz"
+    dest: /opt/cni/bin
     remote_src: true
-  when: not cni_bridge.stat.exists
+    keep_newer: true
+    extra_opts:
+      - --no-anchored
+    owner: root
+    group: root
+    mode: 0755

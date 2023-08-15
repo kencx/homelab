@@ -14,14 +14,13 @@
     VAULT_TOKEN: "{{ nomad_ansible_token }}"
   register: prepare_gossip_key
   changed_when: "'present' not in prepare_gossip_key.stdout"
-  when: "'server' in group_names"
+  when: nomad_server | bool
   run_once: true
 
-# TODO setup gossip key rotation with vault:
-# consul-template only triggers reload in consul, it does not
-# renew the secret for us. we need to run a cronjob to trigger this renewal manually.
-# the secret also has no ttl so old versions will never expire.
-# requires helper-script
+# TODO Setup gossip key rotation with vault:
+# consul-template only triggers reload in consul, it does not renew the secret for us.
+# We need to run a cronjob to trigger this renewal manually. the secret also has no ttl
+# so old versions will never expire. requires helper-script
 - name: Add gossip key to Nomad configuration
   blockinfile:
     path: "{{ consul_template_config_dir }}/consul-template.hcl"

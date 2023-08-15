@@ -1,4 +1,11 @@
 ---
+- name: Check for both Nomad server and client enabled
+  fail:
+    msg: "Cannot setup both Nomad server and client on the same node."
+  when:
+    - nomad_server | bool
+    - nomad_client | bool
+
 - name: Create Nomad directories
   file:
     path: "{{ item }}"
@@ -20,10 +27,21 @@
 
 - name: Install CNI plugins
   import_tasks: cni_plugins.yml
-  when: "'server' not in group_names"
+  when: nomad_client | bool
 
 - set_fact:
-    local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
+  local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
+
+- name: Check if {{ local_cert_dir }} exists
+  block:
+    - stat:
+        path: "{{ local_cert_dir }}"
+
+    - assert:
+        that:
+          - local_cert_dir.stat.isdir is defined
+          - local_cert_dir.stat.isdir
+        fail_msg: "{{ local_cert_dir }} does not exist"
 
 - name: Login with Ansible auth cert
   become: false
@@ -59,14 +77,16 @@
 
 - name: Setup Nomad Gossip Encryption
   import_tasks: gossip.yml
-  when: "'server' in group_names"
+  when: nomad_server | bool
 
 - name: Setup Nomad TLS
   import_tasks: tls.yml
 
 - name: Setup Vault integration
   import_tasks: vault_integration.yml
-  when: "'server' in group_names and nomad_vault_integration"
+  when:
+    - nomad_server | bool
+    - nomad_vault_integration | bool
 
 - name: Copy service file
   template:
@@ -95,7 +115,7 @@
         mode: 0644
         owner: nomad
         group: nomad
-      when: "'server' in group_names"
+      when: nomad_server | bool
 
     - name: Client-only config
       template:
@@ -104,7 +124,7 @@
         mode: 0644
         owner: nomad
         group: nomad
-      when: "'server' not in group_names"
+      when: nomad_client | bool
   notify:
     - reload nomad
 

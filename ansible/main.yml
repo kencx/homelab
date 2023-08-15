@@ -44,7 +44,13 @@
         vault_server: false
     - role: consul-template
     - role: consul
+      vars:
+        consul_server: false
+        consul_client: true
     - role: nomad
+      vars:
+        nomad_server: false
+        nomad_client: true
 
   tasks:
     - name: Allow HTTP, HTTPS ports on ufw
