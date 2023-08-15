@@ -4,18 +4,18 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-{% if 'server' in group_names %}
+{% if consul_server %}
 User=consul
 Group=consul
 {% endif %}
 
 ExecReload=/bin/kill -HUP $MAINPID
-ExecStart=/usr/bin/consul agent -config-dir=/etc/consul.d
+ExecStart=/usr/bin/consul agent -config-dir={{ consul_config_dir }}
 ExecStop=/usr/bin/consul leave
 KillMode=process
 KillSignal=SIGINT
 Restart=on-failure
-RestartSec=2
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target

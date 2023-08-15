@@ -5,18 +5,20 @@ consul_tls_dir: "{{ consul_data_dir }}/tls"
 consul_template_config_dir: "/etc/consul-template"
 
 # server
+consul_server: true
 consul_bootstrap_expect: 1
 
 # client
+consul_client: false
 consul_server_ip: ""
 
 # certificate generation
 consul_vault_addr: "https://localhost:8200"
-consul_common_name: "server.dc1.consul"
+consul_common_name: "{{ 'server' if consul_server else 'client' }}.dc1.consul"
 consul_alt_names: "consul.service.consul"
 consul_ip_sans: "127.0.0.1"
 
 # watches
-setup_consul_watches: true
+setup_consul_watches: false
 consul_gotify_url: ""
 consul_gotify_token: ""

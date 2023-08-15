@@ -1,4 +1,11 @@
 ---
+- name: Check for both Consul server and client enabled
+  fail:
+    msg: "Cannot setup both Consul server and client on the same node."
+  when:
+    - consul_server | bool
+    - consul_client | bool
+
 - name: Create Consul directories
   file:
     path: "{{ item }}"
@@ -19,7 +26,18 @@
     state: directory
 
 - set_fact:
-    local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
+  local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
+
+- name: Check if {{ local_cert_dir }} exists
+  block:
+    - stat:
+        path: "{{ local_cert_dir }}"
+
+    - assert:
+        that:
+          - local_cert_dir.stat.isdir is defined
+          - local_cert_dir.stat.isdir
+        fail_msg: "{{ local_cert_dir }} does not exist"
 
 - name: Login with Ansible auth cert
   become: false
@@ -80,8 +98,8 @@
     owner: consul
     group: consul
   when:
-    - "'server' in group_names"
-    - setup_consul_watches
+    - consul_server | bool
+    - setup_consul_watches | bool
 
 - name: Copy Consul config files
   block:
@@ -100,7 +118,7 @@
         mode: 0644
         owner: consul
         group: consul
-      when: "'server' in group_names"
+      when: consul_server | bool
 
     - name: Client-only config
       template:
@@ -109,7 +127,7 @@
         mode: 0644
         owner: consul
         group: consul
-      when: "'server' not in group_names"
+      when: consul_client | bool
   notify:
     - reload consul
 
