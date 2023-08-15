@@ -102,7 +102,7 @@
         group: "{{ vps_username }}"
 
     - name: Configure sxkcd server
-      import_tasks: tasks/sxkcd.yml
+      import_tasks: ../tasks/sxkcd.yml
       vars:
         sxkcd_user: "{{ vps_username }}"
         sxkcd_image: "ghcr.io/kencx/sxkcd:${SXKCD_TAG:-v0.1.3}"
@@ -111,7 +111,7 @@
         sxkcd_webhook_secret: foo
 
     - name: Configure blog
-      import_tasks: tasks/blog.yml
+      import_tasks: ../tasks/blog.yml
       vars:
         blog_user: "{{ vps_username }}"
         blog_server_name: ken.cheo.dev

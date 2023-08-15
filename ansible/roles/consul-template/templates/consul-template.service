@@ -1,7 +1,7 @@
 [Unit]
 Description=Consul-template
-Wants=network-online.target
-After=network-online.target
+Wants=network-online.target vault-agent.service
+After=network-online.target vault-agent.service
 StartLimitInterval=180
 StartLimitBurst=3
 
