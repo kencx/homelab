@@ -27,6 +27,12 @@ as:
 | common_reset_nomad | Clear Nomad data directory | boolean | `true` |
 | common_dotfiles | List of dotfiles to be added, and their destinations | list | `[]` |
 
+## Tags
+
+- Skip `bw` to not install the Bitwarden CLI
+- Skip `nfs` to not create any NFS share directories
+- Skip `dotfiles` to not copy any remote dotfiles
+
 ## Notes
 
 - This role clears any existing `/opt/nomad/data` directories to a blank slate. To disable this
