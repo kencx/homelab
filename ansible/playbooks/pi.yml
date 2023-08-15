@@ -30,5 +30,12 @@
             - {rule: 'allow', port: '4000', proto: 'tcp', comment: 'blocky http'}
     - role: coredns
     - role: blocky
-
+      vars:
+        blocky_client_lookup:
+          upstream: 192.168.86.1
+          clients:
+            arch:
+              - 192.168.86.82
+            pixel:
+              - 192.168.86.20
 # TODO add static route to access private subnet

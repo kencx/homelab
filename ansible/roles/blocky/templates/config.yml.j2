@@ -29,13 +29,10 @@ blocking:
 caching:
   maxItemsCount: 0
 
+{% if blocky_client_lookup | length != 0 %}
 clientLookup:
-  upstream: {{ blocky_client_upstream }}
-  clients:
-  {% for client in blocky_clients %}
-    {{ client.name }}:
-      - {{ client.ip }}
-  {% endfor %}
+{{ blocky_client_lookup | to_nice_yaml(indent=2, sort_keys=false) | indent(2, true) }}
+{% endif %}
 
 ports:
   dns: 53

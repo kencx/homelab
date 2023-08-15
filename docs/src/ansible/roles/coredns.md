@@ -11,8 +11,6 @@ DNS server.
 | Variable | Description | Type | Default |
 | -------- | ----------- | ---- | ------- |
 | coredns_version | Version to install | string | `1.10.1` |
-| coredns_url | Binary URL | string | |
-| coredns_checksum_url | Binary checksum URL | string | `${coredns_url}.sha256` |
 | coredns_dns_port | | int | `5300` |
 | coredns_user | User | string | `coredns` |
 | coredns_group | Group | string | `coredns` |

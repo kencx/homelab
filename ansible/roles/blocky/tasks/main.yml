@@ -1,18 +1,35 @@
 ---
+- name: Lookup latest version of blocky
+  set_fact:
+    blocky_version: "{{ (lookup('url', 'https://api.github.com/repos/0xERR0R/blocky/releases/latest', split_lines=False) | from_json).get('tag_name') | replace('v', '') }}"
+  when: "blocky_version == 'latest'"
+
+- name: Check blocky release metadata
+  uri:
+    url: "https://api.github.com/repos/0xERR0R/blocky/releases/tags/v{{ blocky_version }}"
+    return_content: true
+  register: blocky_release
+
 - name: Get checksum
   set_fact:
-    blocky_checksum: "{{ lookup('url', blocky_checksum_url).split(',') |
+    blocky_checksum: "{{ lookup('url', item.browser_download_url).split(',') |
         select('regex', regex) |
         first | split(' ') | first }}"
-  run_once: true
   vars:
-    regex: "{{ '^.* ' ~ __blocky_tar|trim }}"
+    regex: "{{ '^.* ' ~ blocky_tar|trim }}"
+  run_once: true
+  loop: "{{ blocky_release.json.assets }}"
+  when: "'blocky_checksums.txt' in item.name"
+  no_log: true
 
 - name: Download blocky
   get_url:
-    url: "{{ blocky_url }}"
+    url: "{{ item.browser_download_url }}"
     dest: "/tmp/blocky-{{ blocky_version }}.tgz"
     checksum: "sha256:{{ blocky_checksum }}"
+  loop: "{{ blocky_release.json.assets }}"
+  when: "blocky_tar in item.name"
+  no_log: true
 
 - name: Install blocky
   unarchive:
@@ -21,6 +38,9 @@
     remote_src: true
     include: blocky
     creates: /usr/local/bin/blocky
+    keep_newer: true
+    extra_opts:
+      - --no-anchored
     owner: root
     group: root
     mode: 0755

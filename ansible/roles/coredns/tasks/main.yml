@@ -1,21 +1,42 @@
 ---
+- name: Lookup latest version of coredns
+  set_fact:
+    coredns_version: "{{ (lookup('url', 'https://api.github.com/repos/coredns/coredns/releases/latest', split_lines=False) | from_json).get('tag_name') | replace('v', '') }}"
+  when: "coredns_version == 'latest'"
+
+- name: Check coredns release metadata
+  uri:
+    url: "https://api.github.com/repos/coredns/coredns/releases/tags/v{{ coredns_version }}"
+    return_content: true
+  register: coredns_release
+
 - name: Get checksum
   set_fact:
-    coredns_checksum: "{{ lookup('url', coredns_checksum_url).split(' ')[0] }}"
+    coredns_checksum: "{{ lookup('url', item.browser_download_url).split(' ') | first }}"
   run_once: true
+  loop: "{{ coredns_release.json.assets }}"
+  when: "coredns_tar ~ '.sha256' in item.name"
+  no_log: true
 
 - name: Download coredns
   get_url:
-    url: "{{ coredns_url }}"
+    url: "{{ item.browser_download_url }}"
     dest: "/tmp/coredns-{{ coredns_version }}.tgz"
     checksum: "sha256:{{ coredns_checksum }}"
+  loop: "{{ coredns_release.json.assets }}"
+  when: "coredns_tar in item.name"
+  no_log: true
 
 - name: Install coredns
   unarchive:
     src: "/tmp/coredns-{{ coredns_version }}.tgz"
     dest: /usr/local/bin
     remote_src: true
+    include: coredns
     creates: /usr/local/bin/coredns
+    keep_newer: true
+    extra_opts:
+      - --no-anchored
     owner: root
     group: root
     mode: 0755
