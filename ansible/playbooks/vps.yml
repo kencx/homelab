@@ -66,10 +66,10 @@
         - docker_users: ["{{ vps_username }}"]
 
     - name: Setup nginx
-      role: nginx
+      role: kencx.ansible.nginx
 
     - name: Generate Let's Encrypt certificates
-      role: certbot
+      role: kencx.ansible.certbot
       vars:
         certbot_admin_email: "{{ vps_certbot_email }}"
         certbot_certs:
@@ -81,7 +81,7 @@
               - api.cheo.dev
 
     - name: Setup webhook
-      role: webhook
+      role: kencx.ansible.webhook
       vars:
         webhook_nginx_setup: true
         webhook_nginx_server_name: "api.cheo.dev"
