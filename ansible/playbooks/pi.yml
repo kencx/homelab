@@ -22,12 +22,12 @@
     - name: Security hardening
       role: kencx.ansible.security
       vars:
-        - ssh_disable_root_login: true
-        - ufw_rules:
-            - {rule: 'allow', port: '22', proto: 'tcp', comment: 'ssh'}
-            - {rule: 'allow', port: '53', proto: 'tcp', comment: 'dns'}
-            - {rule: 'allow', port: '53', proto: 'udp', comment: 'dns'}
-            - {rule: 'allow', port: '4000', proto: 'tcp', comment: 'blocky http'}
+        ssh_disable_root_login: true
+        ufw_rules:
+          - {rule: 'allow', port: '22', proto: 'tcp', comment: 'ssh'}
+          - {rule: 'allow', port: '53', proto: 'tcp', comment: 'dns'}
+          - {rule: 'allow', port: '53', proto: 'udp', comment: 'dns'}
+          - {rule: 'allow', port: '4000', proto: 'tcp', comment: 'blocky http'}
     - role: coredns
     - role: blocky
       vars:
