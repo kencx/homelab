@@ -42,7 +42,6 @@
 <!-- - [Consul]() -->
 <!-- - [Nomad]() -->
 <!-- - [Certificate Management]() -->
-<!-- - [VPS](vps.md) -->
 
 # Applications
 
