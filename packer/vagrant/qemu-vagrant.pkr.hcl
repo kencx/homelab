@@ -57,7 +57,7 @@ build {
   }
 
   provisioner "ansible" {
-    playbook_file = "../../ansible/common.yml"
+    playbook_file = "../../ansible/playbooks/common.yml"
     extra_arguments = [
       "-e",
       "user=${var.ssh_username}",
