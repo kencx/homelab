@@ -201,3 +201,18 @@ resource "nomad_job" "registry" {
       registry_volumes_data  = var.registry_volumes_data
   })
 }
+
+resource "nomad_job" "pigallery2" {
+  jobspec = templatefile("${local.apps}/pigallery2.tpl",
+    {
+      datacenters          = local.datacenters
+      pigallery2_subdomain = "images"
+      domain               = local.domain
+
+      pigallery2_image_version  = var.pigallery2_image_version
+      pigallery2_volumes_config = var.pigallery2_volumes_config
+      pigallery2_volumes_data   = var.pigallery2_volumes_data
+      pigallery2_volumes_images = var.pigallery2_volumes_images
+      pigallery2_volumes_tmp    = var.pigallery2_volumes_tmp
+  })
+}

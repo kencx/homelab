@@ -181,3 +181,28 @@ variable "registry_volumes_data" {
   type        = string
   description = "Data volume for registry"
 }
+
+variable "pigallery2_image_version" {
+  type        = string
+  description = "Docker image version for pigallery2"
+}
+
+variable "pigallery2_volumes_config" {
+  type        = string
+  description = "Config volume for pigallery2"
+}
+
+variable "pigallery2_volumes_data" {
+  type        = string
+  description = "Data volume for pigallery2"
+}
+
+variable "pigallery2_volumes_images" {
+  type        = string
+  description = "Image volume for pigallery2"
+}
+
+variable "pigallery2_volumes_tmp" {
+  type        = string
+  description = "Temp volume for pigallery2"
+}
