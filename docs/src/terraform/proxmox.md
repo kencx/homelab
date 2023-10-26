@@ -3,13 +3,38 @@
 The
 [telmate/proxmox](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs)
 provider is used by Terraform to communicate with the Proxmox API. The provider
-must be configured appropriately:
+must be configured appropriately.
+
+## Authentication
+
+The Terraform configuration in `terraform/proxmox` defines the appropriate
+Proxmox users, groups and roles for the management of Proxmox VMs with
+Terraform. The created user is given only the permissions necessary to clone,
+create and destroy VMs. Root permissions are necessary for access management.
+
+To use the created user, create an API token in the web console with the
+following options:
+
+```text
+user: user@pam
+token_id: some_secret
+privilege_separation: false
+```
+
+where `user@pam` must be the same as the `user_id` in
+`proxmox_virtual_environment_user.tf`. Then, use the following credentials with
+your chosen Proxmox provider:
 
 ```hcl
 provider "proxmox" {
-  pm_api_url  = var.proxmox_ip
-  pm_user     = var.proxmox_user
-  pm_password = var.proxmox_password
+    endpoint = ""
+    api_token = "user@pam!some_secret=api_token"
+    insecure = true
+
+    ssh {
+      agent = true
+      username = "root"
+    }
 }
 ```
 
