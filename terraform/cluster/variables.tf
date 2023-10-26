@@ -3,12 +3,7 @@ variable "proxmox_ip" {
   description = "IP of Proxmox server (mandatory)"
 }
 
-variable "proxmox_user" {
-  type    = string
-  default = "root@pam"
-}
-
-variable "proxmox_password" {
+variable "proxmox_api_token" {
   type      = string
   sensitive = true
 }
@@ -20,14 +15,14 @@ variable "target_node" {
 }
 
 variable "tags" {
-  type        = string
+  type        = list(string)
   description = "VM tags"
-  default     = "prod"
+  default     = ["prod"]
 }
 
-variable "template_name" {
-  type        = string
-  description = "Template to clone"
+variable "template_id" {
+  type        = number
+  description = "Template ID to clone"
 }
 
 variable "onboot" {
@@ -36,7 +31,7 @@ variable "onboot" {
   default     = false
 }
 
-variable "oncreate" {
+variable "started" {
   type        = bool
   description = "Start VM on creation"
   default     = true
@@ -83,13 +78,9 @@ variable "server_memory" {
 }
 
 variable "server_disk_size" {
-  type        = string
-  description = "Disk size in server nodes. The format must match the regex \\d+[GMK]."
-  default     = "5G"
-  validation {
-    condition     = can(regex("^[0-9]+[GMK]$", var.server_disk_size))
-    error_message = "Format must match regex \\d+[GMK]"
-  }
+  type        = number
+  description = "Disk size (GB) in server nodes"
+  default     = 5
 }
 
 variable "client_cores" {
@@ -107,22 +98,18 @@ variable "client_sockets" {
 variable "client_memory" {
   type        = number
   description = "Memory (MB) in client nodes"
-  default     = 2048
+  default     = 1024
 }
 
 variable "client_disk_size" {
-  type        = string
-  description = "Disk size in client nodes. The format must match the regex \\d+[GMK]."
-  default     = "5G"
-  validation {
-    condition     = can(regex("^[0-9]+[GMK]$", var.client_disk_size))
-    error_message = "Format must match regex \\d+[GMK]"
-  }
+  type        = number
+  description = "Disk size (GB) in server nodes"
+  default     = 5
 }
 
-variable "disk_storage_pool" {
+variable "disk_datastore" {
   type        = string
-  description = "Storage pool on which to store disk"
+  description = "Datastore on which to store disk"
   default     = "volumes"
 }
 
@@ -148,6 +135,15 @@ variable "client_ip_address" {
   }
 }
 
+variable "control_ip_address" {
+  type        = string
+  description = "Control IPv4 address in CIDR notation (eg. 10.10.10.2/24)"
+  validation {
+    condition     = can(cidrnetmask(var.control_ip_address))
+    error_message = "Must be a valid IPv4 address with subnet mask"
+  }
+}
+
 variable "ip_gateway" {
   type        = string
   description = "IP gateway address (eg. 10.10.10.1)"
@@ -160,11 +156,6 @@ variable "ip_gateway" {
 variable "ssh_user" {
   type        = string
   description = "SSH user"
-}
-
-variable "ssh_private_key_file" {
-  type        = string
-  description = "Private SSH key file"
 }
 
 variable "ssh_public_key_file" {

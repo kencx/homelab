@@ -1,16 +1,19 @@
 terraform {
   required_providers {
     proxmox = {
-      source  = "telmate/proxmox"
-      version = ">= 2.9.10"
+      source  = "bpg/proxmox"
+      version = ">=0.36.0"
     }
   }
 }
 
 provider "proxmox" {
-  pm_api_url  = var.proxmox_ip
-  pm_user     = var.proxmox_user
-  pm_password = var.proxmox_password
+  endpoint  = var.proxmox_ip
+  api_token = var.proxmox_api_token
+  insecure  = true
+  ssh {
+    agent = true
+  }
 }
 
 locals {
@@ -37,23 +40,22 @@ module "dev" {
   tags        = var.tags
   target_node = var.target_node
 
-  clone_template_name = var.template_name
-  onboot              = var.onboot
-  oncreate            = var.oncreate
+  clone_template_id = var.template_id
+  onboot            = var.onboot
+  started           = var.started
 
   cores   = var.server_cores
   sockets = var.server_sockets
   memory  = var.server_memory
 
-  disk_size         = var.server_disk_size
-  disk_storage_pool = var.disk_storage_pool
+  disk_size      = var.server_disk_size
+  disk_datastore = var.disk_datastore
 
   ip_address = each.value.ip_address
   ip_gateway = var.ip_gateway
 
   ssh_user        = var.ssh_user
-  ssh_private_key = file(var.ssh_private_key_file)
-  ssh_public_key  = file(var.ssh_public_key_file)
+  ssh_public_keys = [file(var.ssh_public_key_file)]
 }
 
 module "dev-client" {
@@ -65,23 +67,22 @@ module "dev-client" {
   tags        = var.tags
   target_node = var.target_node
 
-  clone_template_name = var.template_name
-  onboot              = var.onboot
-  oncreate            = var.oncreate
+  clone_template_id = var.template_id
+  onboot            = var.onboot
+  started           = var.started
 
   cores   = var.client_cores
   sockets = var.client_sockets
   memory  = var.client_memory
 
-  disk_size         = var.client_disk_size
-  disk_storage_pool = var.disk_storage_pool
+  disk_size      = var.server_disk_size
+  disk_datastore = var.disk_datastore
 
   ip_address = each.value.ip_address
   ip_gateway = var.ip_gateway
 
   ssh_user        = var.ssh_user
-  ssh_private_key = file(var.ssh_private_key_file)
-  ssh_public_key  = file(var.ssh_public_key_file)
+  ssh_public_keys = [file(var.ssh_public_key_file)]
 }
 
 module "dev-control" {
@@ -93,20 +94,20 @@ module "dev-control" {
   tags        = var.tags
   target_node = var.target_node
 
-  clone_template_name = var.template_name
-  onboot              = var.onboot
-  oncreate            = var.oncreate
+  clone_template_id = var.template_id
+  onboot            = var.onboot
+  started           = var.started
 
-  cores             = 1
-  sockets           = 1
-  memory            = 1024
-  disk_size         = "10G"
-  disk_storage_pool = var.disk_storage_pool
+  cores   = 1
+  sockets = 1
+  memory  = 1024
+
+  disk_size      = 10
+  disk_datastore = var.disk_datastore
 
   ip_address = var.control_ip_address
   ip_gateway = var.ip_gateway
 
   ssh_user        = var.ssh_user
-  ssh_private_key = file(var.ssh_private_key_file)
-  ssh_public_key  = file(var.ssh_public_key_file)
+  ssh_public_keys = [file(var.ssh_public_key_file)]
 }

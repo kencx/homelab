@@ -17,20 +17,14 @@ variable "vmid" {
 }
 
 variable "tags" {
-  type        = string
+  type        = list(string)
   description = "VM tags"
-  default     = ""
+  default     = []
 }
 
-variable "description" {
+variable "clone_template_id" {
   type        = string
-  description = "VM description"
-  default     = "This VM is managed by Terraform."
-}
-
-variable "clone_template_name" {
-  type        = string
-  description = "VM Template name to clone"
+  description = "VM Template ID to clone"
 }
 
 variable "onboot" {
@@ -39,7 +33,7 @@ variable "onboot" {
   default     = false
 }
 
-variable "oncreate" {
+variable "started" {
   type        = bool
   description = "Start VM on creation"
   default     = true
@@ -64,18 +58,18 @@ variable "memory" {
 }
 
 variable "disk_size" {
-  type        = string
+  type        = number
   description = <<EOT
-  (Optional) VM bootdisk size
+  (Optional) VM bootdisk size in GB
 
-  Default: 10G
+  Default: 10
   EOT
-  default     = "10G"
+  default     = 10
 }
 
-variable "disk_storage_pool" {
+variable "disk_datastore" {
   type        = string
-  description = "Storage pool on which to store disk"
+  description = "Datastore on which to store disk"
   default     = "volumes"
 }
 
@@ -102,12 +96,7 @@ variable "ssh_user" {
   description = "SSH user"
 }
 
-variable "ssh_private_key" {
-  type        = string
-  description = "Private SSH key"
-}
-
-variable "ssh_public_key" {
-  type        = string
-  description = "Public SSH key"
+variable "ssh_public_keys" {
+  type        = list(string)
+  description = "List of public SSH keys"
 }
