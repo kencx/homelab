@@ -1,70 +1,88 @@
 # Proxmox
 
-The
-[telmate/proxmox](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs)
-provider is used by Terraform to communicate with the Proxmox API. The provider
-must be configured appropriately.
+This page describes the Terraform configuration for managing
+[Proxmox](https://www.proxmox.com/en/). It uses the
+[bpg/proxmox](https://registry.terraform.io/providers/bpg/proxmox/latest/docs)
+provider to manage three types of Proxmox resources:
 
-## Authentication
+- Access management
+- Cloud images
+- VMs
 
-The Terraform configuration in `terraform/proxmox` defines the appropriate
-Proxmox users, groups and roles for the management of Proxmox VMs with
-Terraform. The created user is given only the permissions necessary to clone,
-create and destroy VMs. Root permissions are necessary for access management.
+## Access Management
 
-To use the created user, create an API token in the web console with the
+This configuration is found in `terraform/proxmox` and creates a dedicated
+Terraform user for the management of Proxmox VMs to be described later. It
+defines a `terraform@pam` user in a `Terraform` group which have the minimum
+roles required for creating, cloning and destroying VMs. This configuration
+requires credentials with at least the `PVEUserAdmin` role (I use the root user
+for convenience).
+
+After creating the user, we must create an API token in the web console with the
 following options:
 
 ```text
-user: user@pam
+user: terraform@pam
 token_id: some_secret
 privilege_separation: false
 ```
 
-where `user@pam` must be the same as the `user_id` in
-`proxmox_virtual_environment_user.tf`. Then, use the following credentials with
-your chosen Proxmox provider:
+## Upload of Cloud Images
 
-```hcl
-provider "proxmox" {
-    endpoint = ""
-    api_token = "user@pam!some_secret=api_token"
-    insecure = true
+The same Terraform configuration in `terraform/proxmox` can also be used to
+upload cloud images to Proxmox with a given source URL. These images
+must have the `.img` extension or Proxmox will fail.
 
-    ssh {
-      agent = true
-      username = "root"
-    }
-}
-```
+However, these cloud images cannot be used directly by Packer or Terraform to
+create VMs. Instead, a template must be created as described in [Cloud
+Images](../images/cloud_image.md).
 
-## Overview
+## VM Management
 
-The Terraform configuration in `terraform/cluster` is used to deploy server and
-client cluster nodes. It uses a custom module (`terraform/modules/vm`) that
-clones an existing VM template and bootstraps it with cloud-init.
+The Terraform configuration in `terraform/cluster` is used to create Proxmox VMs
+for the deployment of server and client cluster nodes. It utilizes a custom
+module (`terraform/modules/vm`) that clones an existing VM template and
+bootstraps it with cloud-init.
 
 >**Note**: The VM template must have cloud-init installed. See
 >[Packer](../images/packer.md) for how to create a compatible template.
 
-The number of nodes provisioned are defined by the length of the array
+While root credentials can be used, this configuration accepts an API token
+(created previously):
+
+```hcl
+provider "proxmox" {
+    endpoint = "https://[ip]:8006/api2/json"
+    api_token = "terraform@pam!some_secret=api_token"
+    insecure = true
+
+    ssh {
+      agent = true
+    }
+}
+```
+
+The number of VMs provisioned are defined by the length of the array
 variables. The following will deploy four nodes in total: two server and two
 client nodes with the given IP addresses. All nodes will be cloned from the
 given VM template.
 
 ```hcl
-template_name = "base"
-server_vmid      = [110, 111]
-client_vmid      = [120, 121]
+template_id       = 5000
+server_vmid       = [110, 111]
+client_vmid       = [120, 121]
 server_ip_address = ["10.10.10.110/24", "10.10.10.111/24"]
 client_ip_address = ["10.10.10.120/24", "10.10.10.121/24"]
 ip_gateway        = "10.10.10.1"
 ```
 
 On success, the provisioned VMs are accessible via the configured SSH username
-and key pair.
+and public key.
 
-## Ansible Inventory
+>**Note**: The VM template must have `qemu-guest-agent` installed and `agent=1`
+>set. Otherwise, Terraform will timeout.
+
+### Ansible Inventory
 Terraform will also generate an Ansible inventory file `tf_ansible_inventory` in
 the same directory. Ansible can read this inventory file automatically by
 appending the following in the `ansible.cfg`:
@@ -75,57 +93,57 @@ inventory=../terraform/cluster/tf_ansible_inventory,/path/to/other/inventory/fil
 
 ## Variables
 
+### Proxmox
+
+| Variable               | Description            | Type         | Default    |
+| ---------------------- | -----------------------| ------------ | ---------- |
+| proxmox_ip             | Proxmox IP address     | string       |            |
+| proxmox_user           | Proxmox API token      | string       | `root@pam` |
+| proxmox_password       | Proxmox API token      | string       |            |
+
 ### VM
 
 | Variable               | Description                                    | Type         | Default    |
 | ---------------------- | ---------------------------------------------- | ------------ | ---------- |
 | proxmox_ip             | Proxmox IP address                             | string       |            |
-| proxmox_user           | Proxmox username                               | string       | `root@pam` |
-| proxmox_password       | Proxmox pw                                     | string       |            |
+| proxmox_api_token      | Proxmox API token                              | string       |            |
 | target_node            | Proxmox node to start VM in                    | string       | `pve`      |
-| tags                   | Proxmox VM tags                                | string       | `prod`     |
-| template_name          | Proxmox VM template to clone                   | string       |            |
+| tags                   | List of Proxmox VM tags                        | list(string) | `[prod]` |
+| template_id            | Template ID to clone                           | number       |            |
 | onboot                 | Start VM on boot                               | bool         | `false`    |
-| oncreate               | Start VM on creation                           | bool         | `true`     |
+| started                | Start VM on creation                           | bool         | `true`     |
 | server_hostname_prefix | Hostname prefix for all server nodes           | string       | `server`   |
 | server_vmid            | List of server VM IDs                          | list(number) |            |
 | server_cores           | Number of cores for all server nodes           | number       | `2`        |
 | server_sockets         | Number of sockets for all server nodes         | number       | `2`        |
 | server_memory          | Total memory for all server nodes (MB)         | number       | `2048`     |
-| server_disk_size       | Disk size in all server nodes                  | string       | `5G`       |
+| server_disk_size       | Disk size in all server nodes (GB)             | string       | `5`       |
 | client_hostname_prefix | Hostname prefix for all client nodes           | string       | `client`   |
 | client_vmid            | List of client VM IDs                          | list(number) |            |
 | client_cores           | Number of cores for all client nodes           | number       | `2`        |
 | client_sockets         | Number of sockets for all client nodes         | number       | `2`        |
 | client_memory          | Total memory for all client nodes (MB)         | number       | `2048`     |
-| client_disk_size       | Disk size in all client nodes                  | string       | `5G`       |
+| client_disk_size       | Disk size in all client nodes (GB)             | string       | `5`       |
+| disk_datastore         | Datastore on which to store VM disk            | string       | `volumes`  |
 | server_ip_address      | List of server IPv4 addresses in CIDR notation | list(string) |            |
 | client_ip_address      | List of client IPv4 addresses in CIDR notation | list(string) |            |
+| control_ip_address     | Control IPv4 address in CIDR notation          | string       |            |
 | ip_gateway             | IPv4 gateway address                           | string       |            |
-| disk_storage_pool      | Storage pool on which to store VM disk         | string       | `volumes`  |
 | ssh_username           | User to SSH into during provisioning           | string       |            |
 | ssh_private_key_file   | Filepath of private SSH key                    | string       |            |
 | ssh_public_key_file    | Filepath of public SSH key                     | string       |            |
 
-- `*_disk_size` must match the regex `\d+[GMK]`.
-- The VM template corresponding to `template_name` must be exist.
+- The VM template corresponding to `template_id` must exist
 - The length of `server_vmid` and `server_ip_address` must be equal. Each
   element in the latter corresponds to the IP address of the latter. The same
-  applies for the client arrays.
-- The lists of IPv4 addresses must be in CIDR notation with subnet masks.
+  applies for the client arrays
+- The lists of IPv4 addresses must be in CIDR notation with subnet masks
 
 ## Notes
 
-### Inconsistent Disk Changes
-
-There is an [existing
-bug](https://github.com/Telmate/terraform-provider-proxmox/issues/700) that may
-cause Terraform plans to add additional disks that are not configured. The bug
-is inconsistent and appears to be random.
-
 ### Proxmox credentials and LXC bind mounts
 
-Credentials `proxmox_user="root@pam"` and `proxmox_password` must be used
-in place of the API token credentials if you require bind mounts. There is [no
+Root credentials must be used in place of an API token if you require bind
+mounts with an LXC. There is [no
 support](https://bugzilla.proxmox.com/show_bug.cgi?id=2582) for mounting bind
 mounts to LXC via an API token.

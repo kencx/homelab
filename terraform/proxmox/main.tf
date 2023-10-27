@@ -7,10 +7,6 @@ terraform {
   }
 }
 
-# This configuration requires root credentials for access management for future
-# Terraform runs. It creates a "terraform" user for management of VMs and is to be used
-# with an API token. The API token must be manually created in the PVE web console.
-
 provider "proxmox" {
   endpoint = var.proxmox_ip
   username = var.proxmox_user
