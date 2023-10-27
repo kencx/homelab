@@ -59,13 +59,12 @@ software installed (eg. Docker). For more information, refer to
 2. Populate the necessary variables in `terraform.tfvars`:
 
 ```hcl
-proxmox_ip       = "https://${PVE_IP}:8006/api2/json"
-proxmox_user     = "user@pam"
-proxmox_password = "password"
+proxmox_ip        = "https://${PVE_IP}:8006/api2/json"
+proxmox_api_token = "${API_TOKEN}"
 
-template_name = "base-template"
-server_vmid      = [110]
-client_vmid      = [111]
+template_id       = 5000
+server_vmid       = [110]
+client_vmid       = [111]
 server_ip_address = ["10.10.10.110/24"]
 client_ip_address = ["10.10.10.111/24"]
 ip_gateway        = "10.10.10.1"
@@ -74,6 +73,9 @@ ssh_user             = "debian"
 ssh_private_key_file = "/path/to/ssh/private/key"
 ssh_public_key_file  = "/path/to/ssh/public/key"
 ```
+
+>**Note**: To create a Proxmox API token, see [Access
+>Management](./terraform/proxmox.md#access-management).
 
 >**Note**: Any template to be cloned by Terraform must have `cloud-init` and
 >`qemu-guest-agent` installed.
