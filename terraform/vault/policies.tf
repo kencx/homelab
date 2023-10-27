@@ -73,3 +73,8 @@ resource "vault_policy" "nomad_registry" {
   name   = "nomad_registry"
   policy = file("policies/nomad_registry.hcl")
 }
+
+resource "vault_policy" "nomad_paperless" {
+  name   = "nomad_paperless"
+  policy = file("policies/nomad_paperless.hcl")
+}

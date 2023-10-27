@@ -31,19 +31,9 @@ job "paperless" {
               local_bind_port  = 6379
             }
           }
+          # prevent Consul from attaching traefik tags to sidecar task
           tags = ["dummy"]
         }
-      }
-
-      check {
-        type     = "http"
-        path     = "/"
-        port     = "http"
-        interval = "30s"
-        timeout  = "5s"
-
-        success_before_passing   = "3"
-        failures_before_critical = "3"
       }
     }
 
@@ -56,16 +46,50 @@ job "paperless" {
         ports              = ["http"]
 
         volumes = [
-          "paperless_volumes_data:/usr/src/paperless/data",
-          "paperless_volumes_consume:/usr/src/paperless/consume",
-          "paperless_volumes_media:/usr/src/paperless/media",
+          "${paperless_volumes_data}:/usr/src/paperless/data",
+          "${paperless_volumes_consume}:/usr/src/paperless/consume",
+          "${paperless_volumes_media}:/usr/src/paperless/media",
         ]
 
-        labels = {
-          "diun.enable"     = "true"
-          "diun.watch_repo" = "true"
-          "diun.max_tags"   = 3
-        }
+        # labels = {
+        #   "diun.enable"     = "true"
+        #   "diun.watch_repo" = "true"
+        #   "diun.max_tags"   = 3
+        # }
+      }
+
+      vault {
+        policies = ["nomad_paperless", "paperless"]
+      }
+
+      template {
+        data        = <<EOF
+{{ with secret "kvv2/data/prod/nomad/paperless" }}
+PAPERLESS_SECRET_KEY="{{ .Data.data.secret_key }}"
+PAPERLESS_ADMIN_USER="{{ .Data.data.admin_username }}"
+PAPERLESS_ADMIN_PASSWORD="{{ .Data.data.admin_password }}"
+{{ end }}
+EOF
+        destination = "$${NOMAD_SECRETS_DIR}/auth.env"
+        env         = true
+      }
+
+      template {
+        data        = <<EOF
+{{ range service "postgres" }}
+PAPERLESS_DBENGINE  = "postgresql"
+PAPERLESS_DBHOST    = "{{ .Address }}"
+PAPERLESS_DBPORT    = "{{ .Port }}"
+{{ end }}
+PAPERLESS_DBNAME    = "paperless"
+PAPERLESS_DBUSER    = "paperless"
+{{ with secret "postgres/static-creds/paperless" }}
+PAPERLESS_DBPASS    = "{{ .Data.password }}"
+PAPERLESS_DBSSLMODE = "disable"
+{{ end }}
+EOF
+        destination = "$${NOMAD_SECRETS_DIR}/db.env"
+        env         = true
       }
 
       env {
@@ -75,7 +99,6 @@ job "paperless" {
         PAPERLESS_URL       = "https://${paperless_subdomain}.${domain}"
         PAPERLESS_REDIS     = "redis://$${NOMAD_UPSTREAM_ADDR_paperless_redis}"
 
-        PAPERLESS_SECRET_KEY   = ""
         PAPERLESS_OCR_LANGUAGE = "eng"
 
         # default 0, set to 1 on pi
@@ -84,22 +107,23 @@ job "paperless" {
         # default 2, set to 1 on pi
         PAPERLESS_WEBSERVER_WORKERS = 1
 
-        # traefik
-        PAPERLESS_HTTP_REMOTE_USER_HEADER_NAME = HTTP_X_FORWARDED_USER
-        PAPERLESS_ALLOWED_HOSTS                = "$${NOMAD_IP_http},localhost"
-
-        # refer to docs
-        PAPERLESS_TASKS_WORKERS      = 2
+        PAPERLESS_ENABLE_NLTK        = false
+        PAPERLESS_TASKS_WORKERS      = 1
         PAPERLESS_THREADS_PER_WORKER = 1
 
-        PAPERLESS_ADMIN_USER     = ""
-        PAPERLESS_ADMIN_PASSWORD = ""
+        # 15min
+        PAPERLESS_CONSUMER_POLLING = 900
+
+        # traefik
+        # PAPERLESS_HTTP_REMOTE_USER_HEADER_NAME = HTTP_X_FORWARDED_USER
+        # PAPERLESS_ALLOWED_HOSTS                = "$${NOMAD_IP_http},localhost"
+
         PAPERLESS_ADMIN_MAIL     = ""
       }
 
       resources {
-        cpu    = 50
-        memory = 400
+        cpu    = 300
+        memory = 1024
       }
     }
   }
@@ -125,7 +149,7 @@ job "paperless" {
       driver = "docker"
 
       config {
-        image = "redis:6"
+        image = "redis:${paperless_redis_image_version}"
         ports = ["redis"]
       }
 

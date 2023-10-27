@@ -106,6 +106,8 @@ resource "vault_token_auth_backend_role" "nomad_cluster" {
     "nomad_diun",
     "nomad_minio",
     "nomad_registry",
+    "nomad_paperless",
+    "paperless",
   ]
   allowed_entity_aliases = ["nomad_token"]
   token_period           = 259200 # 72h
