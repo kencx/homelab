@@ -17,10 +17,10 @@ galaxy.install: requirements.yml
 
 # packer
 packer.validate:
-	cd packer/base && packer validate -var-file="auto.pkrvars.hcl" .
+	cd packer/base-clone && packer validate -var-file="auto.pkrvars.hcl" .
 
 packer.base:
-	cd packer/base && packer build -var-file="auto.pkrvars.hcl" .
+	cd packer/base-clone && packer build -var-file="auto.pkrvars.hcl" .
 
 # molecule
 mol = create converge verify destroy test login prepare

@@ -12,8 +12,9 @@ packer {
 }
 
 locals {
+  vm_name        = "${var.vm_name}-${formatdate("YYYY-MM-DD", timestamp())}"
   ssh_public_key = file(var.ssh_public_key_path)
-  template_desc  = "${var.template_description}. Created by Packer on ${formatdate("YYYY-MM-DD", timestamp())}"
+  template_desc  = "${var.template_description}. Created by Packer on ${formatdate("YYYY-MM-DD", timestamp())}."
   ipv4           = "${var.ip_address}/24"
 }
 
@@ -33,7 +34,7 @@ source "proxmox-clone" "base" {
   cloud_init_storage_pool = "volumes"
 
   vm_id                = var.vm_id
-  vm_name              = var.vm_name
+  vm_name              = local.vm_name
   template_description = local.template_desc
 
   os              = "l26"
@@ -106,6 +107,7 @@ build {
     ansible_env_vars = [
       "ANSIBLE_STDOUT_CALLBACK=yaml",
       "ANSIBLE_HOST_KEY_CHECKING=False",
+      "ANSIBLE_CONFIG=../../ansible/ansible.cfg"
     ]
     use_proxy    = false
     pause_before = "5s"
