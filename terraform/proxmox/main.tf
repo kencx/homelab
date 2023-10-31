@@ -26,6 +26,10 @@ data "proxmox_virtual_environment_role" "datastore_admin" {
   role_id = "PVEDatastoreAdmin"
 }
 
+data "proxmox_virtual_environment_role" "sdn_user" {
+  role_id = "PVESDNUser"
+}
+
 resource "proxmox_virtual_environment_group" "tf" {
   group_id = "Terraform"
   comment  = "Terraform Providers"
@@ -40,6 +44,12 @@ resource "proxmox_virtual_environment_group" "tf" {
     path      = "/storage"
     propagate = true
     role_id   = data.proxmox_virtual_environment_role.datastore_user.role_id
+  }
+
+  acl {
+    path      = "/sdn/zones/localnetwork/vmbr1"
+    propagate = true
+    role_id   = data.proxmox_virtual_environment_role.sdn_user.role_id
   }
 
   # upload vm ISOs
