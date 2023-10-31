@@ -76,7 +76,7 @@ args=(
     --serial0 socket
     --vga serial0
     --scsihw virtio-scsi-pci
-    --scsi0 "$DISK_STORE:0,import-from=$IMG"
+    --scsi0 "$DISK_STORE:0,import-from=$IMG_PATH"
     --bootdisk scsi0
     --boot "order=scsi0"
     --ide1 "$DISK_STORE:cloudinit"
