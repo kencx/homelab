@@ -2,7 +2,7 @@ resource "vault_pki_secret_backend_role" "server_role" {
   backend        = vault_mount.pki_int.path
   name           = "server"
   ttl            = "86400"
-  max_ttl        = "259200"
+  max_ttl        = "2592000" # 30d
   generate_lease = true
 
   allowed_domains    = concat(["localhost"], var.allowed_server_domains)
@@ -19,7 +19,7 @@ resource "vault_pki_secret_backend_role" "client_role" {
   backend        = vault_mount.pki_int.path
   name           = "client"
   ttl            = "86400"
-  max_ttl        = "259200"
+  max_ttl        = "2592000" # 30d
   generate_lease = true
 
   allowed_domains    = concat(["localhost"], var.allowed_client_domains)
@@ -39,7 +39,7 @@ resource "vault_pki_secret_backend_role" "auth_role" {
   backend        = vault_mount.pki_int.path
   name           = "auth"
   ttl            = "86400"
-  max_ttl        = "259200"
+  max_ttl        = "2592000" # 30d
   generate_lease = true
 
   allowed_domains    = concat(["localhost"], var.allowed_auth_domains)

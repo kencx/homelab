@@ -34,6 +34,7 @@ consul_config_dir: "/etc/consul.d"
 consul_data_dir: "/opt/consul"
 consul_tls_dir: "{{ consul_data_dir }}/tls"
 consul_server_ip: "{{ server_ip }}"
+consul_ttl: "168h"
 setup_consul_watches: false
 
 # nomad
@@ -41,3 +42,4 @@ nomad_config_dir: "/etc/nomad.d"
 nomad_data_dir: "/opt/nomad/data"
 nomad_tls_dir: "/opt/nomad/data/tls"
 nomad_server_ip: "{{ server_ip }}"
+nomad_ttl: "168h"

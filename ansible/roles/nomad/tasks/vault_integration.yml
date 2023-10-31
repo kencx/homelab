@@ -53,7 +53,7 @@
   register: nomad_startup_cert
 
 - name: Get certificates for nomad-startup cert auth from Vault server
-  command: vault write -format=json pki_int/issue/auth "common_name=nomad-startup@global.vault" "ttl=72h"
+  command: vault write -format=json pki_int/issue/auth "common_name=nomad-startup@global.vault" "ttl=720h"
   environment:
     VAULT_TOKEN: "{{ nomad_ansible_token }}"
     VAULT_ADDR: "{{ nomad_vault_addr }}"
@@ -94,7 +94,7 @@
     - nomad_startup_certificate_json.data is defined
 
 - name: Write nomad_startup certificate to auth role
-  command: "vault write auth/cert/certs/nomad_startup certificate=@{{ nomad_tls_dir }}/nomad_startup.crt 'token_policies=nomad_startup, nomad_cluster' token_ttl=86400"
+  command: "vault write auth/cert/certs/nomad_startup certificate=@{{ nomad_tls_dir }}/nomad_startup.crt 'token_policies=nomad_startup, nomad_cluster' token_ttl=720h"
   environment:
     VAULT_TOKEN: "{{ nomad_ansible_token }}"
     VAULT_ADDR: "{{ nomad_vault_addr }}"
@@ -111,7 +111,7 @@
     block: |
       template {
         contents = <<EOF
-      {{ '{{' }} with pkiCert "pki_int/issue/auth" "common_name=nomad-startup@global.vault" "ttl=72h" {{ '}}' }}
+      {{ '{{' }} with pkiCert "pki_int/issue/auth" "common_name=nomad-startup@global.vault" "ttl=720h" {{ '}}' }}
       {{ '{{' }} .Cert {{ '}}' }}
       {{ '{{' }} if .CA {{ '}}' }}
       {{ '{{' }} .CA | writeToFile "{{ nomad_tls_dir }}/nomad_startup_ca.crt" "nomad" "nomad" "0600" {{ '}}' }}

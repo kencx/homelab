@@ -30,4 +30,5 @@ cni_plugin_tar: "cni-plugins-{{ ansible_system | lower }}-{{ cni_plugin_arch }}-
 nomad_vault_addr: "https://localhost:8200"
 nomad_common_name: "{{ 'server' if nomad_server else 'client' }}.global.nomad"
 nomad_alt_names: "nomad.service.consul"
+nomad_ttl: "24h"
 nomad_ip_sans: "127.0.0.1"
