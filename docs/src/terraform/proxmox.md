@@ -68,12 +68,32 @@ client nodes with the given IP addresses. All nodes will be cloned from the
 given VM template.
 
 ```hcl
-template_id       = 5000
-server_vmid       = [110, 111]
-client_vmid       = [120, 121]
-server_ip_address = ["10.10.10.110/24", "10.10.10.111/24"]
-client_ip_address = ["10.10.10.120/24", "10.10.10.121/24"]
-ip_gateway        = "10.10.10.1"
+template_id = 5003
+ip_gateway  = "10.10.10.1"
+
+servers = [
+  {
+    name       = "server"
+    id         = 110
+    cores      = 2
+    sockets    = 2
+    memory     = 4096
+    disk_size  = 10
+    ip_address = "10.10.10.110/24"
+  }
+]
+
+clients = [
+  {
+    name       = "client"
+    id         = 111
+    cores      = 2
+    sockets    = 2
+    memory     = 10240
+    disk_size  = 15
+    ip_address = "10.10.10.111/24"
+  }
+]
 ```
 
 On success, the provisioned VMs are accessible via the configured SSH username
@@ -112,21 +132,9 @@ inventory=../terraform/cluster/tf_ansible_inventory,/path/to/other/inventory/fil
 | template_id            | Template ID to clone                           | number       |            |
 | onboot                 | Start VM on boot                               | bool         | `false`    |
 | started                | Start VM on creation                           | bool         | `true`     |
-| server_hostname_prefix | Hostname prefix for all server nodes           | string       | `server`   |
-| server_vmid            | List of server VM IDs                          | list(number) |            |
-| server_cores           | Number of cores for all server nodes           | number       | `2`        |
-| server_sockets         | Number of sockets for all server nodes         | number       | `2`        |
-| server_memory          | Total memory for all server nodes (MB)         | number       | `2048`     |
-| server_disk_size       | Disk size in all server nodes (GB)             | string       | `5`       |
-| client_hostname_prefix | Hostname prefix for all client nodes           | string       | `client`   |
-| client_vmid            | List of client VM IDs                          | list(number) |            |
-| client_cores           | Number of cores for all client nodes           | number       | `2`        |
-| client_sockets         | Number of sockets for all client nodes         | number       | `2`        |
-| client_memory          | Total memory for all client nodes (MB)         | number       | `2048`     |
-| client_disk_size       | Disk size in all client nodes (GB)             | string       | `5`       |
+| servers | List of server config (see above) | list(object) | `[]` |
+| clients | List of client config (see above) | list(object) | `[]` |
 | disk_datastore         | Datastore on which to store VM disk            | string       | `volumes`  |
-| server_ip_address      | List of server IPv4 addresses in CIDR notation | list(string) |            |
-| client_ip_address      | List of client IPv4 addresses in CIDR notation | list(string) |            |
 | control_ip_address     | Control IPv4 address in CIDR notation          | string       |            |
 | ip_gateway             | IPv4 gateway address                           | string       |            |
 | ssh_username           | User to SSH into during provisioning           | string       |            |
@@ -134,10 +142,8 @@ inventory=../terraform/cluster/tf_ansible_inventory,/path/to/other/inventory/fil
 | ssh_public_key_file    | Filepath of public SSH key                     | string       |            |
 
 - The VM template corresponding to `template_id` must exist
-- The length of `server_vmid` and `server_ip_address` must be equal. Each
-  element in the latter corresponds to the IP address of the latter. The same
-  applies for the client arrays
-- The lists of IPv4 addresses must be in CIDR notation with subnet masks
+- The IPv4 addresses must be in CIDR notation with subnet masks (eg.
+  `10.0.0.2/24`)
 
 ## Notes
 

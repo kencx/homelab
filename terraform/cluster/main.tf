@@ -16,27 +16,14 @@ provider "proxmox" {
   }
 }
 
-locals {
-  servers = {
-    for idx, val in var.server_vmid : val => {
-      index      = idx + 1,
-      ip_address = var.server_ip_address[idx],
-    }
-  }
-  clients = {
-    for idx, val in var.client_vmid : val => {
-      index      = idx + 1,
-      ip_address = var.client_ip_address[idx],
-    }
-  }
-}
-
 module "server" {
-  source   = "../modules/vm"
-  for_each = local.servers
+  source = "../modules/vm"
+  for_each = {
+    for idx, vm in var.servers : idx + 1 => vm
+  }
 
-  hostname    = "${var.server_hostname_prefix}-${each.value.index}"
-  vmid        = parseint(each.key, 10)
+  hostname    = "server-${each.key}"
+  vmid        = each.value.id
   tags        = var.tags
   target_node = var.target_node
 
@@ -44,11 +31,11 @@ module "server" {
   onboot            = var.onboot
   started           = var.started
 
-  cores   = var.server_cores
-  sockets = var.server_sockets
-  memory  = var.server_memory
+  cores   = each.value.cores
+  sockets = each.value.sockets
+  memory  = each.value.memory
 
-  disk_size      = var.server_disk_size
+  disk_size      = each.value.disk_size
   disk_datastore = var.disk_datastore
 
   ip_address = each.value.ip_address
@@ -59,11 +46,13 @@ module "server" {
 }
 
 module "client" {
-  source   = "../modules/vm"
-  for_each = local.clients
+  source = "../modules/vm"
+  for_each = {
+    for idx, vm in var.clients : idx + 1 => vm
+  }
 
-  hostname    = "${var.client_hostname_prefix}-${each.value.index}"
-  vmid        = parseint(each.key, 10)
+  hostname    = "client-${each.key}"
+  vmid        = each.value.id
   tags        = var.tags
   target_node = var.target_node
 
@@ -71,11 +60,11 @@ module "client" {
   onboot            = var.onboot
   started           = var.started
 
-  cores   = var.client_cores
-  sockets = var.client_sockets
-  memory  = var.client_memory
+  cores   = each.value.cores
+  sockets = each.value.sockets
+  memory  = each.value.memory
 
-  disk_size      = var.client_disk_size
+  disk_size      = each.value.disk_size
   disk_datastore = var.disk_datastore
 
   ip_address = each.value.ip_address
@@ -88,21 +77,21 @@ module "client" {
 resource "local_file" "tf_ansible_inventory_file" {
   content         = <<-EOF
 [server]
-%{for ip in var.server_ip_address~}
-${split("/", ip)[0]}
+%{for vm in var.servers~}
+${split("/", vm.ip_address)[0]}
 %{endfor~}
 
 [client]
-%{for ip in var.client_ip_address~}
-${split("/", ip)[0]}
+%{for vm in var.clients~}
+${split("/", vm.ip_address)[0]}
 %{endfor~}
 
 [prod]
-%{for ip in var.server_ip_address~}
-${split("/", ip)[0]}
+%{for vm in var.servers~}
+${split("/", vm.ip_address)[0]}
 %{endfor~}
-%{for ip in var.client_ip_address~}
-${split("/", ip)[0]}
+%{for vm in var.clients~}
+${split("/", vm.ip_address)[0]}
 %{endfor~}
 EOF
   filename        = "${path.module}/tf_ansible_inventory"

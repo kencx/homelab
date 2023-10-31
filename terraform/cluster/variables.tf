@@ -37,74 +37,30 @@ variable "started" {
   default     = true
 }
 
-variable "server_hostname_prefix" {
-  type        = string
-  description = "Hostname prefix of server node"
-  default     = "server"
+variable "servers" {
+  type = list(object({
+    name       = string
+    id         = number
+    cores      = number
+    sockets    = number
+    memory     = number
+    disk_size  = number
+    ip_address = string
+  }))
+  default = []
 }
 
-variable "client_hostname_prefix" {
-  type        = string
-  description = "Hostname prefix of client node"
-  default     = "client"
-}
-
-variable "server_vmid" {
-  type        = list(number)
-  description = "List of server VM IDs"
-}
-
-variable "client_vmid" {
-  type        = list(number)
-  description = "List of client VM IDs"
-}
-
-variable "server_cores" {
-  type        = number
-  description = "Number of cores in server nodes"
-  default     = 2
-}
-
-variable "server_sockets" {
-  type        = number
-  description = "Number of sockets in server nodes"
-  default     = 2
-}
-
-variable "server_memory" {
-  type        = number
-  description = "Memory (MB) in server nodes"
-  default     = 2048
-}
-
-variable "server_disk_size" {
-  type        = number
-  description = "Disk size (GB) in server nodes"
-  default     = 5
-}
-
-variable "client_cores" {
-  type        = number
-  description = "Number of cores in client nodes"
-  default     = 2
-}
-
-variable "client_sockets" {
-  type        = number
-  description = "Number of sockets in client nodes"
-  default     = 2
-}
-
-variable "client_memory" {
-  type        = number
-  description = "Memory (MB) in client nodes"
-  default     = 1024
-}
-
-variable "client_disk_size" {
-  type        = number
-  description = "Disk size (GB) in server nodes"
-  default     = 5
+variable "clients" {
+  type = list(object({
+    name       = string
+    id         = number
+    cores      = number
+    sockets    = number
+    memory     = number
+    disk_size  = number
+    ip_address = string
+  }))
+  default = []
 }
 
 variable "disk_datastore" {
@@ -113,27 +69,27 @@ variable "disk_datastore" {
   default     = "volumes"
 }
 
-variable "server_ip_address" {
-  type        = list(string)
-  description = "List of server IPv4 address in CIDR notation (eg. 10.10.10.2/24)"
-  validation {
-    condition = alltrue([
-      for i in var.server_ip_address : can(cidrnetmask(i))
-    ])
-    error_message = "Must be a valid IPv4 address with subnet mask"
-  }
-}
-
-variable "client_ip_address" {
-  type        = list(string)
-  description = "List of client IPv4 address in CIDR notation (eg. 10.10.10.2/24)"
-  validation {
-    condition = alltrue([
-      for i in var.client_ip_address : can(cidrnetmask(i))
-    ])
-    error_message = "Must be a valid IPv4 address with subnet mask"
-  }
-}
+# variable "server_ip_address" {
+#   type        = list(string)
+#   description = "List of server IPv4 address in CIDR notation (eg. 10.10.10.2/24)"
+#   validation {
+#     condition = alltrue([
+#       for i in var.server_ip_address : can(cidrnetmask(i))
+#     ])
+#     error_message = "Must be a valid IPv4 address with subnet mask"
+#   }
+# }
+#
+# variable "client_ip_address" {
+#   type        = list(string)
+#   description = "List of client IPv4 address in CIDR notation (eg. 10.10.10.2/24)"
+#   validation {
+#     condition = alltrue([
+#       for i in var.client_ip_address : can(cidrnetmask(i))
+#     ])
+#     error_message = "Must be a valid IPv4 address with subnet mask"
+#   }
+# }
 
 variable "control_ip_address" {
   type        = string

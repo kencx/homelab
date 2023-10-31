@@ -62,12 +62,32 @@ software installed (eg. Docker). For more information, refer to
 proxmox_ip        = "https://${PVE_IP}:8006/api2/json"
 proxmox_api_token = "${API_TOKEN}"
 
-template_id       = 5000
-server_vmid       = [110]
-client_vmid       = [111]
-server_ip_address = ["10.10.10.110/24"]
-client_ip_address = ["10.10.10.111/24"]
-ip_gateway        = "10.10.10.1"
+template_id = 5000
+ip_gateway  = "10.10.10.1"
+
+servers = [
+  {
+    name       = "server"
+    id         = 110
+    cores      = 2
+    sockets    = 2
+    memory     = 4096
+    disk_size  = 10
+    ip_address = "10.10.10.110/24"
+  }
+]
+
+clients = [
+  {
+    name       = "client"
+    id         = 111
+    cores      = 2
+    sockets    = 2
+    memory     = 10240
+    disk_size  = 15
+    ip_address = "10.10.10.111/24"
+  }
+]
 
 ssh_user             = "debian"
 ssh_private_key_file = "/path/to/ssh/private/key"
