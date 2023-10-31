@@ -26,18 +26,20 @@
     state: directory
 
 - set_fact:
-  local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
+    local_cert_dir: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/certs"
 
 - name: Check if {{ local_cert_dir }} exists
   block:
     - stat:
         path: "{{ local_cert_dir }}"
+      register: c
 
     - assert:
         that:
-          - local_cert_dir.stat.isdir is defined
-          - local_cert_dir.stat.isdir
+          - c.stat is defined
+          - c.stat.isdir
         fail_msg: "{{ local_cert_dir }} does not exist"
+  delegate_to: localhost
 
 - name: Login with Ansible auth cert
   become: false

@@ -6,12 +6,14 @@
   block:
     - stat:
         path: "{{ local_cert_dir }}"
+      register: c
 
     - assert:
         that:
-          - local_cert_dir.stat.isdir is defined
-          - local_cert_dir.stat.isdir
+          - c.stat is defined
+          - c.stat.isdir
         fail_msg: "{{ local_cert_dir }} does not exist"
+  delegate_to: localhost
 
 - name: Check if Vault CA cert exists on client
   stat:
