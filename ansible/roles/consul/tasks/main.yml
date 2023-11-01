@@ -1,4 +1,9 @@
 ---
+- name: Setup dnsmasq
+  become: true
+  import_tasks: dnsmasq.yml
+  when: consul_server | bool
+
 - name: Check for both Consul server and client enabled
   fail:
     msg: "Cannot setup both Consul server and client on the same node."

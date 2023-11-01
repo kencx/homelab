@@ -24,6 +24,7 @@ For encryption, the role creates consul-template templates for:
 | consul_data_dir | Data directory | string | `/opt/consul` |
 | consul_tls_dir | TLS files directory | string | `${consul_data_dir}/tls` |
 | consul_template_config_dir | consul-template configuration file | string | `/etc/consul-template` |
+| consul_upstream_dns_address | List of upstream DNS servers for dnsmasq | `["1.1.1.1"]` |
 | consul_server | Start Consul in server mode | bool | `true` |
 | consul_bootstrap_expect | (server only) The expected number of servers in a cluster | number | `1` |
 | consul_client | Start Consul in client mode | bool | `false` |

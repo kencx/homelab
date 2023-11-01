@@ -1,0 +1,4 @@
+listen-address={{ ansible_default_ipv4.address }},127.0.0.1
+{% for addr in consul_upstream_dns_address %}
+server={{ addr }}
+{% endfor %}

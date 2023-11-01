@@ -3,6 +3,7 @@ consul_config_dir: "/etc/consul.d"
 consul_data_dir: "/opt/consul"
 consul_tls_dir: "{{ consul_data_dir }}/tls"
 consul_template_config_dir: "/etc/consul-template"
+consul_upstream_dns_address: ["1.1.1.1"]
 
 # server
 consul_server: true

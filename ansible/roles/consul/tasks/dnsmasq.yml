@@ -1,0 +1,62 @@
+---
+- name: Install dnsmasq
+  apt:
+    name:
+      - dnsmasq
+    state: present
+
+- name: Remove resolvconf
+  apt:
+    name:
+      - resolvconf
+      - openresolv
+    state: absent
+
+- name: Allow ufw port 53
+  ufw:
+    rule: "allow"
+    port: 53
+
+- name: Disable systemd-resolved
+  systemd:
+    name: systemd-resolved
+    state: stopped
+    enabled: false
+
+- name: Write new /etc/resolv.conf
+  copy:
+    content: "nameserver 127.0.0.1"
+    dest: "/etc/resolv.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Copy dnsmasq config
+  template:
+    src: "dnsmasq.conf.j2"
+    dest: "/etc/dnsmasq.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Copy Consul dnsmasq forwarding config
+  copy:
+    content: |
+      server=/consul/127.0.0.1#8600
+      rev-server=10.0.0.0/8,127.0.0.1#8600
+    dest: "/etc/dnsmasq.d/10-consul"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Start dnsmasq
+  systemd:
+    name: dnsmasq
+    state: started
+    enabled: true
+
+- name: Wait for port 53
+  wait_for:
+    port: 53
+    host: "{{ ansible_default_ipv4.address }}"
+    state: started
