@@ -1,5 +1,13 @@
 This documents known issues that have not been fixed.
 
+## Manual Vault Unseal Process
+
+Vault server must be manually unsealed when host is rebooted.
+
+## Nomad
+
+On some occasions, restarting the Nomad client results in some running jobs being unreachable. The temporary fix is to restart the job (not alloc or task).
+
 ## ~Vault-agent not reloading TLS certs~
 
 ~Vault-agent does not reload its own TLS configuration after the certificate has
@@ -12,27 +20,3 @@ is [not supported](https://github.com/hashicorp/vault/issues/20538).~
 [#18562](https://github.com/hashicorp/vault/issues/18562). A
 [fix](https://github.com/hashicorp/vault/pull/19002) is available in Vault
 1.14.~
-
-## Vault
-
-Vault server must be manually unsealed when host is rebooted.
-
-## Nomad
-
-On some occasions, restarting the Nomad client results in some running jobs being unreachable. The temporary fix is to restart the job (not alloc or task).
-
-## Packer Proxmox-ISO
-
-`preseed.cfg` is unreachable by boot command when controller host and Proxmox VM
-are on different subnets.
-
-## Ansible
-
-### autorestic Role
-
-- Installation of restic and autorestic not implemented
-- `autorestic.env` not populated by Ansible
-
-### unseal_vault Role
-
-- Not implemented and untested
