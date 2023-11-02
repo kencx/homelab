@@ -5,16 +5,6 @@ terraform {
       version = "2.0.0-beta.1"
     }
   }
-  backend "s3" {
-    region = "main"
-    bucket = "terraform-state"
-    key    = "nomad/terraform.tfstate"
-
-    skip_credentials_validation = true
-    skip_region_validation      = true
-    skip_metadata_api_check     = true
-    force_path_style            = true
-  }
 }
 
 provider "nomad" {
