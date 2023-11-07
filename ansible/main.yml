@@ -9,7 +9,7 @@
 
   roles:
     - name: Create root, intermediate CA for Vault
-      role: kencx.ansible.ssl
+      role: kencx.ansible_collection.ssl
       become: true
       run_once: true
 
@@ -21,7 +21,7 @@
   tasks:
     - name: Goss smoke test
       import_role:
-        name: kencx.ansible.goss
+        name: kencx.ansible_collection.goss
       vars:
         goss_dir: "./goss"
         goss_file: "server.yml"
@@ -36,7 +36,7 @@
 
   roles:
     - name: Mount NFS shares on client
-      role: kencx.ansible.nfs
+      role: kencx.ansible_collection.nfs
       tags: nfs
 
     - role: vault
@@ -64,7 +64,7 @@
 
     - name: Goss smoke test
       import_role:
-        name: kencx.ansible.goss
+        name: kencx.ansible_collection.goss
       vars:
         goss_dir: "./goss"
         goss_file: "client.yml"

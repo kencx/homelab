@@ -20,7 +20,7 @@
 
   roles:
     - name: Security hardening
-      role: kencx.ansible.security
+      role: kencx.ansible_collection.security
       vars:
         ssh_disable_root_login: true
         ufw_rules:

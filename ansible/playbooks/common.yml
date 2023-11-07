@@ -20,7 +20,7 @@
         docker_users: ["{{ user }}"]
 
     - name: Security hardening
-      role: kencx.ansible.security
+      role: kencx.ansible_collection.security
       vars:
         ssh_disable_root_login: true
         ufw_rules:
@@ -41,7 +41,7 @@
           - {rule: 'allow', port: '8600', proto: 'udp', comment: 'consul DNS'}
 
     - name: Goss validation
-      role: kencx.ansible.goss
+      role: kencx.ansible_collection.goss
       vars:
         goss_dir: "./goss"
         goss_file: "base.yml"
