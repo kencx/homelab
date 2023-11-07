@@ -1,0 +1,41 @@
+name: molecule
+on: workflow_dispatch
+
+jobs:
+  molecule:
+    runs-on: macos-10.15
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@v3
+
+      - name: Setup Python3
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: pip-ansible
+
+      - name: Cache Vagrant box
+        uses: actions/cache@v3
+        with:
+          path: ~/.vagrant.d/boxes
+          key: ${{ runner.os }}-vagrant-${{ hashFiles('ansible/molecule/common/molecule.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-vagrant-
+
+      - name: Install dependencies
+        run: |
+          pip install -q --disable-pip-version-check wheel
+          pip install -q --disable-pip-version-check ansible molecule-vagrant
+        env:
+          PIP_CACHE_DIR: ~/.cache/pip
+
+      - name: Test common
+        run: molecule test -s common
+        working-directory: ansible
+        env:
+          ANSIBLE_FORCE_COLOR: "True"

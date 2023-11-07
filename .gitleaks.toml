@@ -1,0 +1,9 @@
+[extend]
+useDefault = true
+
+[allowlist]
+# testing CA for Vault
+paths = [
+    '''ansible/molecule/vault/testca''',
+    '''ansible/molecule/vault/testca\/\.*''',
+]
