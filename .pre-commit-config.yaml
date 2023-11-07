@@ -2,7 +2,7 @@ default_stages: [push, commit]
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -10,18 +10,18 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: detect-private-key
         exclude: ansible/molecule/vault/testca
 
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.16.1
+    rev: v8.18.0
     hooks:
       - id: gitleaks-docker
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.77.0
+    rev: v1.83.5
     hooks:
       - id: terraform_fmt
         args:
@@ -40,13 +40,13 @@ repos:
         require_serial: true
 
   - repo: https://github.com/gruntwork-io/pre-commit
-    rev: v0.1.19
+    rev: v0.1.22
     hooks:
       - id: packer-validate
 
   # - repo: https://github.com/ansible-community/ansible-lint
-  #   rev: v6.6.1
+  #   rev: v6.22.0
   #   hooks:
   #     - id: ansible-lint
-  #       entry: ansible-lint --project-dir ./ansible -c ./ansible/.ansible-lint ./ansible
+  #       entry: ansible-lint -c ansible/.ansible-lint ansible
   #       pass_filenames: false

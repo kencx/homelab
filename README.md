@@ -8,8 +8,9 @@ The cluster is hosted on Proxmox as a personal, private homelab.
 
 ## Disclaimer
 
-This project is in pre-alpha status and subject to
+This project is in alpha status and subject to
 [bugs](https://kencx.github.io/homelab/references/issues) and breaking changes.
+
 Please do not run any code on your machine without understanding the
 provisioning flow, in case of data loss. Some playbooks may perform destructive
 actions that are irreversible!
