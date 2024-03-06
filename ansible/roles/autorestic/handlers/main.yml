@@ -1,5 +1,0 @@
----
-- name: daemon-reload backup.service
-  systemd:
-    name: backup.service
-    daemon_reload: true

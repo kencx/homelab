@@ -3,9 +3,3 @@ server
 client
 prod
 dev
-
-[nas]
-10.10.10.102 ansible_user=debian
-
-[pi]
-192.168.86.49 ansible_user=holden

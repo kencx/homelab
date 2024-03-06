@@ -1,9 +1,0 @@
-[Unit]
-Description=Runs autorestic backup daily
-
-[Timer]
-OnCalendar=*-*-* {{ nas_backup_time }}
-Persistent=true
-
-[Install]
-WantedBy=timers.target

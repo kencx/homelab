@@ -1,9 +1,0 @@
-[Unit]
-Description=Updates 'aur' repo
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-ExecStart=/usr/bin/aura sync
-CPUWeight=1
-IOWeight=1

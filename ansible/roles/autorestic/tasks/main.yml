@@ -1,4 +1,0 @@
----
-- import_tasks: install_restic.yml
-- import_tasks: install_autorestic.yml
-- import_tasks: backups.yml
