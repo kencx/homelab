@@ -1,3 +1,5 @@
+# Unseal Vault
+
 >**Work in Progress**: This role is unfinished and untested.
 
 This role unseals an initialized but sealed Vault server. The unseal key shares

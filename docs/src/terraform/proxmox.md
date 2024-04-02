@@ -9,23 +9,23 @@ provider to manage three types of Proxmox resources:
 - Cloud images
 - VMs
 
-## Access Management
-
-This configuration is found in `terraform/proxmox` and creates a dedicated
-Terraform user for the management of Proxmox VMs to be described later. It
-defines a `terraform@pam` user in a `Terraform` group which have the minimum
-roles required for creating, cloning and destroying VMs. This configuration
-requires credentials with at least the `PVEUserAdmin` role (I use the root user
-for convenience).
-
-After creating the user, we must create an API token in the web console with the
-following options:
-
-```text
-user: terraform@pam
-token_id: some_secret
-privilege_separation: false
-```
+<!-- ## Access Management -->
+<!---->
+<!-- This configuration is found in `terraform/proxmox` and creates a dedicated -->
+<!-- Terraform user for the management of Proxmox VMs to be described later. It -->
+<!-- defines a `terraform@pam` user in a `Terraform` group which have the minimum -->
+<!-- roles required for creating, cloning and destroying VMs. This configuration -->
+<!-- requires credentials with at least the `PVEUserAdmin` role (I use the root user -->
+<!-- for convenience). -->
+<!---->
+<!-- After creating the user, we must create an API token in the web console with the -->
+<!-- following options: -->
+<!---->
+<!-- ```text -->
+<!-- user: terraform@pam -->
+<!-- token_id: some_secret -->
+<!-- privilege_separation: false -->
+<!-- ``` -->
 
 ## Upload of Cloud Images
 

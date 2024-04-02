@@ -1,12 +1,15 @@
+# Issues
+
 This documents known issues that have not been fixed.
 
 ## Manual Vault Unseal Process
 
 Vault server must be manually unsealed when host is rebooted.
 
-## Nomad
+## Unreachable Nomad Jobs on Reboot
 
-On some occasions, restarting the Nomad client results in some running jobs being unreachable. The temporary fix is to restart the job (not alloc or task).
+On some occasions, restarting the Nomad client results in some running jobs
+being unreachable. The temporary fix is to restart the job (not alloc or task).
 
 ## ~Vault-agent not reloading TLS certs~
 

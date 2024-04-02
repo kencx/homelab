@@ -29,10 +29,7 @@
             - [Unseal Vault](ansible/roles/unseal_vault.md)
             - [Vault](ansible/roles/vault.md)
 
-    <!-- - [Development Server]() -->
-
 <!-- - [CICD]() -->
-<!-- - [Monitoring]() -->
 <!-- - [Vault]() -->
 <!-- - [Consul]() -->
 <!-- - [Nomad]() -->
@@ -44,8 +41,6 @@
     - [Adding New Application](apps/add_new.md)
     - [Diun](apps/diun.md)
     - [Registry](apps/registry.md)
-
-- [Backups](backups.md)
 
 # References
 

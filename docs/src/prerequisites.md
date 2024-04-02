@@ -34,14 +34,23 @@ The following are optional, but highly recommended:
   [Coredns](roles/coredns.md).
 - A custom domain from any domain registrar, added to Cloudflare as a zone.
 
-## Controller Host
+## Controller Node
 
-A controller host with the provisioning tools (Packer, Ansible, Terraform) installed.
+A workstation, controller node or separate host system will be used to run the
+required provisioning tools. This system will need to have the following tools
+installed:
+
+- Packer
+- Terraform
+- Ansible
+- Python 3 for various scripts (optional)
+
+Alternatively, you are free to install the above tools on the same server that
+you are provisioning the cluster.
 
 ## Cluster Requirements
 
-- A Proxmox base image template, either from [an existing cloud
-  image](images/cloud_image.md) or built with [Packer](images/packer.md).
+- An existing Proxmox server that is reachable by the controller node
 - (Optional) An offline, private root and intermediate CA.
 - A self-signed certificate, private key for TLS encryption of Vault. A default
   key-pair is
@@ -51,5 +60,5 @@ A controller host with the provisioning tools (Packer, Ansible, Terraform) insta
 >**Note**: While Vault can use certificates generated from its own PKI secrets
 >engine, a temporary key pair is still required to start up Vault.
 
-- (Optional) A secure password manager. This project supports [Bitwarden](https://bitwarden.com/) with
-  custom scripts.
+<!-- - (Optional) A secure password manager. This project supports [Bitwarden](https://bitwarden.com/) with -->
+<!--   custom scripts. -->

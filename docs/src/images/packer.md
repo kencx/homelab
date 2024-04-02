@@ -10,27 +10,27 @@ Proxmox.
 
 ## Proxmox-clone
 
-The `proxmox-clone` builder creates a new VM template from an existing one. This
-is best used with an [uploaded cloud image](./cloud_image.md) which has been
-converted into a VM template.
+The `proxmox-clone` builder creates a new VM template from an existing one. If
+you do not have an existing VM template or want to create a new template, you
+can [upload a new cloud image](./cloud_image.md) and convert it into a new VM template.
 
-This existing template [must
+Note that this existing template [must
 have](https://pve.proxmox.com/wiki/Cloud-Init_Support#_preparing_cloud_init_templates):
 
 - An attached cloud-init drive for the builder to add the SSH communicator
-  configuration.
-- `cloud-init` installed.
+  configuration
+- `cloud-init` installed
 
-The builder will do the following:
+After running the builder, it will do the following:
 
-1. Clone existing template.
-2. Add a SSH communicator configuration via cloud-init.
+1. Clone existing template by given name
+2. Add a SSH communicator configuration via cloud-init
 3. Connect via SSH and run the shell provisioner scripts to prepare the VM for
-   Ansible.
-4. Install and start `qemu-guest-agent`.
-5. Run the Ansible provisioner with the `ansible/common.yml` playbook.
+   Ansible
+4. Install and start `qemu-guest-agent`
+5. Run the Ansible provisioner with the `ansible/common.yml` playbook
 6. Stop and convert the VM into a template with a new (and empty) cloud-init
-   drive.
+   drive
 
 ### Variables
 
