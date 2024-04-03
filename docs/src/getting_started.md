@@ -175,7 +175,7 @@ $ ansible-inventory --graph --vars
 $ ansible-playbook main.yml
 ```
 
-The playbook will perform the following idempotently:
+The playbook will perform the following:
 
 1. Create a root and intermediate CA for Vault
 2. Configure Vault to use new CA
@@ -196,3 +196,31 @@ existing state in the `terraform/vault` subdirectory if a different
 `vault_terraform_workspace` is not provided. This WILL result in permanent data
 loss and care should be taken when running the role (and playbook) on multiple
 clusters or servers.
+
+## Post Setup
+
+### Smoke Tests
+
+Smoke tests are performed with [goss](https://github.com/goss-org/goss) as part
+of the `main.yml` playbook to ensure all required software are installed and
+running.
+
+>**Note**: The included goss files are static with hardcoded information. As
+>such, they will fail if some of the Ansible default variables are changed (eg.
+>username, NFS mountpoints). See
+>[issues](./references/issues.md#static-goss-files) for details on a workaround.
+
+### Running Applications
+
+After verifying that the cluster is up and running, we can begin to run
+applications on it with Nomad jobs. This project provides a number of Nomad
+jobspec files in `terraform/nomad/apps` to be run with Terraform with the
+following features:
+
+- With Vault integration configured, Nomad supports the fetching of application
+secrets with Vault
+- Traefik as a reverse proxy
+- (Optional) Postgres as a database (with Vault-managed DB credentials)
+
+See [Adding a New Application](./apps/add_new.md) for details on onboarding a
+new application to Nomad.

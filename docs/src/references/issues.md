@@ -23,3 +23,20 @@ is [not supported](https://github.com/hashicorp/vault/issues/20538).~
 [#18562](https://github.com/hashicorp/vault/issues/18562). A
 [fix](https://github.com/hashicorp/vault/pull/19002) is available in Vault
 1.14.~
+
+## Static Goss Files
+
+The provided goss files in `ansible/goss` contain hardcoded information that can
+cause the smoke tests to fail if some Ansible variables are modified:
+
+- common_user
+- common_nfs_dir
+- common_packages
+
+The temporary workaround is to create your own goss files, edit the given goss
+files or to simply comment out the smoke test tasks.
+
+To fix this, goss
+[supports](https://github.com/goss-org/goss/blob/master/docs/gossfile.md#templates)
+templating to create dynamic goss files. The `ansible_collection.goss` role must
+be modified to add support for dynamic tests.
