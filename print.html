@@ -1,0 +1,1666 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Homelab Documentation</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Home</a></li><li class="chapter-item expanded affix "><a href="prerequisites.html">Prerequisites</a></li><li class="chapter-item expanded affix "><a href="getting_started.html">Getting Started</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Infrastructure</li><li class="chapter-item expanded "><a href="provisioning.html">Provisioning</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="images/index.html">Images</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="images/cloud_image.html">Cloud Images</a></li><li class="chapter-item "><a href="images/packer.html">Packer</a></li></ol></li><li class="chapter-item "><a href="terraform/index.html">Terraform</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="terraform/postgres.html">Postgres</a></li><li class="chapter-item "><a href="terraform/proxmox.html">Proxmox</a></li><li class="chapter-item "><a href="terraform/vault.html">Vault</a></li></ol></li><li class="chapter-item "><a href="ansible/index.html">Ansible</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="ansible/roles/index.html">Roles</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="ansible/roles/common.html">Common</a></li><li class="chapter-item "><a href="ansible/roles/consul.html">Consul</a></li><li class="chapter-item "><a href="ansible/roles/consul-template.html">Consul Template</a></li><li class="chapter-item "><a href="ansible/roles/issue_cert.html">Issue Cert</a></li><li class="chapter-item "><a href="ansible/roles/nomad.html">Nomad</a></li><li class="chapter-item "><a href="ansible/roles/unseal_vault.html">Unseal Vault</a></li><li class="chapter-item "><a href="ansible/roles/vault.html">Vault</a></li></ol></li></ol></li></ol></li><li class="chapter-item expanded "><li class="part-title">Applications</li><li class="chapter-item expanded "><a href="apps/index.html">Applications</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="apps/add_new.html">Adding New Application</a></li><li class="chapter-item "><a href="apps/diun.html">Diun</a></li><li class="chapter-item "><a href="apps/registry.html">Registry</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">References</li><li class="chapter-item expanded "><a href="references/issues.html">Known Issues</a></li><li class="chapter-item expanded "><a href="references/TODO.html">Roadmap</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Homelab Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/kencx/homelab" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="hubble-homelab"><a class="header" href="#hubble-homelab">Hubble Homelab</a></h1>
+<p><strong><a href="https://kencx.github.io/homelab">Documentation</a></strong></p>
+<p>This repository contains infrastructure-as-code for the automated deployment and
+configuration, and management of a Hashicorp (Nomad + Consul + Vault) cluster on
+Proxmox.</p>
+<h2 id="disclaimer"><a class="header" href="#disclaimer">Disclaimer</a></h2>
+<p>This project is in alpha status and subject to
+<a href="https://kencx.github.io/homelab/references/issues">bugs</a> and breaking changes.</p>
+<p>Please do not run any code on your machine without understanding the
+provisioning flow, in case of data loss. Some playbooks may perform destructive
+actions that are irreversible!</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>This project aims to provision a full Hashicorp cluster in a <strong>semi-automated</strong>
+manner. It utilizes Packer, Ansible and Terraform:</p>
+<ol>
+<li>Packer creates base Proxmox VM templates from cloud images and ISOs</li>
+<li>Terraform provisions cluster nodes by cloning existing VM templates</li>
+<li>Ansible installs and configures Vault, Consul, Nomad on cluster nodes</li>
+</ol>
+<p>It comprises minimally of one server and one client node with no high
+availability (HA). The nodes run Vault, Consul and Nomad as a cluster.</p>
+<p>To support HA, the setup can be further expanded to at least three server nodes
+and multiple client nodes hosted on a Proxmox cluster, spanning multiple
+physical machines.</p>
+<h2 id="features"><a class="header" href="#features">Features</a></h2>
+<ul>
+<li><input disabled="" type="checkbox" checked=""/>
+Golden image creation with Packer</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Declarative configuration of Proxmox VMs and Vault with Terraform</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Automated post-provisioning with Ansible</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Nomad container scheduling and orchestration</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Consul service discovery</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Secure node communication via mTLS</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Personal Certificate Authority hosted on Vault</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Secrets management, retrieval and rotation with Vault</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Automated certificate management with Vault and consul-template</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Let's Encrypt certificates on Traefik reverse proxy</li>
+</ul>
+<h2 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h2>
+<p>See the <a href="https://kencx.github.io/homelab/getting_started">documentation</a> for more
+information on the concrete steps to configure and provision the cluster.</p>
+<h2 id="folder-structure"><a class="header" href="#folder-structure">Folder Structure</a></h2>
+<pre><code class="language-bash">.
+├── ansible/
+│   ├── roles
+│   ├── playbooks
+│   ├── inventory    # inventory files
+│   └── goss         # goss config
+├── bin              # custom scripts
+├── packer/
+│   ├── base         # VM template from ISO
+│   └── base-clone   # VM template from existing template
+└── terraform/
+    ├── cluster      # config for cluster
+    ├── dev          # config where I test changes
+    ├── minio        # config for Minio buckets
+    ├── modules      # tf modules
+    ├── nomad        # nomad jobs
+    ├── postgres     # config for Postgres DB users
+    ├── proxmox      # config for Proxmox accounts
+    └── vault        # config for Vault
+</code></pre>
+<h2 id="limitations"><a class="header" href="#limitations">Limitations</a></h2>
+<ul>
+<li>Manual Vault unseal on reboot</li>
+<li>Inter-job dependencies are <a href="https://github.com/hashicorp/nomad/issues/545">not supported</a> in Nomad</li>
+<li>Vault agent is run as root</li>
+</ul>
+<p>See <a href="">issues</a> for more information.</p>
+<h2 id="acknowledgements"><a class="header" href="#acknowledgements">Acknowledgements</a></h2>
+<ul>
+<li><a href="https://github.com/CGamesPlay/infra">CGamesPlay/infra</a></li>
+<li><a href="https://github.com/assareh/home-lab">assareh/homelab</a></li>
+<li><a href="https://github.com/RealOrangeOne/infrastructure">RealOrangeOne/infrastructure</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h1>
+<h2 id="hardware-requirements"><a class="header" href="#hardware-requirements">Hardware Requirements</a></h2>
+<p>This project can be run on any modern x86_64 system that meets the recommended system
+requirements of <a href="https://pve.proxmox.com/wiki/System_Requirements">Proxmox</a>. I
+recommend mini-SFF workstations such as those from <a href="https://www.servethehome.com/introducing-project-tinyminimicro-home-lab-revolution/">Project
+TinyMiniMicro</a>.
+Alternatively, you may choose to run the cluster on a different hypervisor, on
+ARM64 systems or entirely on bare metal but YMMV.</p>
+<p>My own setup comprises of:</p>
+<ul>
+<li>1x Intel HP Elitedesk 800 G2 Mini
+<ul>
+<li>CPU: Intel Core i5-6500T</li>
+<li>RAM: 16GB DDR4</li>
+<li>Storage: 256GB SSD (OS), 3TB HDD</li>
+</ul>
+</li>
+<li>1x Raspberry Pi 4B+</li>
+<li>TP-Link 5 Port Gigabit Switch</li>
+</ul>
+<p>While a separate router and NAS is recommended, I run a virtualized instance of
+both within Proxmox itself.</p>
+<h3 id="networking"><a class="header" href="#networking">Networking</a></h3>
+<p>The LAN is not restricted to any specific network architecture, but all server
+nodes should be reachable by each other, and the controller host via SSH.</p>
+<p>The following are optional, but highly recommended:</p>
+<ul>
+<li>A local DNS server that
+<a href="https://developer.hashicorp.com/consul/tutorials/networking/dns-forwarding">forwards</a>
+<code>service.consul</code> queries to Consul for DNS lookup. This project uses
+<a href="roles/coredns.html">Coredns</a>.</li>
+<li>A custom domain from any domain registrar, added to Cloudflare as a zone.</li>
+</ul>
+<h2 id="controller-node"><a class="header" href="#controller-node">Controller Node</a></h2>
+<p>A workstation, controller node or separate host system will be used to run the
+required provisioning tools. This system will need to have the following tools
+installed:</p>
+<ul>
+<li>Packer</li>
+<li>Terraform</li>
+<li>Ansible</li>
+<li>Python 3 for various scripts (optional)</li>
+</ul>
+<p>Alternatively, you are free to install the above tools on the same server that
+you are provisioning the cluster.</p>
+<h2 id="cluster-requirements"><a class="header" href="#cluster-requirements">Cluster Requirements</a></h2>
+<ul>
+<li>An existing Proxmox server that is reachable by the controller node</li>
+<li>(Optional) An offline, private root and intermediate CA.</li>
+<li>A self-signed certificate, private key for TLS encryption of Vault. A default
+key-pair is
+<a href="https://github.com/hashicorp/vault/blob/main/.release/linux/postinst">generated</a>
+on installation of Vault.</li>
+</ul>
+<blockquote>
+<p><strong>Note</strong>: While Vault can use certificates generated from its own PKI secrets
+engine, a temporary key pair is still required to start up Vault.</p>
+</blockquote>
+<!-- - (Optional) A secure password manager. This project supports [Bitwarden](https://bitwarden.com/) with -->
+<!--   custom scripts. -->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started-1"><a class="header" href="#getting-started-1">Getting Started</a></h1>
+<p>Our goal is to provision a Nomad, Consul and Vault cluster with one server node
+and one client node. The basic provisioning flow is as follows:</p>
+<ol>
+<li>Packer creates base Proxmox VM templates from cloud images and ISOs</li>
+<li>Terraform provisions cluster nodes by cloning existing VM templates</li>
+<li>Ansible installs and configures Vault, Consul, Nomad on cluster nodes</li>
+</ol>
+<h3 id="assumptions"><a class="header" href="#assumptions">Assumptions</a></h3>
+<p>The following assumptions are made in this guide:</p>
+<ul>
+<li>All <a href="./prerequisites.html">prerequisites</a> are fulfilled</li>
+<li>The cluster is provisioned on a Proxmox server</li>
+<li>All nodes are running Debian 11 virtual machines (not LXCs)</li>
+</ul>
+<p>Please make the necessary changes if there are any deviations from the above.</p>
+<h2 id="creating-a-vm-template"><a class="header" href="#creating-a-vm-template">Creating a VM template</a></h2>
+<p>The Proxmox builder plugin is used to create a new VM template. It supports two
+different builders:</p>
+<ul>
+<li><code>proxmox-clone</code> - From an <a href="./images/packer.html#proxmox-clone">existing VM template</a> (recommended)</li>
+<li><code>proxmox-iso</code> - From an <a href="./images/packer.html#proxmox-iso">ISO file</a> (incomplete)</li>
+</ul>
+<p>We will be using the first builder. If you have an existing template to
+provision, you may <a href="getting_started.html#provisioning-with-terraform">skip to the next section</a>.
+Otherwise, assuming that we are lacking an existing, clean VM template, we will
+import a cloud image and turn it into a new template.</p>
+<blockquote>
+<p><strong>Note</strong>: It is important that the existing template <a href="https://pve.proxmox.com/wiki/Cloud-Init_Support#_preparing_cloud_init_templates">must
+have</a>:</p>
+<ul>
+<li>An attached cloud-init drive for the builder to add the SSH communicator
+configuration</li>
+<li>cloud-init installed</li>
+<li>qemu-guest-agent installed</li>
+</ul>
+</blockquote>
+<ol>
+<li>(Optional) Run the <code>bin/import-cloud-image</code> <a href="./images/cloud_image.html#script">script</a> to import a new cloud image:</li>
+</ol>
+<pre><code class="language-bash">$ import-cloud-image [URL]
+</code></pre>
+<ol start="2">
+<li>Navigate to <code>packer/base-clone</code></li>
+</ol>
+<blockquote>
+<p><strong>Tip</strong>: Use the <code>bin/generate-vars</code> script to quickly generate variable files
+in <code>packer</code> and <code>terraform</code> subdirectories.</p>
+</blockquote>
+<ol start="3">
+<li>Populate the necessary variables in <code>auto.pkrvars.hcl</code>:</li>
+</ol>
+<pre><code class="language-hcl">proxmox_url      = "https://&lt;PVE_IP&gt;:8006/api2/json"
+proxmox_username = "&lt;user&gt;@pam"
+proxmox_password = "&lt;password&gt;"
+
+clone_vm = "&lt;cloud-image-name&gt;"
+vm_name  = "&lt;new-template-name&gt;"
+vm_id    = 5000
+
+ssh_username = "debian"
+ssh_public_key_path = "/path/to/public/key"
+ssh_private_key_path = "/path/to/private/key"
+</code></pre>
+<ol start="4">
+<li>Build the image:</li>
+</ol>
+<pre><code class="language-bash">$ packer validate -var-file="auto.pkrvars.hcl" .
+$ packer build -var-file="auto.pkrvars.hcl" .
+</code></pre>
+<p>Packer will create a new base image and use the Ansible post-provisioner to
+install and configure software (eg. Docker, Nomad, Consul and Vault). For more
+details, see <a href="./images/packer.html#proxmox-clone">Packer</a>.</p>
+<h2 id="provisioning-with-terraform"><a class="header" href="#provisioning-with-terraform">Provisioning with Terraform</a></h2>
+<p>We are using the
+<a href="https://registry.terraform.io/providers/bpg/proxmox/latest/docs">bpg/proxmox</a>
+provider to provision virtual machines from our Packer templates.</p>
+<ol>
+<li>Navigate to <code>terraform/cluster</code></li>
+<li>Populate the necessary variables in <code>terraform.tfvars</code>:</li>
+</ol>
+<pre><code class="language-hcl">proxmox_ip        = "https://&lt;PVE_IP&gt;:8006/api2/json"
+proxmox_api_token = "&lt;API_TOKEN&gt;"
+
+template_id = 5000
+ip_gateway  = "10.10.10.1"
+
+servers = [
+  {
+    name       = "server"
+    id         = 110
+    cores      = 2
+    sockets    = 2
+    memory     = 4096
+    disk_size  = 10
+    ip_address = "10.10.10.110/24"
+  }
+]
+
+clients = [
+  {
+    name       = "client"
+    id         = 111
+    cores      = 2
+    sockets    = 2
+    memory     = 10240
+    disk_size  = 15
+    ip_address = "10.10.10.111/24"
+  }
+]
+
+ssh_user             = "debian"
+ssh_private_key_file = "/path/to/ssh/private/key"
+ssh_public_key_file  = "/path/to/ssh/public/key"
+</code></pre>
+<!-- >**Note**: To create a Proxmox API token, see [Access -->
+<!-- >Management](./terraform/proxmox.md#access-management). -->
+<ol start="3">
+<li>Provision the cluster:</li>
+</ol>
+<pre><code class="language-bash">$ terraform init
+$ terraform plan
+$ terraform apply
+</code></pre>
+<p>The above configuration will provision two VM nodes in Proxmox:</p>
+<pre><code>Server node: VMID 110 at 10.10.10.110
+Client node: VMID 111 at 10.10.10.111
+</code></pre>
+<p>An Ansible inventory file <code>tf_ansible_inventory</code> should be generated in the same
+directory with the given VM IPs in the <code>server</code> and <code>client</code> groups.</p>
+<p>For more details, refer to the <a href="terraform/proxmox.html">Terraform configuration for
+Proxmox</a>.</p>
+<h2 id="configuration-with-ansible"><a class="header" href="#configuration-with-ansible">Configuration with Ansible</a></h2>
+<p>At this stage, there should be one server node and one client node running on
+Proxmox that is reachable by SSH. These nodes should have Nomad, Consul and
+Vault installed. We will proceed to use Ansible (and Terraform) to configure
+Vault, Consul and Nomad (in that order) into a working cluster.</p>
+<ol>
+<li>Navigate to <code>ansible</code></li>
+<li>Ensure that the Terraform-generated Ansible inventory file is being read:</li>
+</ol>
+<pre><code class="language-bash">$ ansible-inventory --graph
+</code></pre>
+<ol start="3">
+<li>Populate and check the <code>group_vars</code> files in
+<code>inventory/group_vars/{prod,server,client}.yml</code></li>
+</ol>
+<pre><code class="language-bash">$ ansible-inventory --graph --vars
+</code></pre>
+<blockquote>
+<p><strong>Note</strong>: The <code>nfs_share_mounts</code> variable in <code>inventory/group_vars/client.yml</code>
+should be modified or removed if not required</p>
+</blockquote>
+<ol start="4">
+<li>Run the playbook:</li>
+</ol>
+<pre><code class="language-bash">$ ansible-playbook main.yml
+</code></pre>
+<p>The playbook will perform the following:</p>
+<ol>
+<li>Create a root and intermediate CA for Vault</li>
+<li>Configure Vault to use new CA</li>
+<li>Initialize Vault roles, authentication and PKI with Terraform with
+<a href="./terraform/vault.html">configuration</a> in <code>terraform/vault</code></li>
+<li>Configure Vault-agent and consul-template in server node</li>
+<li>Configure Consul and Nomad in server node. These roles depend on Vault being
+successfully configured and started as they require Vault to generate a
+gossip key and TLS certificates</li>
+<li>Repeat 4-5 for client node</li>
+</ol>
+<h3 id="note-on-data-loss"><a class="header" href="#note-on-data-loss">Note on Data Loss</a></h3>
+<p>When re-running the playbook on the same server, Vault will not be
+re-initialized. However, if the playbook is run on a separate server (eg. for
+testing on a dev cluster), the Vault role will permanently delete any
+existing state in the <code>terraform/vault</code> subdirectory if a different
+<code>vault_terraform_workspace</code> is not provided. This WILL result in permanent data
+loss and care should be taken when running the role (and playbook) on multiple
+clusters or servers.</p>
+<h2 id="post-setup"><a class="header" href="#post-setup">Post Setup</a></h2>
+<h3 id="smoke-tests"><a class="header" href="#smoke-tests">Smoke Tests</a></h3>
+<p>Smoke tests are performed with <a href="https://github.com/goss-org/goss">goss</a> as part
+of the <code>main.yml</code> playbook to ensure all required software are installed and
+running.</p>
+<blockquote>
+<p><strong>Note</strong>: The included goss files are static with hardcoded information. As
+such, they will fail if some of the Ansible default variables are changed (eg.
+username, NFS mountpoints). See
+<a href="./references/issues.html#static-goss-files">issues</a> for details on a workaround.</p>
+</blockquote>
+<h3 id="running-applications"><a class="header" href="#running-applications">Running Applications</a></h3>
+<p>After verifying that the cluster is up and running, we can begin to run
+applications on it with Nomad jobs. This project provides a number of Nomad
+jobspec files in <code>terraform/nomad/apps</code> to be run with Terraform with the
+following features:</p>
+<ul>
+<li>With Vault integration configured, Nomad supports the fetching of application
+secrets with Vault</li>
+<li>Traefik as a reverse proxy</li>
+<li>(Optional) Postgres as a database (with Vault-managed DB credentials)</li>
+</ul>
+<p>See <a href="./apps/add_new.html">Adding a New Application</a> for details on onboarding a
+new application to Nomad.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="provisioning"><a class="header" href="#provisioning">Provisioning</a></h1>
+<p>Provisioning requires a minimum of one server and one client node with no high
+availability (HA).</p>
+<p>To support HA, the setup can be further expanded to at least three server nodes
+and multiple client nodes hosted on a Proxmox cluster, spanning multiple
+physical machines.</p>
+<!-- ## Variables -->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="images"><a class="header" href="#images">Images</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="cloud-images"><a class="header" href="#cloud-images">Cloud Images</a></h1>
+<p>Cloud images are pre-installed disk images that have been customized to run on
+cloud platforms. They are shipped with <code>cloud-init</code> that simplifies the
+installation and provisioning of virtual machines.</p>
+<p>Unlike ISOs and LXC container images, Proxmox's API lacks support for uploading
+cloud images directly from a given URL (see
+<a href="https://bugzilla.proxmox.com/show_bug.cgi?id=4141">here</a> and
+<a href="https://forum.proxmox.com/threads/new-vm-from-cloud-init-image-via-api.111091/">here</a>).
+Instead, they must be manually downloaded and converted into a VM
+template to be available to Proxmox.</p>
+<blockquote>
+<p><strong>Warning</strong>: When cloning the cloud image template with Terraform,
+<code>qemu-guest-agent</code> must be installed and <code>agent=1</code> must be set. Otherwise,
+Terraform will timeout. As such, it is recommended to create a further
+bootstrapped template with <a href="images/./packer.html">Packer and Ansible</a>.</p>
+</blockquote>
+<h2 id="manual-upload"><a class="header" href="#manual-upload">Manual Upload</a></h2>
+<ol>
+<li>Download any cloud image:</li>
+</ol>
+<pre><code class="language-bash">$ wget https://cloud.debian.org/images/cloud/bullseye/20230124-1270/debian11-generic-amd64-20230124-1270.qcow2
+</code></pre>
+<ol start="2">
+<li>Create a Proxmox VM from the downloaded image:</li>
+</ol>
+<pre><code class="language-bash">$ qm create 9000 \
+    --name "debian-11-amd64" \
+    --net0 "virtio,bridge=vmbr0" \
+    --serial0 socket \
+    --vga serial0 \
+    --scsihw virtio-scsi-pci \
+    --scsi0 "local:0,import-from=/path/to/image" \
+    --bootdisk scsi0 \
+    --boot "order=scsi0" \
+    --ide1 "local:cloudinit" \
+    --ostype l26 \
+    --cores 1 \
+    --sockets 1 \
+    --memory 512 \
+    --agent 1
+</code></pre>
+<ol start="3">
+<li>Resize the new VM (if necessary):</li>
+</ol>
+<pre><code class="language-bash">$ qm resize 9000 scsi0 5G
+</code></pre>
+<ol start="4">
+<li>Convert the VM into a template:</li>
+</ol>
+<pre><code class="language-bash">$ qm template 9000
+</code></pre>
+<h2 id="script"><a class="header" href="#script">Script</a></h2>
+<p>A full script of the steps above can be found at
+<a href="https://github.com/kencx/homelab/blob/master/bin/import-cloud-image">bin/import-cloud-image</a>.</p>
+<pre><code class="language-bash">$ import-cloud-image --help
+
+Usage: import-cloud-image [--debug|--force] [URL] [FILENAME]
+</code></pre>
+<h2 id="references"><a class="header" href="#references">References</a></h2>
+<ul>
+<li><a href="https://pve.proxmox.com/wiki/Cloud-Init_Support">Proxmox Wiki - cloud-init Support</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="packer"><a class="header" href="#packer">Packer</a></h1>
+<p><a href="https://packer.io">Packer</a> is used to create golden images in Proxmox with the
+community <a href="https://www.packer.io/plugins/builders/proxmox">Proxmox builder
+plugin</a>.</p>
+<p>Two different builders are supported: <code>proxmox-iso</code> and <code>proxmox-clone</code> to
+target both ISO and cloud-init images for virtual machine template creation in
+Proxmox.</p>
+<h2 id="proxmox-clone"><a class="header" href="#proxmox-clone">Proxmox-clone</a></h2>
+<p>The <code>proxmox-clone</code> builder creates a new VM template from an existing one. If
+you do not have an existing VM template or want to create a new template, you
+can <a href="images/./cloud_image.html">upload a new cloud image</a> and convert it into a new VM template.</p>
+<p>Note that this existing template <a href="https://pve.proxmox.com/wiki/Cloud-Init_Support#_preparing_cloud_init_templates">must
+have</a>:</p>
+<ul>
+<li>An attached cloud-init drive for the builder to add the SSH communicator
+configuration</li>
+<li><code>cloud-init</code> installed</li>
+</ul>
+<p>After running the builder, it will do the following:</p>
+<ol>
+<li>Clone existing template by given name</li>
+<li>Add a SSH communicator configuration via cloud-init</li>
+<li>Connect via SSH and run the shell provisioner scripts to prepare the VM for
+Ansible</li>
+<li>Install and start <code>qemu-guest-agent</code></li>
+<li>Run the Ansible provisioner with the <code>ansible/common.yml</code> playbook</li>
+<li>Stop and convert the VM into a template with a new (and empty) cloud-init
+drive</li>
+</ol>
+<h3 id="variables"><a class="header" href="#variables">Variables</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Default</th></tr></thead><tbody>
+<tr><td>proxmox_url</td><td>Proxmox URL Endpoint</td><td>string</td><td></td></tr>
+<tr><td>proxmox_username</td><td>Proxmox username</td><td>string</td><td></td></tr>
+<tr><td>proxmox_password</td><td>Proxmox pw</td><td>string</td><td></td></tr>
+<tr><td>proxmox_node</td><td>Proxmox node to start VM in</td><td>string</td><td><code>pve</code></td></tr>
+<tr><td>clone_vm</td><td>Name of existing VM template to clone</td><td>string</td><td></td></tr>
+<tr><td>vm_id</td><td>ID of final VM template</td><td>number</td><td>5000</td></tr>
+<tr><td>vm_name</td><td>Name of final VM template</td><td>string</td><td></td></tr>
+<tr><td>template_description</td><td>Description of final VM template</td><td>string</td><td></td></tr>
+<tr><td>cores</td><td>Number of CPU cores</td><td>number</td><td>1</td></tr>
+<tr><td>sockets</td><td>Number of CPU sockets</td><td>number</td><td>1</td></tr>
+<tr><td>memory</td><td>Memory in MB</td><td>number</td><td>1024</td></tr>
+<tr><td>ssh_username</td><td>User to SSH into during provisioning</td><td>string</td><td></td></tr>
+<tr><td>ip_address</td><td>Temporary IP address of VM template</td><td>string</td><td><code>10.10.10.250</code></td></tr>
+<tr><td>gateway</td><td>Gateway of VM template</td><td>string</td><td><code>10.10.10.1</code></td></tr>
+<tr><td>ssh_public_key_path</td><td>Custom SSH public key path</td><td>string</td><td></td></tr>
+<tr><td>ssh_private_key_path</td><td>Custom SSH private key path</td><td>string</td><td></td></tr>
+</tbody></table>
+</div>
+<h2 id="proxmox-iso"><a class="header" href="#proxmox-iso">Proxmox-ISO</a></h2>
+<blockquote>
+<p>This builder configuration is a work-in-progress!!</p>
+</blockquote>
+<p>The <code>proxmox-iso</code> builder creates a VM template from an ISO file.</p>
+<h3 id="variables-1"><a class="header" href="#variables-1">Variables</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Default</th></tr></thead><tbody>
+<tr><td>proxmox_url</td><td>Proxmox URL Endpoint</td><td>string</td><td></td></tr>
+<tr><td>proxmox_username</td><td>Proxmox username</td><td>string</td><td></td></tr>
+<tr><td>proxmox_password</td><td>Proxmox pw</td><td>string</td><td></td></tr>
+<tr><td>proxmox_node</td><td>Proxmox node to start VM in</td><td>string</td><td><code>pve</code></td></tr>
+<tr><td>iso_url</td><td>URL for ISO file to upload to Proxmox</td><td>string</td><td></td></tr>
+<tr><td>iso_checksum</td><td>Checksum for ISO file</td><td>string</td><td></td></tr>
+<tr><td>vm_id</td><td>ID of created VM and final template</td><td>number</td><td>9000</td></tr>
+<tr><td>cores</td><td>Number of CPU cores</td><td>number</td><td>1</td></tr>
+<tr><td>sockets</td><td>Number of CPU sockets</td><td>number</td><td>1</td></tr>
+<tr><td>memory</td><td>Memory in MB</td><td>number</td><td>1024</td></tr>
+<tr><td>ssh_username</td><td>User to SSH into during provisioning</td><td>string</td><td></td></tr>
+</tbody></table>
+</div>
+<h2 id="build-images"><a class="header" href="#build-images">Build Images</a></h2>
+<ol>
+<li>
+<p>Create and populate the <code>auto.pkrvars.hcl</code> variable file.</p>
+</li>
+<li>
+<p>Run the build:</p>
+</li>
+</ol>
+<pre><code class="language-bash">$ packer validate -var-file="auto.pkrvars.hcl" .
+$ packer build -var-file="auto.pkrvars.hcl" .
+</code></pre>
+<p>If a template of the same <code>vm_id</code> already exists, you may force its re-creation
+with the <code>--force</code> flag:</p>
+<pre><code class="language-bash">$ packer build -var-file="auto.pkrvars.hcl" --force .
+</code></pre>
+<blockquote>
+<p><strong>Note</strong>: This is only available from <code>packer-plugin-proxmox</code> v1.1.2.</p>
+</blockquote>
+<h2 id="notes"><a class="header" href="#notes">Notes</a></h2>
+<ul>
+<li>Currently, only <code>proxmox_username</code> and <code>proxmox_password</code> are supported for
+authentication.</li>
+<li>The given <code>ssh_username</code> must already exist in the VM template when using
+<code>proxmox-clone</code>.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="terraform"><a class="header" href="#terraform">Terraform</a></h1>
+<p>Terraform is used to provision Proxmox guest VMs by cloning existing templates.</p>
+<h2 id="state"><a class="header" href="#state">State</a></h2>
+<p>Terraform state can be configured to be stored in a Minio S3 bucket.</p>
+<pre><code class="language-hcl">terraform {
+  backend "s3" {
+    region = "main"
+    bucket = "terraform-state"
+    key    = "path/to/terraform.tfstate"
+
+    skip_credentials_validation = true
+    skip_region_validation      = true
+    skip_metadata_api_check     = true
+    force_path_style            = true
+  }
+}
+</code></pre>
+<p>Initialize the backend with:</p>
+<pre><code class="language-bash">$ terraform init \
+    -backend-config="access_key=${TFSTATE_ACCESS_KEY}" \
+    -backend-config="secret_key=${TFSTATE_SECRET_KEY}" \
+    -backend-config="endpoint=${TFSTATE_ENDPOINT}"
+</code></pre>
+<blockquote>
+<p><strong>Note</strong>: When the Minio credentials are passed with the <code>-backend-config</code>
+flag, they will still appear in plain text in the <code>.terraform</code> subdirectory and
+any plan files.</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="postgres"><a class="header" href="#postgres">Postgres</a></h1>
+<p>This uses the
+<a href="https://registry.terraform.io/providers/hashicorp/vault/latest/docs">Vault</a> and
+<a href="https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs">Postgresql</a>
+provider to declaratively manage roles and databases in a single Postgres
+instance.</p>
+<p>The Vault and Postgres provider must be configured appropriately:</p>
+<pre><code class="language-hcl">provider "vault" {
+  address      = var.vault_address
+  token        = var.vault_token
+  ca_cert_file = var.vault_ca_cert_file
+}
+
+provider "postgresql" {
+  host     = var.postgres_host
+  port     = var.postgres_port
+  database = var.postgres_database
+  username = var.postgres_username
+  password = var.postgres_password
+  sslmode  = "disable"
+}
+</code></pre>
+<h2 id="overview-1"><a class="header" href="#overview-1">Overview</a></h2>
+<p>This Terraform configuration provisions and manages multiple databases a single
+instance of Postgres. It uses a custom module (<code>terraform/modules/database</code>) to
+create a new role and database for a given application. Vault is then used to
+periodically rotate the database credentials with a <a href="https://developer.hashicorp.com/vault/docs/secrets/databases#static-roles">static role in the database
+secrets
+engine</a>.
+To access the rotated credentials in Vault from Nomad, a relevant Vault policy
+is also created.</p>
+<h2 id="prerequisites-1"><a class="header" href="#prerequisites-1">Prerequisites</a></h2>
+<ul>
+<li>An existing Vault instance</li>
+<li>To access the credentials in Nomad, Vault integration must be configured</li>
+<li>An existing Postgres instance</li>
+</ul>
+<p>Minimally, the Postgres instance should have a default user and database
+(<code>postgres</code>) that can has the privileges to create roles and databases. The
+connection credentials must be passed as variables.</p>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<p>The <code>database</code> module requires two shared resources from Vault:</p>
+<pre><code class="language-hcl">resource "vault_mount" "db" {
+  path = "postgres"
+  type = "database"
+}
+
+resource "vault_database_secret_backend_connection" "postgres" {
+  backend       = vault_mount.db.path
+  name          = "postgres"
+  allowed_roles = ["*"]
+
+  postgresql {
+    connection_url = local.connection_url
+  }
+}
+</code></pre>
+<p>These resources provide a single shared backend and DB connection that must be passed
+to each module:</p>
+<pre><code class="language-hcl">module "role" {
+  source   = "../modules/database"
+  for_each = local.roles
+
+  postgres_vault_backend = vault_mount.db.path
+  postgres_db_name       = vault_database_secret_backend_connection.postgres.name
+
+  postgres_role_name                   = each.key
+  postgres_role_password               = each.key
+  postgres_static_role_rotation_period = each.value
+}
+</code></pre>
+<p>The <code>for_each</code> meta-argument simplifies the use of the module further by simply
+requiring a list of role objects as input:</p>
+<pre><code class="language-hcl">postgres_roles = [
+  {
+    name = "foo"
+    rotation_period = 86400
+  },
+  {
+    name = "bar"
+  },
+]
+</code></pre>
+<ul>
+<li><code>name</code> is the chosen name of the role</li>
+<li><code>rotation_period</code> is the password rotation period of the role in seconds
+(optional with a default of <code>86400</code>)</li>
+</ul>
+<p>The Nomad job obtains the database credentials with a <code>template</code> and <code>vault</code> block:</p>
+<pre><code class="language-hcl">vault {
+  policies = ["foo"]
+}
+
+template {
+  data        = &lt;&lt;EOF
+{{ with secret "postgres/static-creds/foo" }}
+DATABASE_URL = "postgres://foo:{{ .Data.password }}@localhost:5432/foo?sslmode=disable"
+{{ end }}
+EOF
+  destination = "secrets/.env"
+  env         = true
+}
+</code></pre>
+<h2 id="variables-2"><a class="header" href="#variables-2">Variables</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Default</th></tr></thead><tbody>
+<tr><td>vault_address</td><td>Vault address</td><td>string</td><td><code>https://localhost:8200</code></td></tr>
+<tr><td>vault_token</td><td>(Root) Vault token for provider</td><td>string</td><td></td></tr>
+<tr><td>vault_ca_cert_file</td><td>Local path to Vault CA cert file</td><td>string</td><td><code>./certs/vault_ca.crt</code></td></tr>
+<tr><td>postgres_username</td><td>Postgres root username</td><td>string</td><td><code>postgres</code></td></tr>
+<tr><td>postgres_password</td><td>Postgres root password</td><td>string</td><td><code>postgres</code></td></tr>
+<tr><td>postgres_database</td><td>Postgres database</td><td>string</td><td><code>postgres</code></td></tr>
+<tr><td>postgres_host</td><td>Postgres host</td><td>string</td><td><code>localhost</code></td></tr>
+<tr><td>postgres_port</td><td>Postgres port</td><td>string</td><td><code>"5432"</code></td></tr>
+<tr><td>postgres_roles</td><td>List of roles to be added</td><td>list(object)</td><td></td></tr>
+</tbody></table>
+</div>
+<h2 id="notes-1"><a class="header" href="#notes-1">Notes</a></h2>
+<ul>
+<li>Any new entries must also be added to <code>allowed_policies</code> in the
+<code>vault_token_auth_backend_role.nomad_cluster</code> resource in <a href="terraform/./vault.html">Vault</a>
+to be available by Nomad.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="proxmox"><a class="header" href="#proxmox">Proxmox</a></h1>
+<p>This page describes the Terraform configuration for managing
+<a href="https://www.proxmox.com/en/">Proxmox</a>. It uses the
+<a href="https://registry.terraform.io/providers/bpg/proxmox/latest/docs">bpg/proxmox</a>
+provider to manage three types of Proxmox resources:</p>
+<ul>
+<li>Access management</li>
+<li>Cloud images</li>
+<li>VMs</li>
+</ul>
+<!-- ## Access Management -->
+<!---->
+<!-- This configuration is found in `terraform/proxmox` and creates a dedicated -->
+<!-- Terraform user for the management of Proxmox VMs to be described later. It -->
+<!-- defines a `terraform@pam` user in a `Terraform` group which have the minimum -->
+<!-- roles required for creating, cloning and destroying VMs. This configuration -->
+<!-- requires credentials with at least the `PVEUserAdmin` role (I use the root user -->
+<!-- for convenience). -->
+<!---->
+<!-- After creating the user, we must create an API token in the web console with the -->
+<!-- following options: -->
+<!---->
+<!-- ```text -->
+<!-- user: terraform@pam -->
+<!-- token_id: some_secret -->
+<!-- privilege_separation: false -->
+<!-- ``` -->
+<h2 id="upload-of-cloud-images"><a class="header" href="#upload-of-cloud-images">Upload of Cloud Images</a></h2>
+<p>The same Terraform configuration in <code>terraform/proxmox</code> can also be used to
+upload cloud images to Proxmox with a given source URL. These images
+must have the <code>.img</code> extension or Proxmox will fail.</p>
+<p>However, these cloud images cannot be used directly by Packer or Terraform to
+create VMs. Instead, a template must be created as described in <a href="terraform/../images/cloud_image.html">Cloud
+Images</a>.</p>
+<h2 id="vm-management"><a class="header" href="#vm-management">VM Management</a></h2>
+<p>The Terraform configuration in <code>terraform/cluster</code> is used to create Proxmox VMs
+for the deployment of server and client cluster nodes. It utilizes a custom
+module (<code>terraform/modules/vm</code>) that clones an existing VM template and
+bootstraps it with cloud-init.</p>
+<blockquote>
+<p><strong>Note</strong>: The VM template must have cloud-init installed. See
+<a href="terraform/../images/packer.html">Packer</a> for how to create a compatible template.</p>
+</blockquote>
+<p>While root credentials can be used, this configuration accepts an API token
+(created previously):</p>
+<pre><code class="language-hcl">provider "proxmox" {
+    endpoint = "https://[ip]:8006/api2/json"
+    api_token = "terraform@pam!some_secret=api_token"
+    insecure = true
+
+    ssh {
+      agent = true
+    }
+}
+</code></pre>
+<p>The number of VMs provisioned are defined by the length of the array
+variables. The following will deploy four nodes in total: two server and two
+client nodes with the given IP addresses. All nodes will be cloned from the
+given VM template.</p>
+<pre><code class="language-hcl">template_id = 5003
+ip_gateway  = "10.10.10.1"
+
+servers = [
+  {
+    name       = "server"
+    id         = 110
+    cores      = 2
+    sockets    = 2
+    memory     = 4096
+    disk_size  = 10
+    ip_address = "10.10.10.110/24"
+  }
+]
+
+clients = [
+  {
+    name       = "client"
+    id         = 111
+    cores      = 2
+    sockets    = 2
+    memory     = 10240
+    disk_size  = 15
+    ip_address = "10.10.10.111/24"
+  }
+]
+</code></pre>
+<p>On success, the provisioned VMs are accessible via the configured SSH username
+and public key.</p>
+<blockquote>
+<p><strong>Note</strong>: The VM template must have <code>qemu-guest-agent</code> installed and <code>agent=1</code>
+set. Otherwise, Terraform will timeout.</p>
+</blockquote>
+<h3 id="ansible-inventory"><a class="header" href="#ansible-inventory">Ansible Inventory</a></h3>
+<p>Terraform will also generate an Ansible inventory file <code>tf_ansible_inventory</code> in
+the same directory. Ansible can read this inventory file automatically by
+appending the following in the <code>ansible.cfg</code>:</p>
+<pre><code class="language-ini">inventory=../terraform/cluster/tf_ansible_inventory,/path/to/other/inventory/files
+</code></pre>
+<h2 id="variables-3"><a class="header" href="#variables-3">Variables</a></h2>
+<h3 id="proxmox-1"><a class="header" href="#proxmox-1">Proxmox</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Default</th></tr></thead><tbody>
+<tr><td>proxmox_ip</td><td>Proxmox IP address</td><td>string</td><td></td></tr>
+<tr><td>proxmox_user</td><td>Proxmox API token</td><td>string</td><td><code>root@pam</code></td></tr>
+<tr><td>proxmox_password</td><td>Proxmox API token</td><td>string</td><td></td></tr>
+</tbody></table>
+</div>
+<h3 id="vm"><a class="header" href="#vm">VM</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Default</th></tr></thead><tbody>
+<tr><td>proxmox_ip</td><td>Proxmox IP address</td><td>string</td><td></td></tr>
+<tr><td>proxmox_api_token</td><td>Proxmox API token</td><td>string</td><td></td></tr>
+<tr><td>target_node</td><td>Proxmox node to start VM in</td><td>string</td><td><code>pve</code></td></tr>
+<tr><td>tags</td><td>List of Proxmox VM tags</td><td>list(string)</td><td><code>[prod]</code></td></tr>
+<tr><td>template_id</td><td>Template ID to clone</td><td>number</td><td></td></tr>
+<tr><td>onboot</td><td>Start VM on boot</td><td>bool</td><td><code>false</code></td></tr>
+<tr><td>started</td><td>Start VM on creation</td><td>bool</td><td><code>true</code></td></tr>
+<tr><td>servers</td><td>List of server config (see above)</td><td>list(object)</td><td><code>[]</code></td></tr>
+<tr><td>clients</td><td>List of client config (see above)</td><td>list(object)</td><td><code>[]</code></td></tr>
+<tr><td>disk_datastore</td><td>Datastore on which to store VM disk</td><td>string</td><td><code>volumes</code></td></tr>
+<tr><td>control_ip_address</td><td>Control IPv4 address in CIDR notation</td><td>string</td><td></td></tr>
+<tr><td>ip_gateway</td><td>IPv4 gateway address</td><td>string</td><td></td></tr>
+<tr><td>ssh_username</td><td>User to SSH into during provisioning</td><td>string</td><td></td></tr>
+<tr><td>ssh_private_key_file</td><td>Filepath of private SSH key</td><td>string</td><td></td></tr>
+<tr><td>ssh_public_key_file</td><td>Filepath of public SSH key</td><td>string</td><td></td></tr>
+</tbody></table>
+</div>
+<ul>
+<li>The VM template corresponding to <code>template_id</code> must exist</li>
+<li>The IPv4 addresses must be in CIDR notation with subnet masks (eg.
+<code>10.0.0.2/24</code>)</li>
+</ul>
+<h2 id="notes-2"><a class="header" href="#notes-2">Notes</a></h2>
+<h3 id="proxmox-credentials-and-lxc-bind-mounts"><a class="header" href="#proxmox-credentials-and-lxc-bind-mounts">Proxmox credentials and LXC bind mounts</a></h3>
+<p>Root credentials must be used in place of an API token if you require bind
+mounts with an LXC. There is <a href="https://bugzilla.proxmox.com/show_bug.cgi?id=2582">no
+support</a> for mounting bind
+mounts to LXC via an API token.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="vault"><a class="header" href="#vault">Vault</a></h1>
+<p>This uses the
+<a href="https://registry.terraform.io/providers/hashicorp/vault/latest/docs">Vault</a>
+provider to declaratively manage secrets and policies in a running Vault
+instance. The Vault provider must be configured appropriately:</p>
+<pre><code class="language-tf">provider "vault" {
+  address      = var.vault_address
+  token        = var.vault_token
+  ca_cert_file = var.vault_ca_cert_file
+}
+</code></pre>
+<h2 id="workspaces"><a class="header" href="#workspaces">Workspaces</a></h2>
+<p>Ansible initializes Vault in the <a href="terraform/../roles/vault.html#initialization">vault role</a>.
+When doing so, any existing Vault resources in the same workspace are
+<strong>destroyed permanently</strong>. As such, care should be taken to ensure the
+appropriate workspaces are used when running the role on multiple Vault server
+instances or environments (eg. dev and prod).</p>
+<h2 id="outputs"><a class="header" href="#outputs">Outputs</a></h2>
+<p>Vault produces the following outputs:</p>
+<ul>
+<li>Certificate key pair for Ansible certificate authentication to Vault</li>
+</ul>
+<h2 id="variables-4"><a class="header" href="#variables-4">Variables</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Default</th></tr></thead><tbody>
+<tr><td>vault_address</td><td>Vault address</td><td>string</td><td><code>https://localhost:8200</code></td></tr>
+<tr><td>vault_token</td><td>(Root) Vault token for provider</td><td>string</td><td></td></tr>
+<tr><td>vault_ca_cert_file</td><td>Local path to Vault CA cert file</td><td>string</td><td><code>./certs/vault_ca.crt</code></td></tr>
+<tr><td>vault_audit_path</td><td>Vault audit file path</td><td>string</td><td><code>/vault/logs/vault.log</code></td></tr>
+<tr><td>admin_password</td><td>Password for admin user</td><td>string</td><td></td></tr>
+<tr><td>kvuser_password</td><td>Password for kv user</td><td>string</td><td></td></tr>
+<tr><td>allowed_server_domains</td><td>List of allowed_domains for PKI server role</td><td>list(string)</td><td><code>["service.consul", "dc1.consul", "dc1.nomad", "global.nomad"]</code></td></tr>
+<tr><td>allowed_client_domains</td><td>List of allowed_domains for PKI client role</td><td>list(string)</td><td><code>["service.consul", "dc1.consul", "dc1.nomad", "global.nomad"]</code></td></tr>
+<tr><td>allowed_auth_domains</td><td>List of allowed_domains for PKI auth role</td><td>list(string)</td><td><code>["global.vault"]</code></td></tr>
+<tr><td>allowed_vault_domains</td><td>List of allowed_domains for PKI vault role</td><td>list(string)</td><td><code>["vault.service.consul", "global.vault"]</code></td></tr>
+<tr><td>ansible_public_key_path</td><td>Local path to store Ansible public key for auth</td><td>string</td><td><code>../../certs/ansible.crt</code></td></tr>
+<tr><td>ansible_private_key_path</td><td>Local path to store Ansible private key for auth</td><td>string</td><td><code>../../certs/ansible_key.pem</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="notes-3"><a class="header" href="#notes-3">Notes</a></h2>
+<ul>
+<li>The resources for Postgres database secrets engine are configured separately
+in <a href="terraform/./postgres.html">Postgres</a>. This is because the Postgres database might not
+be up when Vault is being initialized.</li>
+<li>It is not recommended to change the <code>ansible_*_key_path</code> variables. Changing
+them will heavily affect the Ansible roles when they attempt to login to Vault
+with the auth certs.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ansible"><a class="header" href="#ansible">Ansible</a></h1>
+<p>Ansible playbooks are used to configure provisioned server and client nodes to
+run a functional cluster. They use modular and customizable roles to setup
+various software.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="roles"><a class="header" href="#roles">Roles</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="common"><a class="header" href="#common">Common</a></h1>
+<p>This role installs common packages and performs standard post-provisioning such
+as:</p>
+<ul>
+<li>Creation of user</li>
+<li>Creation of NFS share directories</li>
+<li>Installation of Hashicorp software</li>
+<li>Installation of Bitwarden CLI</li>
+</ul>
+<blockquote>
+<p><strong>Note</strong>: Security hardening and installation of Docker are performed
+separately in the <code>common.yml</code> playbook.</p>
+</blockquote>
+<h2 id="variables-5"><a class="header" href="#variables-5">Variables</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Default</th></tr></thead><tbody>
+<tr><td>common_user</td><td>User to be created</td><td>string</td><td><code>debian</code></td></tr>
+<tr><td>common_timezone</td><td>Timezone to set</td><td>string</td><td><code>Asia/Singapore</code></td></tr>
+<tr><td>common_keyring_dir</td><td>Keyring directory path for external apt repositories</td><td>string</td><td><code>/etc/apt/keyrings</code></td></tr>
+<tr><td>common_nfs_dir</td><td>NFS share directory path</td><td>string</td><td><code>/mnt/storage</code></td></tr>
+<tr><td>common_packages</td><td>List of common packages to be installed</td><td>list(string)</td><td>See <code>defaults.yml</code> for full list</td></tr>
+<tr><td>common_nomad_version</td><td>Nomad version to install</td><td>string</td><td><code>1.6.1-1</code></td></tr>
+<tr><td>common_consul_version</td><td>Consul version to install</td><td>string</td><td><code>1.15.4-1</code></td></tr>
+<tr><td>common_vault_version</td><td>Vault version to install</td><td>string</td><td><code>1.14.0-1</code></td></tr>
+<tr><td>common_consul_template_version</td><td>Consul template version to install</td><td>string</td><td><code>0.32.0-1</code></td></tr>
+<tr><td>common_reset_nomad</td><td>Clear Nomad data directory</td><td>boolean</td><td><code>true</code></td></tr>
+<tr><td>common_dotfiles</td><td>List of dotfiles to be added, and their destinations</td><td>list</td><td><code>[]</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="tags"><a class="header" href="#tags">Tags</a></h2>
+<ul>
+<li>Skip <code>bw</code> to not install the Bitwarden CLI</li>
+<li>Skip <code>nfs</code> to not create any NFS share directories</li>
+<li>Skip <code>dotfiles</code> to not copy any remote dotfiles</li>
+</ul>
+<h2 id="notes-4"><a class="header" href="#notes-4">Notes</a></h2>
+<ul>
+<li>This role clears any existing <code>/opt/nomad/data</code> directories to a blank slate. To disable this
+behaviour, set <code>common_reset_nomad: false</code>.</li>
+<li>This role only supports Ubuntu/Debian amd64 systems with <code>apt</code>.</li>
+<li>The Hashicorp apt server <a href="https://github.com/hashicorp/terraform/issues/27378">only supports amd64
+packages</a>. For arm64
+systems, download the individual zip files instead.</li>
+<li><code>common_dotfiles</code> is used to add dotfiles from a Github repository to the host.
+For example:</li>
+</ul>
+<pre><code class="language-yml">common_dotfiles:
+  - url: https://raw.githubusercontent.com/foo/repo/master/.vimrc
+    dest: /home/foo/.vimrc
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="consul"><a class="header" href="#consul">Consul</a></h1>
+<p>This role deploys a new Consul instance. It can deploy Consul as a server or client,
+depending on the host's group name.</p>
+<h2 id="prerequisites-2"><a class="header" href="#prerequisites-2">Prerequisites</a></h2>
+<ul>
+<li>An existing Vault instance to save gossip key and provision TLS certs</li>
+<li>An existing consul-template instance to rotate TLS certs</li>
+<li>Consul installed</li>
+<li>Ansible auth certificate on localhost to access Vault</li>
+</ul>
+<h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
+<p>For encryption, the role creates consul-template templates for:</p>
+<ul>
+<li>Consul's gossip key. A new key is added with <code>consul keygen</code> if it does not
+already exist</li>
+<li>Consul TLS certs from Vault PKI</li>
+</ul>
+<h2 id="variables-6"><a class="header" href="#variables-6">Variables</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Default</th></tr></thead><tbody>
+<tr><td>consul_config_dir</td><td>Configuration directory</td><td>string</td><td><code>/etc/consul.d</code></td></tr>
+<tr><td>consul_data_dir</td><td>Data directory</td><td>string</td><td><code>/opt/consul</code></td></tr>
+<tr><td>consul_tls_dir</td><td>TLS files directory</td><td>string</td><td><code>${consul_data_dir}/tls</code></td></tr>
+<tr><td>consul_template_config_dir</td><td>consul-template configuration file</td><td>string</td><td><code>/etc/consul-template</code></td></tr>
+<tr><td>consul_upstream_dns_address</td><td>List of upstream DNS servers for dnsmasq</td><td><code>["1.1.1.1"]</code></td><td></td></tr>
+<tr><td>consul_server</td><td>Start Consul in server mode</td><td>bool</td><td><code>true</code></td></tr>
+<tr><td>consul_bootstrap_expect</td><td>(server only) The expected number of servers in a cluster</td><td>number</td><td><code>1</code></td></tr>
+<tr><td>consul_client</td><td>Start Consul in client mode</td><td>bool</td><td><code>false</code></td></tr>
+<tr><td>consul_server_ip</td><td>(client only) Server's IP address</td><td>string</td><td>-</td></tr>
+<tr><td>consul_vault_addr</td><td>Vault server API address to use</td><td>string</td><td><code>https://localhost:8200</code></td></tr>
+<tr><td>consul_common_name</td><td>Consul node certificate common_name</td><td>string</td><td>See below</td></tr>
+<tr><td>consul_alt_names</td><td>Consul's TLS certificate alt names</td><td>string</td><td><code>consul.service.consul</code></td></tr>
+<tr><td>consul_ip_sans</td><td>Consul's TLS certificate IP SANs</td><td>string</td><td><code>127.0.0.1</code></td></tr>
+<tr><td>setup_consul_watches</td><td>Set up Consul watches for healthchecks</td><td>bool</td><td><code>false</code></td></tr>
+<tr><td>consul_gotify_url</td><td>Gotify URL for sending webhook</td><td>string</td><td><code>""</code></td></tr>
+<tr><td>consul_gotify_token</td><td>Gotify token for sending webhook</td><td>string</td><td><code>""</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="notes-5"><a class="header" href="#notes-5">Notes</a></h2>
+<ul>
+<li><code>consul_server</code> and <code>consul_agent</code> are mutually exclusive and cannot be both
+<code>true</code>.</li>
+<li><code>consul_bootstrap_expect</code> must be the same value in all Consul servers. If the
+key is not present in the server, that server instance will not attempt to
+bootstrap the cluster.</li>
+<li>An existing Consul server must be running and reachable at <code>consul_server_ip</code>
+when <code>consul_agent</code> is <code>true</code>.</li>
+<li>The default value of <code>consul_common_name</code> is <code>server.dc1.consul</code> or
+<code>client.dc1.consul</code> depending on whether Consul is started in server or client
+mode.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="consul-template"><a class="header" href="#consul-template">Consul-template</a></h1>
+<p>This role deploys a new Consul-template instance.</p>
+<h2 id="prerequisites-3"><a class="header" href="#prerequisites-3">Prerequisites</a></h2>
+<ul>
+<li>consul-template installed</li>
+<li>Access to any template destination directories</li>
+</ul>
+<h2 id="setup-1"><a class="header" href="#setup-1">Setup</a></h2>
+<p><a href="ansible/roles/./vault.html#vault-agent">Vault-agent</a> is used to authenticate to Vault for
+consul-template. It only requires access to the <code>vault_agent_token_file</code>. This
+means consul-template requires access to Vault directories. It also requires
+access to any template destination directories (eg. Consul, Nomad TLS
+directories). As such, the role runs consul-template as root. I'm still
+considering alternatives that allow consul-template to be ran as a
+non-privileged user.</p>
+<blockquote>
+<p><strong>Note</strong>: Vault and Vault-agent do not have to be installed for the role to run
+successfully. However, they must be available for the consul-template service
+to start without error.</p>
+</blockquote>
+<h2 id="variables-7"><a class="header" href="#variables-7">Variables</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Default</th></tr></thead><tbody>
+<tr><td>consul_template_dir</td><td>Configuration directory</td><td>string</td><td><code>/opt/consul-template</code></td></tr>
+<tr><td>vault_address</td><td>Vault instance IP address</td><td>string</td><td><code>${ansible_default_ipv4.address}</code></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="issue-cert"><a class="header" href="#issue-cert">Issue Cert</a></h1>
+<p>This role issues a new Vault certificate from the configured <code>pki_int</code> role.</p>
+<h2 id="prerequisites-4"><a class="header" href="#prerequisites-4">Prerequisites</a></h2>
+<ul>
+<li>An existing Vault instance</li>
+<li>(Optional) An existing consul-template instance</li>
+<li>Ansible auth certificate on localhost</li>
+</ul>
+<h2 id="setup-2"><a class="header" href="#setup-2">Setup</a></h2>
+<p>The role issues a new certificate from Vault and writes it to the host's
+filesystem at a chosen path. The role logins with an existing Ansible
+auth certificate with limited permissions from its configured policies.</p>
+<p>The role also optionally adds a consul-template template stanza to automatically
+renew the certificate key pair.</p>
+<h2 id="variables-8"><a class="header" href="#variables-8">Variables</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Default</th></tr></thead><tbody>
+<tr><td>issue_cert_role</td><td>Certificate role</td><td>string</td><td><code>client</code></td></tr>
+<tr><td>issue_cert_common_name</td><td>Certificate common name</td><td>string</td><td><code>""</code></td></tr>
+<tr><td>issue_cert_ttl</td><td>Certificate TTL</td><td>string</td><td><code>24h</code></td></tr>
+<tr><td>issue_cert_vault_addr</td><td>Vault instance address</td><td>string</td><td><code>https://localhost:8200</code></td></tr>
+<tr><td>issue_cert_owner</td><td>Certificate key pair owner</td><td>string</td><td><code>""</code></td></tr>
+<tr><td>issue_cert_group</td><td>Certificate key pair group</td><td>string</td><td><code>""</code></td></tr>
+<tr><td>issue_cert_path</td><td>Certificate path</td><td>string</td><td><code>cert.crt</code></td></tr>
+<tr><td>issue_cert_key_path</td><td>Private key path</td><td>string</td><td><code>key.pem</code></td></tr>
+<tr><td>issue_cert_ca_path</td><td>CA path</td><td>string</td><td><code>ca.crt</code></td></tr>
+<tr><td>issue_cert_auth_role</td><td>Auth role to write certificate to</td><td>string</td><td><code>""</code></td></tr>
+<tr><td>issue_cert_auth_policies</td><td>Policies to add to auth role</td><td>string</td><td><code>""</code></td></tr>
+<tr><td>issue_cert_add_template</td><td>Add consul-template template</td><td>boolean</td><td><code>true</code></td></tr>
+<tr><td>issue_cert_consul_template_config</td><td>consul-template config file path</td><td>string</td><td><code>/etc/consul-template/consul-template.hcl</code></td></tr>
+<tr><td>issue_cert_consul_template_marker</td><td>consul-template template marker</td><td>string</td><td><code># {mark} TLS</code></td></tr>
+<tr><td>issue_cert_service</td><td>Service to restart after consul-template renews cert</td><td>string</td><td><code>""</code></td></tr>
+</tbody></table>
+</div>
+<ul>
+<li><code>issue_cert_auth_*</code> variables are only used when <code>issue_cert_role = "auth"</code></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="nomad"><a class="header" href="#nomad">Nomad</a></h1>
+<p>This role deploys a new Nomad instance. It can deploy Nomad as a server or client,
+depending on the host's group name.</p>
+<h2 id="prerequisites-5"><a class="header" href="#prerequisites-5">Prerequisites</a></h2>
+<ul>
+<li>An existing Vault instance to save gossip key and provision TLS certs</li>
+<li>An existing consul-template instance to rotate TLS certs</li>
+<li>Nomad installed</li>
+<li>Ansible auth certificate on localhost to access Vault</li>
+</ul>
+<h2 id="setup-3"><a class="header" href="#setup-3">Setup</a></h2>
+<p>For encryption, the role creates consul-template templates for:</p>
+<ul>
+<li>Nomad's gossip key. A new key is added with <code>nomad operator gossip keyring generate</code> if it does not already exist</li>
+<li>Nomad TLS certs from Vault PKI</li>
+<li>Vault token for Vault integration</li>
+</ul>
+<h2 id="variables-9"><a class="header" href="#variables-9">Variables</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Default</th></tr></thead><tbody>
+<tr><td>nomad_config_dir</td><td>Configuration directory</td><td>string</td><td><code>/etc/nomad.d</code></td></tr>
+<tr><td>nomad_data_dir</td><td>Data directory</td><td>string</td><td><code>/opt/nomad</code></td></tr>
+<tr><td>nomad_tls_dir</td><td>TLS files directory</td><td>string</td><td><code>${nomad_data_dir}/tls</code></td></tr>
+<tr><td>consul_template_config_dir</td><td>consul-template configuration file</td><td>string</td><td><code>/etc/consul-template</code></td></tr>
+<tr><td>nomad_register_consul</td><td>Register Nomad as a Consul service</td><td>bool</td><td><code>true</code></td></tr>
+<tr><td>nomad_vault_integration</td><td>Sets up Vault integration in server node</td><td>bool</td><td><code>true</code></td></tr>
+<tr><td>nomad_server</td><td>Start Nomad in server mode</td><td>bool</td><td><code>true</code></td></tr>
+<tr><td>nomad_bootstrap_expect</td><td>(server only) The expected number of servers in a cluster</td><td>number</td><td><code>1</code></td></tr>
+<tr><td>nomad_client</td><td>Start Nomad in client mode</td><td>bool</td><td><code>false</code></td></tr>
+<tr><td>nomad_server_ip</td><td>(client only) Server's IP address</td><td>string</td><td>-</td></tr>
+<tr><td>nomad_vault_addr</td><td>Vault server API address to use</td><td>string</td><td><code>https://localhost:8200</code></td></tr>
+<tr><td>nomad_common_name</td><td>Nomad node certificate common_name</td><td>string</td><td><code>server.global.nomad</code></td></tr>
+<tr><td>nomad_alt_names</td><td>Nomad's TLS certificate alt names</td><td>string</td><td><code>nomad.service.consul</code></td></tr>
+<tr><td>nomad_ip_sans</td><td>Nomad's TLS certificate IP SANs</td><td>string</td><td><code>127.0.0.1</code></td></tr>
+<tr><td>cni_plugin_version</td><td>CNI plugins version</td><td>string</td><td><code>1.3.0</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="notes-6"><a class="header" href="#notes-6">Notes</a></h2>
+<ul>
+<li><code>nomad_server</code> and <code>nomad_agent</code> are mutually exclusive and cannot be both
+<code>true</code>.</li>
+<li><code>nomad_bootstrap_expect</code> must be the same value in all Nomad servers. If the
+key is not present in the server, that server instance will not attempt to
+bootstrap the cluster.</li>
+<li>An existing Nomad server must be running and reachable at <code>nomad_server_ip</code>
+when <code>nomad_agent</code> is <code>true</code>.</li>
+<li>The default value of <code>nomad_common_name</code> is <code>server.global.nomad</code> or
+<code>client.global.nomad</code> depending on whether nomad is started in server or client
+mode.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="unseal-vault"><a class="header" href="#unseal-vault">Unseal Vault</a></h1>
+<blockquote>
+<p><strong>Work in Progress</strong>: This role is unfinished and untested.</p>
+</blockquote>
+<p>This role unseals an initialized but sealed Vault server. The unseal key shares
+can be provided as:</p>
+<ul>
+<li>A variable array of keys</li>
+<li>A variable array of file paths to the keys on the remote filesystem</li>
+<li>Secrets from Bitwarden</li>
+</ul>
+<h2 id="variables-10"><a class="header" href="#variables-10">Variables</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Default</th></tr></thead><tbody>
+<tr><td>unseal_vault_port</td><td>Configured Vault port</td><td>int</td><td><code>8200</code></td></tr>
+<tr><td>unseal_vault_addr</td><td>Vault HTTP address</td><td>string</td><td><code>http://localhost:8200</code></td></tr>
+<tr><td>unseal_store</td><td>Accepts <code>file, bitwarden</code></td><td>string</td><td></td></tr>
+<tr><td>unseal_keys_files</td><td>Array of files with unseal keys</td><td>list</td><td></td></tr>
+<tr><td>unseal_keys</td><td>Array of key shares</td><td>list</td><td></td></tr>
+<tr><td>unseal_bw_password</td><td>Bitwarden password</td><td>string</td><td></td></tr>
+<tr><td>unseal_bw_keys_names</td><td>List of Bitwarden secrets storing key shares</td><td>list</td><td></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="vault-1"><a class="header" href="#vault-1">Vault</a></h1>
+<p>This role deploys a new Vault instance and performs the required initialization.
+If ran on a client node, it provisions a Vault agent instance instead.</p>
+<h2 id="prerequisites-6"><a class="header" href="#prerequisites-6">Prerequisites</a></h2>
+<ul>
+<li>Vault &gt;1.14.0 installed</li>
+<li>Terraform installed on Ansible host</li>
+<li>A private key and signed certificate for TLS encryption. If from a self-signed CA,
+the certificate chain must be trusted.</li>
+<li>(Optional) Bitwarden password manager installed</li>
+</ul>
+<h2 id="initialization"><a class="header" href="#initialization">Initialization</a></h2>
+<p>Vault is configured and started. If the instance is uninitialized, the role
+performs first-time initialization and stores the root token and unseal key.
+Only a single unseal key is supported at the moment. The secrets can be stored
+in the filesystem or on Bitwarden.</p>
+<blockquote>
+<p><strong>Note</strong>: If storing in Bitwarden, the Bitwarden CLI must be installed,
+configured and the <code>bw_password</code> variable must be provided.</p>
+</blockquote>
+<p>It then proceeds to login with the root token and setup the PKI secrets engine
+and various authentication roles with the Terraform provider. A full list of
+Terraform resources can be found at <code>homelab/terraform/vault</code>.</p>
+<blockquote>
+<p><strong>Warning</strong>: Any existing Vault resources in the same workspace are
+<strong>destroyed</strong> permanently. Take care that the appropriate workspaces are used
+when running the role on multiple Vault server instances.</p>
+</blockquote>
+<h2 id="vault-agent"><a class="header" href="#vault-agent">Vault Agent</a></h2>
+<p>If this role is ran on a client node or <code>vault_setup_agent</code> is <code>true</code> (on a
+server node), it will also provision a Vault-Agent instance. It requires an
+existing unsealed Vault server and should be run only after the Vault server has
+been setup.</p>
+<p>Vault-agent's method of authentication to Vault is TLS certificate
+authentication. Ansible will generate these certificates and write them to the
+agent's auth role.</p>
+<blockquote>
+<p><strong>Note</strong>: This means Ansible requires access to Vault which it receives through
+authentication using its own TLS certificates, created by Terraform during the
+provisioning of the Vault server. These certificates were also written to
+<code>homelab/certs/</code></p>
+</blockquote>
+<h2 id="variables-11"><a class="header" href="#variables-11">Variables</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Description</th><th>Type</th><th>Default</th></tr></thead><tbody>
+<tr><td>vault_config_dir</td><td>Configuration directory</td><td>string</td><td><code>/etc/vault.d</code></td></tr>
+<tr><td>vault_data_dir</td><td>Restricted data directory</td><td>string</td><td><code>/opt/vault/data</code></td></tr>
+<tr><td>vault_log_dir</td><td>Restricted logs directory</td><td>string</td><td><code>/opt/vault/logs</code></td></tr>
+<tr><td>vault_tls_dir</td><td>TLS files directory</td><td>string</td><td><code>/opt/vault/tls</code></td></tr>
+<tr><td>vault_ca_cert_dir</td><td>Vault's CA certificate directory</td><td>string</td><td><code>/usr/share/ca-certificates/vault</code></td></tr>
+<tr><td>vault_server</td><td>Setup Vault server</td><td>bool</td><td>true</td></tr>
+<tr><td>vault_log_file</td><td>Audit log file</td><td>string</td><td><code>${vault_log_dir}/vault.log</code></td></tr>
+<tr><td>vault_store_local</td><td>Copy Vault init secrets to local file</td><td>bool</td><td><code>true</code></td></tr>
+<tr><td>vault_secrets_file</td><td>File path for Vault init secrets</td><td>string</td><td><code>vault.txt</code></td></tr>
+<tr><td>vault_store_bw</td><td>Store root token in Bitwarden</td><td>bool</td><td><code>false</code></td></tr>
+<tr><td>vault_terraform_workspace</td><td>Terraform workspace</td><td>string</td><td><code>default</code></td></tr>
+<tr><td>vault_admin_password</td><td>Password for admin user</td><td>string</td><td><code>password</code></td></tr>
+<tr><td>vault_register_consul</td><td>Register Vault as a Consul service</td><td>bool</td><td><code>true</code></td></tr>
+<tr><td>vault_setup_agent</td><td>Setup Vault agent</td><td>bool</td><td><code>true</code></td></tr>
+<tr><td>vault_server_fqdn</td><td>Existing Vault server's FQDN</td><td>string</td><td><code>${ansible_default_ipv4.address}</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="notes-7"><a class="header" href="#notes-7">Notes</a></h2>
+<ul>
+<li><code>vault_server</code> and <code>vault_setup_agent</code> are not mutually exclusive. A host
+can have both instances running at the same time. However, there must already
+be an existing server instance if <code>vault_server</code> is <code>false</code>.</li>
+<li><code>vault_server_fqdn</code> is used to communicate with an existing Vault server that
+is listening on port 8200 when setting up Vault agent.</li>
+</ul>
+<h3 id="vault-initialization-secrets"><a class="header" href="#vault-initialization-secrets">Vault Initialization Secrets</a></h3>
+<p>This role offers two methods of storing the secrets generated (root token and
+unseal key(s)) during the initial Vault initialization:</p>
+<ul>
+<li>On the Ansible host system</li>
+<li>In Bitwarden</li>
+<li>Both</li>
+</ul>
+<p>Storing the secrets on the local filesystem is only recommended as a temporary
+measure (to verify the secrets), or for testing and development. The file should
+be deleted afterwards or moved to a safer location.</p>
+<blockquote>
+<p><strong>Warning</strong>: The Bitwarden storage functionality is not very robust and not
+recommended at the moment. Use it with caution.</p>
+</blockquote>
+<p>Storing the secrets in Bitwarden requires the following prerequisites:</p>
+<ul>
+<li>Bitwarden CLI tool must be installed and configured</li>
+<li>User is logged into Bitwarden</li>
+<li><code>bw_password</code> variable must be defined and passed to Ansible safely</li>
+</ul>
+<p>The <code>bw_get.sh</code> and <code>bw_store.sh</code> helper scripts are used to create or update
+the secrets. Take care that the scripts will overwrite any existing secrets (of
+the same name).</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="applications"><a class="header" href="#applications">Applications</a></h1>
+<h2 id="actual"><a class="header" href="#actual">Actual</a></h2>
+<ul>
+<li>On first startup, you will be prompted to secure the new server with a password.</li>
+</ul>
+<h2 id="calibre-web"><a class="header" href="#calibre-web">Calibre Web</a></h2>
+<ul>
+<li>Point the <code>books</code> bind mount to an existing
+<a href="https://github.com/kovidgoyal/calibre">calibre</a> database with the books
+metadata.</li>
+</ul>
+<h2 id="gotify"><a class="header" href="#gotify">Gotify</a></h2>
+<ul>
+<li>Populate <code>GOTIFY_DEFAULTUSER_NAME</code> and <code>GOTIFY_DEFAULTUSER_PASS</code> with custom
+credentials.</li>
+</ul>
+<h2 id="linkding"><a class="header" href="#linkding">Linkding</a></h2>
+<ul>
+<li>Populate <code>LD_SUPERUSER_NAME</code> and <code>LD_SUPERUSER_PASSWORD</code> with custom
+credentials.</li>
+</ul>
+<h2 id="yarr"><a class="header" href="#yarr">yarr</a></h2>
+<ul>
+<li>Populate the <code>AUTH_FILE</code> environment variable with custom credentials
+in the form <code>username:password</code>.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="adding-a-new-application"><a class="header" href="#adding-a-new-application">Adding a New Application</a></h1>
+<p>Some notes when adding a new application jobspec to Nomad in
+<code>terraform/nomad/apps</code>.</p>
+<h2 id="traefik"><a class="header" href="#traefik">Traefik</a></h2>
+<p>To place the application behind the Traefik reverse proxy, its jobspec should
+include the <code>service.tags</code>:</p>
+<pre><code class="language-hcl">tags = [
+    "traefik.enable=true",
+    "traefik.http.routers.app-proxy.entrypoints=https",
+    "traefik.http.routers.app-proxy.tls=true",
+    "traefik.http.routers.app-proxy.rule=Host(`app.example.tld`)",
+]
+</code></pre>
+<h2 id="secrets"><a class="header" href="#secrets">Secrets</a></h2>
+<p>This section is relevant if the application requires KV secrets from Vault. It
+uses the <a href="apps/../terraform/vault.html">Vault Terraform module</a>.</p>
+<ol>
+<li>
+<p>Firstly, add the relevant KV secrets to Vault.</p>
+</li>
+<li>
+<p>Next, create and add a Vault policy for read-only access to the relevant KV secrets:</p>
+</li>
+</ol>
+<pre><code class="language-hcl"># terraform/vault/policies/nomad_app.hcl
+path "kvv2/data/prod/nomad/app" {
+    capabilities = ["read"]
+}
+
+# terraform/vault/policies.tf
+resource "vault_policy" "nomad_app" {
+    name   = "nomad_app"
+    policy = file("policies/nomad_app.hcl")
+}
+</code></pre>
+<ol start="3">
+<li>Include the <code>vault</code> and <code>template</code> blocks in the Nomad jobspec:</li>
+</ol>
+<pre><code class="language-hcl">vault {
+    policies = ["nomad_app"]
+}
+
+template {
+    data        = &lt;&lt;EOF
+{{ with secret "kvv2/data/prod/nomad/app" }}
+AUTH="{{ .Data.data.username }}":"{{ .Data.data.password }}"
+{{ end }}
+EOF
+    destination = "secrets/auth.env"
+    env         = true
+}
+</code></pre>
+<p>This will access the Vault secrets and include them as the <code>AUTH</code> environment
+variable in the job.</p>
+<h2 id="database"><a class="header" href="#database">Database</a></h2>
+<p>This section is relevant if the application requires access to the Postgres
+database. It uses the <a href="apps/../terraform/postgres.html">Postgres Terraform module</a>.</p>
+<ol>
+<li>Add the application name into the <code>postgres_roles</code> variable in
+<code>terraform/postgres/</code>:</li>
+</ol>
+<pre><code class="language-hcl">postgres_roles = [
+    {
+        name = "app"
+        rotation_period = 86400
+    }
+]
+</code></pre>
+<p>This will create a Postgres role and database in the running Postgres
+instance, a static role in Vault for rotation of the role's credentials, and
+a Vault policy to read the role's credentials.</p>
+<ol start="2">
+<li>Add a <code>template</code> and <code>vault</code> block to access the database credentials:</li>
+</ol>
+<pre><code class="language-hcl">vault {
+    policies = ["app"]
+}
+
+template {
+    data        = &lt;&lt;EOF
+{{ with secret "postgres/static-creds/app" }}
+DATABASE_URL = "postgres://foo:{{ .Data.password }}@localhost:5432/foo?sslmode=disable"
+{{ end }}
+EOF
+    destination = "secrets/.env"
+    env         = true
+}
+</code></pre>
+<h2 id="diun"><a class="header" href="#diun">Diun</a></h2>
+<p><a href="apps/diun.html">Diun</a> allows monitoring a Docker image for new
+updates. To opt in to watching a task's Docker image, include the <code>diun.enable</code>
+label:</p>
+<pre><code class="language-hcl">config {
+  labels = {
+    "diun.enable" = "true"
+  }
+}
+</code></pre>
+<p>By default, this will only watch the current tag of the image. If the tag is
+<code>latest</code>, Diun will send a notification when that tag's checksum changes.</p>
+<p>To allow Diun to watch other tags, include additional labels:</p>
+<pre><code class="language-hcl">config {
+  labels = {
+    "diun.enable"     = "true"
+    "diun.watch_repo" = "true"
+    "diun.max_tags"   = 3
+  }
+}
+</code></pre>
+<p>This will let Diun watch all tags in the Docker repo. It is highly recommended
+to set a maximum number of tags that Diun should watch, otherwise Diun will
+watch ALL tags, including older ones.</p>
+<p>See <a href="apps/./diun.html">Diun</a> for more information on configuring Diun.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="diun-1"><a class="header" href="#diun-1">Diun</a></h1>
+<p><a href="https://crazymax.dev/diun/">Diun</a> is used to monitor Docker images for new
+updates.</p>
+<h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
+<pre><code class="language-yml">watch:
+  workers: 10
+  schedule: "0 0 * * 5"
+  jitter: 30s
+  firstCheckNotif: false
+
+providers:
+  docker:
+    watchByDefault: false
+
+notif:
+  telegram:
+    # Telegram bot token
+    token: aabbccdd:11223344
+    # Telegram chat ID
+    chatIDs:
+      - 123456789
+    templateBody: |
+      Docker tag {{ .Entry.Image }} which you subscribed to through {{ .Entry.Provider }} provider has been released.
+</code></pre>
+<h2 id="watch-images"><a class="header" href="#watch-images">Watch Images</a></h2>
+<p>To opt in to watching a Docker image, include the <code>diun.enable</code>
+Docker label:</p>
+<pre><code class="language-hcl">config {
+  labels = {
+    "diun.enable" = "true"
+  }
+}
+</code></pre>
+<p>By default, this will only watch the current tag of the image. If the tag is
+<code>latest</code>, Diun will send a notification when that tag's checksum changes.</p>
+<p>To allow Diun to watch other tags, include additional labels:</p>
+<pre><code class="language-hcl">config {
+  labels = {
+    "diun.enable"     = "true"
+    "diun.watch_repo" = "true"
+    "diun.max_tags"   = 3
+  }
+}
+</code></pre>
+<p>This will let Diun watch all tags in the Docker repo. It is highly recommended
+to set a maximum number of tags that Diun should watch, otherwise Diun will
+watch ALL tags, including older ones.</p>
+<h3 id="command-line"><a class="header" href="#command-line">Command Line</a></h3>
+<pre><code class="language-bash"># manipulate images in database
+$ docker exec diun diun image list
+$ docker exec diun diun image inspect --image=[image]
+$ docker exec diun diun image remove --image=[image]
+
+# send test notification
+$ docker exec diun diun notif test
+</code></pre>
+<h2 id="references-1"><a class="header" href="#references-1">References</a></h2>
+<ul>
+<li><a href="https://crazymax.dev/diun/">Diun</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="registry"><a class="header" href="#registry">Registry</a></h1>
+<h2 id="basic-auth"><a class="header" href="#basic-auth">Basic Auth</a></h2>
+<p>Create a password file with <code>htpasswd</code>:</p>
+<pre><code class="language-bash">$ docker run \
+    --entrypoint htpasswd \
+    httpd:2 -Bbn foo password &gt; htpasswd
+</code></pre>
+<h2 id="usage-1"><a class="header" href="#usage-1">Usage</a></h2>
+<p>Login to the registry by providing the username and password given in <a href="apps/registry.html#basic-auth">Basic
+Auth</a>:</p>
+<pre><code class="language-bash">$ docker login foo.example.com
+</code></pre>
+<h2 id="references-2"><a class="header" href="#references-2">References</a></h2>
+<ul>
+<li><a href="https://docs.docker.com/registry/deploying/">Docker Registry</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="issues"><a class="header" href="#issues">Issues</a></h1>
+<p>This documents known issues that have not been fixed.</p>
+<h2 id="manual-vault-unseal-process"><a class="header" href="#manual-vault-unseal-process">Manual Vault Unseal Process</a></h2>
+<p>Vault server must be manually unsealed when host is rebooted.</p>
+<h2 id="unreachable-nomad-jobs-on-reboot"><a class="header" href="#unreachable-nomad-jobs-on-reboot">Unreachable Nomad Jobs on Reboot</a></h2>
+<p>On some occasions, restarting the Nomad client results in some running jobs
+being unreachable. The temporary fix is to restart the job (not alloc or task).</p>
+<h2 id="vault-agent-not-reloading-tls-certs"><a class="header" href="#vault-agent-not-reloading-tls-certs"><del>Vault-agent not reloading TLS certs</del></a></h2>
+<p><del>Vault-agent does not reload its own TLS configuration after the certificate has
+been renewed. Although this causes the agent to fail to authenticate with Vault,
+it does not constitute a systemd service failure, and the service must be
+manually restarted to read the new TLS configuration. Sending a <code>SIGHUP</code> sending
+is <a href="https://github.com/hashicorp/vault/issues/20538">not supported</a>.</del></p>
+<p><del>Similar issues: <a href="https://github.com/hashicorp/vault/issues/16266">#16266</a> and
+<a href="https://github.com/hashicorp/vault/issues/18562">#18562</a>. A
+<a href="https://github.com/hashicorp/vault/pull/19002">fix</a> is available in Vault
+1.14.</del></p>
+<h2 id="static-goss-files"><a class="header" href="#static-goss-files">Static Goss Files</a></h2>
+<p>The provided goss files in <code>ansible/goss</code> contain hardcoded information that can
+cause the smoke tests to fail if some Ansible variables are modified:</p>
+<ul>
+<li>common_user</li>
+<li>common_nfs_dir</li>
+<li>common_packages</li>
+</ul>
+<p>The temporary workaround is to create your own goss files, edit the given goss
+files or to simply comment out the smoke test tasks.</p>
+<p>To fix this, goss
+<a href="https://github.com/goss-org/goss/blob/master/docs/gossfile.md#templates">supports</a>
+templating to create dynamic goss files. The <code>ansible_collection.goss</code> role must
+be modified to add support for dynamic tests.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="roadmap"><a class="header" href="#roadmap">Roadmap</a></h1>
+<ul>
+<li><input disabled="" type="checkbox"/>
+Run consul-template as non-root user</li>
+<li><input disabled="" type="checkbox"/>
+Run vault-agent as non-root user</li>
+<li><input disabled="" type="checkbox"/>
+Automated gossip key rotation for Nomad and Consul</li>
+<li><input disabled="" type="checkbox"/>
+ACLs for Nomad and Consul</li>
+<li><input disabled="" type="checkbox"/>
+<code>unseal_vault</code> role</li>
+<li><input disabled="" type="checkbox"/>
+Packer <code>base</code> builder
+<ul>
+<li><code>preseed.cfg</code> is unreachable by boot command when controller host and Proxmox VM
+are on different subnets.</li>
+</ul>
+</li>
+<li><input disabled="" type="checkbox"/>
+Fix configurable cert TTL by Vault</li>
+<li><input disabled="" type="checkbox"/>
+Improve robustness of Bitwarden scripts in Vault role</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

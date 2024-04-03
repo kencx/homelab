@@ -1,0 +1,292 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Cloud Images - Homelab Documentation</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">Home</a></li><li class="chapter-item expanded affix "><a href="../prerequisites.html">Prerequisites</a></li><li class="chapter-item expanded affix "><a href="../getting_started.html">Getting Started</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Infrastructure</li><li class="chapter-item expanded "><a href="../provisioning.html">Provisioning</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../images/index.html">Images</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../images/cloud_image.html" class="active">Cloud Images</a></li><li class="chapter-item "><a href="../images/packer.html">Packer</a></li></ol></li><li class="chapter-item "><a href="../terraform/index.html">Terraform</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../terraform/postgres.html">Postgres</a></li><li class="chapter-item "><a href="../terraform/proxmox.html">Proxmox</a></li><li class="chapter-item "><a href="../terraform/vault.html">Vault</a></li></ol></li><li class="chapter-item "><a href="../ansible/index.html">Ansible</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../ansible/roles/index.html">Roles</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../ansible/roles/common.html">Common</a></li><li class="chapter-item "><a href="../ansible/roles/consul.html">Consul</a></li><li class="chapter-item "><a href="../ansible/roles/consul-template.html">Consul Template</a></li><li class="chapter-item "><a href="../ansible/roles/issue_cert.html">Issue Cert</a></li><li class="chapter-item "><a href="../ansible/roles/nomad.html">Nomad</a></li><li class="chapter-item "><a href="../ansible/roles/unseal_vault.html">Unseal Vault</a></li><li class="chapter-item "><a href="../ansible/roles/vault.html">Vault</a></li></ol></li></ol></li></ol></li><li class="chapter-item expanded "><li class="part-title">Applications</li><li class="chapter-item expanded "><a href="../apps/index.html">Applications</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../apps/add_new.html">Adding New Application</a></li><li class="chapter-item "><a href="../apps/diun.html">Diun</a></li><li class="chapter-item "><a href="../apps/registry.html">Registry</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">References</li><li class="chapter-item expanded "><a href="../references/issues.html">Known Issues</a></li><li class="chapter-item expanded "><a href="../references/TODO.html">Roadmap</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Homelab Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/kencx/homelab" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="cloud-images"><a class="header" href="#cloud-images">Cloud Images</a></h1>
+<p>Cloud images are pre-installed disk images that have been customized to run on
+cloud platforms. They are shipped with <code>cloud-init</code> that simplifies the
+installation and provisioning of virtual machines.</p>
+<p>Unlike ISOs and LXC container images, Proxmox's API lacks support for uploading
+cloud images directly from a given URL (see
+<a href="https://bugzilla.proxmox.com/show_bug.cgi?id=4141">here</a> and
+<a href="https://forum.proxmox.com/threads/new-vm-from-cloud-init-image-via-api.111091/">here</a>).
+Instead, they must be manually downloaded and converted into a VM
+template to be available to Proxmox.</p>
+<blockquote>
+<p><strong>Warning</strong>: When cloning the cloud image template with Terraform,
+<code>qemu-guest-agent</code> must be installed and <code>agent=1</code> must be set. Otherwise,
+Terraform will timeout. As such, it is recommended to create a further
+bootstrapped template with <a href="./packer.html">Packer and Ansible</a>.</p>
+</blockquote>
+<h2 id="manual-upload"><a class="header" href="#manual-upload">Manual Upload</a></h2>
+<ol>
+<li>Download any cloud image:</li>
+</ol>
+<pre><code class="language-bash">$ wget https://cloud.debian.org/images/cloud/bullseye/20230124-1270/debian11-generic-amd64-20230124-1270.qcow2
+</code></pre>
+<ol start="2">
+<li>Create a Proxmox VM from the downloaded image:</li>
+</ol>
+<pre><code class="language-bash">$ qm create 9000 \
+    --name "debian-11-amd64" \
+    --net0 "virtio,bridge=vmbr0" \
+    --serial0 socket \
+    --vga serial0 \
+    --scsihw virtio-scsi-pci \
+    --scsi0 "local:0,import-from=/path/to/image" \
+    --bootdisk scsi0 \
+    --boot "order=scsi0" \
+    --ide1 "local:cloudinit" \
+    --ostype l26 \
+    --cores 1 \
+    --sockets 1 \
+    --memory 512 \
+    --agent 1
+</code></pre>
+<ol start="3">
+<li>Resize the new VM (if necessary):</li>
+</ol>
+<pre><code class="language-bash">$ qm resize 9000 scsi0 5G
+</code></pre>
+<ol start="4">
+<li>Convert the VM into a template:</li>
+</ol>
+<pre><code class="language-bash">$ qm template 9000
+</code></pre>
+<h2 id="script"><a class="header" href="#script">Script</a></h2>
+<p>A full script of the steps above can be found at
+<a href="https://github.com/kencx/homelab/blob/master/bin/import-cloud-image">bin/import-cloud-image</a>.</p>
+<pre><code class="language-bash">$ import-cloud-image --help
+
+Usage: import-cloud-image [--debug|--force] [URL] [FILENAME]
+</code></pre>
+<h2 id="references"><a class="header" href="#references">References</a></h2>
+<ul>
+<li><a href="https://pve.proxmox.com/wiki/Cloud-Init_Support">Proxmox Wiki - cloud-init Support</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../images/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../images/packer.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../images/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../images/packer.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

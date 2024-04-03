@@ -1,0 +1,52 @@
+default_stages: [push, commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-added-large-files
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: detect-private-key
+        exclude: ansible/molecule/vault/testca
+
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks-docker
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.83.5
+    hooks:
+      - id: terraform_fmt
+        args:
+          - --args=-diff
+          - --args=-recursive
+      - id: terraform_validate
+
+  - repo: local
+    hooks:
+      - id: packer_fmt
+        name: Packer fmt
+        description: Rewrites all Packer files in canonical format
+        language: script
+        entry: ./bin/packer-fmt
+        files: (\.pkr\.(hcl|json)|\.pkrvars\.hcl)$
+        require_serial: true
+
+  - repo: https://github.com/gruntwork-io/pre-commit
+    rev: v0.1.22
+    hooks:
+      - id: packer-validate
+
+  # - repo: https://github.com/ansible-community/ansible-lint
+  #   rev: v6.22.0
+  #   hooks:
+  #     - id: ansible-lint
+  #       entry: ansible-lint -c ansible/.ansible-lint ansible
+  #       pass_filenames: false
