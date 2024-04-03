@@ -1,3 +1,9 @@
+### 03/24
+
+- Extracted configuration that is unrelated to setting up a Nomad, Consul and
+  Vault cluster into a separate repository.
+- Added more documentation for how to setup cluster from scratch
+
 ### 29/07/23
 
 - Add `import-cloud-image` script. This could be used with or converted into an
