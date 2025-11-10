@@ -2,7 +2,7 @@ roles:
   - name: geerlingguy.docker
     version: 7.0.1
 collections:
-  - name: https://github.com/kencx/ansible-collection.git
+  - name: https://github.com/jhuesser/ansible-collection.git
     type: git
     version: HEAD
   - name: community.docker

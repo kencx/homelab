@@ -45,7 +45,7 @@ variable "vm_name" {
 variable "template_description" {
   type        = string
   description = "Description of VM template"
-  default     = "Debian 11 base image"
+  default     = "Debian 12 base image"
 }
 
 variable "cores" {

@@ -43,5 +43,5 @@
     - name: Goss validation
       role: kencx.ansible_collection.goss
       vars:
-        goss_dir: "./goss"
+        goss_dir: "../goss"
         goss_file: "base.yml"
