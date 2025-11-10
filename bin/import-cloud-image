@@ -3,7 +3,7 @@
 set -e
 
 help() {
-    echo "Usage: $0 [--debug|--force] [URL] [FILENAME]"
+    echo "Usage: $0 [--debug|--force] [URL] [FILENAME] [VMID] [NET_BRIDGE] [DATASTORE]"
     exit 1
 }
 
@@ -29,7 +29,7 @@ IMG_DIR="/var/lib/vz/images"
 FILENAME="$2"
 IMG_PATH="$IMG_DIR/$FILENAME"
 
-VMID=9001
+VMID=$3
 TEMPLATE_NAME=${FILENAME%.*}
 DESCRIPTION="$(
     cat <<EOF
@@ -45,9 +45,9 @@ EOF
 MEMORY=512
 CORES=1
 SOCKETS=1
-NET_BRIDGE="vmbr1"
+NET_BRIDGE=$4
 DISK_SIZE="4G"
-DISK_STORE="volumes"
+DISK_STORE=$5
 
 install -m 0755 -d "$IMG_DIR"
 if [[ -e $IMG_PATH ]]; then
