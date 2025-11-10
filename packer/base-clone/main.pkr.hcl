@@ -31,7 +31,7 @@ source "proxmox-clone" "base" {
 
   qemu_agent              = true
   cloud_init              = true
-  cloud_init_storage_pool = "volumes"
+  cloud_init_storage_pool = var.proxmox_storage_pool
 
   vm_id                = var.vm_id
   vm_name              = local.vm_name
@@ -44,7 +44,7 @@ source "proxmox-clone" "base" {
   scsi_controller = "virtio-scsi-pci"
 
   network_adapters {
-    bridge = "vmbr1"
+    bridge = var.proxmox_bridge
     model  = "virtio"
   }
 
