@@ -77,6 +77,23 @@
     - vault_init_json is defined
     - vault_init_json.root_token is defined
 
+- name: Wait for Vault to be initialized, unsealed and have a leader (if HA)
+  command: vault status -format=json
+  register: vault_status_raw
+  retries: 20
+  delay: 3
+  until: >
+    vault_status_raw.rc == 0 and
+    (vault_status_raw.stdout | from_json).initialized and
+    not (vault_status_raw.stdout | from_json).sealed and
+    (
+      not ((vault_status_raw.stdout | from_json).ha_enabled)
+      or
+      (((vault_status_raw.stdout | from_json).leader_address | default('')) != '')
+    )
+  changed_when: false
+  failed_when: vault_status_raw.rc != 0
+
 - name: Login with root token
   shell:
     cmd: vault login --format json {{ vault_root_token }}
@@ -128,6 +145,7 @@
       vault_address: "https://{{ ansible_default_ipv4.address }}:8200"
       vault_ca_cert_file: "{{ vault_terraform_cert_dir }}/vault-ca.crt"
       admin_password: "{{ vault_admin_password }}"
+      kvuser_password: "{{ vault_kvuser_password }}"
   delegate_to: localhost
 
 - name: Provision Vault secrets with Terraform provider
