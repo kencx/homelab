@@ -127,6 +127,7 @@
       vault_token: "{{ vault_root_token }}"
       vault_address: "https://{{ ansible_default_ipv4.address }}:8200"
       vault_ca_cert_file: "{{ vault_terraform_cert_dir }}/vault-ca.crt"
+      admin_password: "{{ vault_admin_password }}"
   delegate_to: localhost
 
 - name: Provision Vault secrets with Terraform provider
