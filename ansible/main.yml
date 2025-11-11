@@ -19,6 +19,13 @@
     - role: nomad
 
   tasks:
+    - name: Verify services are running
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+      loop:
+        - consul-template
+
     - name: Goss smoke test
       import_role:
         name: kencx.ansible_collection.goss
