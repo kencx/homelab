@@ -91,6 +91,12 @@ variable "disk_datastore" {
 #   }
 # }
 
+variable "network_bridge" {
+  type        = string
+  description = "Network Brdige device in Proxmox"
+  default = "vmbr0"
+}
+
 variable "control_ip_address" {
   type        = string
   description = "Control IPv4 address in CIDR notation (eg. 10.10.10.2/24)"
