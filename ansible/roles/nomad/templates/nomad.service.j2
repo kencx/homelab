@@ -14,7 +14,7 @@ User=nomad
 Group=nomad
 {% endif %}
 
-ExecReload=/bin/kill -HUP $MAINPID
+ExecReload=/bin/systemctl restart nomad.service
 {% if nomad_server %}
 {% if nomad_vault_integration %}
 Type=forking

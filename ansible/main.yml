@@ -26,6 +26,15 @@
       loop:
         - consul-template
 
+    - name: Wait for consul-template to become active
+      ansible.builtin.command: systemctl is-active consul-template
+      register: consul_template_status
+      retries: 50
+      delay: 3
+      until: consul_template_status.stdout == "active"
+      changed_when: false
+
+
     - name: Goss smoke test
       import_role:
         name: kencx.ansible_collection.goss
