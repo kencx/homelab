@@ -38,13 +38,14 @@ import a cloud image and turn it into a new template.
 >    - cloud-init installed
 >    - qemu-guest-agent installed
 
-1. (Optional) Run the `bin/import-cloud-image` [script](./images/cloud_image.html#script) to import a new cloud image:
+1. (Optional) Run the `bin/import-cloud-image` [script](./images/cloud_image.html#script) on your proxmox node to import a new cloud image:
 
 ```bash
-$ import-cloud-image [URL]
+$ import-cloud-image [URL] [FILENAME] [VMID] [NET_BRIDGE] [DATASTORE]
+# Eg: import-cloud-image https://cdimage.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2 debian12cloud 9000 vmbr0 lvm_local
 ```
 
-2. Navigate to `packer/base-clone`
+2. Navigate to `packer/base-clone` on your control node
 
 >**Tip**: Use the `bin/generate-vars` script to quickly generate variable files
 >in `packer` and `terraform` subdirectories.
@@ -52,13 +53,20 @@ $ import-cloud-image [URL]
 3. Populate the necessary variables in `auto.pkrvars.hcl`:
 
 ```hcl
-proxmox_url      = "https://<PVE_IP>:8006/api2/json"
-proxmox_username = "<user>@pam"
-proxmox_password = "<password>"
+proxmox_url          = "https://<PVE_IP>:8006/api2/json"
+proxmox_username     = "<user>@pam"
+proxmox_password     = "<password>"
+proxmox_node         = "node_name" # Visible in the GUI sidebar
+proxmox_storage_pool = "<pool_name> # Eg. local_lvm
+proxmox_bridge       = "<bridge_name>" # Eg. vmbr0
+
 
 clone_vm = "<cloud-image-name>"
 vm_name  = "<new-template-name>"
-vm_id    = 5000
+vm_id    = 5000 # ID of the template created by packer
+
+ip_address = "<ip_address>"
+gateway = "<gateway_address>"
 
 ssh_username = "debian"
 ssh_public_key_path = "/path/to/public/key"
@@ -88,6 +96,7 @@ provider to provision virtual machines from our Packer templates.
 ```hcl
 proxmox_ip        = "https://<PVE_IP>:8006/api2/json"
 proxmox_api_token = "<API_TOKEN>"
+target_node       = "<proxmox_node_name>" # name of the proxmox cluster node to deploy the VM on
 
 template_id = 5000
 ip_gateway  = "10.10.10.1"
@@ -117,7 +126,6 @@ clients = [
 ]
 
 ssh_user             = "debian"
-ssh_private_key_file = "/path/to/ssh/private/key"
 ssh_public_key_file  = "/path/to/ssh/public/key"
 ```
 
