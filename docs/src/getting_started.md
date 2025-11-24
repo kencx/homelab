@@ -177,6 +177,8 @@ $ ansible-inventory --graph --vars
 >**Note**: The `nfs_share_mounts` variable in `inventory/group_vars/client.yml`
 >should be modified or removed if not required
 
+>**Note**: Check `ansible/roles/common/defaults/main.yml`to customize additional settings, like timezone
+
 4. Run the playbook:
 
 ```bash
