@@ -6,16 +6,16 @@ nomad_vault_addr: "https://{{ server_ip }}:8200"
 nomad_common_name: "client.global.nomad"
 nomad_ip_sans: "127.0.0.1, {{ client_ip }}"
 
-nfs_share_mounts:
-  - src: "10.10.10.102:/home/debian/apps/prod-apps"
-    path: "/mnt/storage"
-    opts: "defaults,bg,intr,_netdev,retry=3"
-    state: mounted
-  - src: "10.10.10.102:/home/debian/syncthing/sync/books"
-    path: "/mnt/books"
-    opts: "defaults,bg,intr,_netdev,retry=3"
-    state: mounted
-  - src: "10.10.10.102:/home/debian/syncthing/sync/paper"
-    path: "/mnt/paper"
-    opts: "defaults,bg,intr,_netdev,retry=3"
-    state: mounted
+#nfs_share_mounts:
+#  - src: "10.10.10.102:/home/debian/apps/prod-apps"
+#    path: "/mnt/storage"
+#    opts: "defaults,bg,intr,_netdev,retry=3"
+#    state: mounted
+#  - src: "10.10.10.102:/home/debian/syncthing/sync/books"
+#    path: "/mnt/books"
+#    opts: "defaults,bg,intr,_netdev,retry=3"
+#    state: mounted
+#  - src: "10.10.10.102:/home/debian/syncthing/sync/paper"
+#    path: "/mnt/paper"
+#    opts: "defaults,bg,intr,_netdev,retry=3"
+#    state: mounted

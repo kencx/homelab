@@ -66,7 +66,7 @@ variable "clients" {
 variable "disk_datastore" {
   type        = string
   description = "Datastore on which to store disk"
-  default     = "volumes"
+  default     = "local-lvm"
 }
 
 # variable "server_ip_address" {
@@ -90,6 +90,12 @@ variable "disk_datastore" {
 #     error_message = "Must be a valid IPv4 address with subnet mask"
 #   }
 # }
+
+variable "network_bridge" {
+  type        = string
+  description = "Network Brdige device in Proxmox"
+  default = "vmbr0"
+}
 
 variable "control_ip_address" {
   type        = string

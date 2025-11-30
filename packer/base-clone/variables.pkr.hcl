@@ -13,7 +13,17 @@ variable "proxmox_password" {
 
 variable "proxmox_node" {
   type    = string
-  default = "pve"
+  default = "pve01"
+}
+
+variable "proxmox_storage_pool" {
+  type    = string
+  default = "local-lvm"
+}
+
+variable "proxmox_bridge" {
+  type    = string
+  default = "vmbr0"
 }
 
 variable "clone_vm" {
@@ -35,7 +45,7 @@ variable "vm_name" {
 variable "template_description" {
   type        = string
   description = "Description of VM template"
-  default     = "Debian 11 base image"
+  default     = "Debian 12 base image"
 }
 
 variable "cores" {

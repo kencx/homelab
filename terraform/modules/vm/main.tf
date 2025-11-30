@@ -41,7 +41,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
   }
 
   network_device {
-    bridge = "vmbr1"
+    bridge = var.network_bridge
   }
 
   operating_system {
@@ -57,7 +57,6 @@ resource "proxmox_virtual_environment_vm" "vm" {
   }
 
   vga {
-    enabled = true
     memory  = 16
     type    = "serial0"
   }

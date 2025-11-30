@@ -73,6 +73,12 @@ variable "disk_datastore" {
   default     = "volumes"
 }
 
+variable "network_bridge" {
+  type        = string
+  description = "Network Brdige device in Proxmox"
+  default = "vmbr0"
+}
+
 variable "ip_address" {
   type        = string
   description = "VM IPv4 address in CIDR notation (eg. 10.10.10.2/24)"
